@@ -1,0 +1,57 @@
+import React from 'react';
+import Link from 'next/link';
+import { Navbar } from '../../components/ui/Navbar';
+import { Button } from '../../components/ui/Core';
+import { solicitarConsultaEvento } from '../actions/eventos';
+
+export default async function DashboardPage() {
+  // --- MÉTODOS DA ConsultarEventoUI (ASTAH) ---
+  const response = await solicitarConsultaEvento();
+  const eventos = response.success ? response.data : [];
+  
+  const exibirDadosEvento = () => eventos;
+  const informarEventoNaoEncontrado = () => (
+    <p className="text-gray-400 text-center py-4">Nenhum evento encontrado no sistema.</p>
+  );
+  return (
+    <div className="min-h-screen bg-brand-dark flex flex-col">
+      <Navbar role="PARTICIPANTE" />
+      
+      <main className="flex-1 w-full max-w-5xl mx-auto py-12 px-6">
+        <div className="border border-white/20 rounded-2xl bg-slate-800/50 backdrop-blur-sm p-8 shadow-xl">
+          <h2 className="text-2xl font-bold text-white text-center mb-8">Inscrições em Eventos</h2>
+          
+          <div className="flex justify-between border-b border-white/10 pb-2 mb-4 text-sm font-semibold text-gray-300">
+            <span>Evento</span>
+            <span>Data/Horário</span>
+          </div>
+
+          <div className="space-y-4">
+            {eventos.length === 0 && informarEventoNaoEncontrado()}
+            {exibirDadosEvento().map((ev: any) => (
+              <div key={ev.id} className="flex flex-col md:flex-row md:items-center justify-between bg-slate-900/80 p-4 rounded-xl border border-white/5 hover:border-brand-accent/50 transition-colors">
+                <div className="mb-4 md:mb-0 md:pr-4">
+                  <h3 className="text-white font-bold">{ev.nome || ev.titulo || `Evento #${ev.id}`}</h3>
+                  <p className="text-gray-400 text-sm mt-1">{ev.descricao || 'Sem descrição'}</p>
+                </div>
+                
+                <div className="flex flex-row md:flex-col items-center justify-between md:items-end min-w-[120px]">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold text-white text-lg">{ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString() : 'TBA'}</span>
+                  </div>
+                  <span className="text-gray-400 text-sm mt-1">{ev.dataFim ? new Date(ev.dataFim).toLocaleDateString() : 'TBA'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <Link href="/atividades/1">
+               <Button className="w-full max-w-sm text-lg py-3">VER ATIVIDADES / INSCREVA-SE</Button>
+            </Link>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
