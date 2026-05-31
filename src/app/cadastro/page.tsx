@@ -58,8 +58,9 @@ export default function CadastroPage() {
       return;
     }
     
-    if (!validarDadosCadastro(formData.nome, formData.email, formData.senha)) {
-      informarDadosInvalidos();
+    const validacao = validarDadosCadastro(formData.nome, formData.email, formData.senha);
+    if (!validacao.valido) {
+      setError(validacao.erro || 'Dados inválidos. Verifique os campos.');
       return;
     }
 
@@ -83,11 +84,7 @@ export default function CadastroPage() {
     if (res.success) {
       informarSucesso();
     } else {
-      if (res.error?.includes('duplicado')) {
-         informarEmailDuplicado();
-      } else {
-         informarErroCadastro();
-      }
+      setError(res.error || 'Erro ao realizar cadastro.');
     }
     setLoading(false);
   };

@@ -1,6 +1,6 @@
 'use server';
 
-import { validarDados } from "../../utils/validation";
+import { validarDados } from '../../utils/validation';
 
 const API_BASE = process.env.API_URL || 'http://localhost:8080/api';
 
@@ -44,9 +44,14 @@ export async function solicitarCadastro(formData: FormData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    
+  
     if (!res.ok) {
-      return { success: false, error: 'Erro no cadastro. Verifique os dados.' };
+      try {
+        const errorData = await res.json();
+        return { success: false, error: errorData.error || 'Erro no cadastro. Verifique os dados.' };
+      } catch (e) {
+        return { success: false, error: 'Erro no cadastro. Verifique os dados.' };
+      }
     }
     
 

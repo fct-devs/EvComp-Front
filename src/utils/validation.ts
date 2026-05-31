@@ -2,15 +2,25 @@ export function validarDados(email: string, senha: string): boolean {
   return email.trim() !== '' && senha.trim() !== '';
 }
 
-export function validarDadosCadastro(nome: string, email: string, senha: string): boolean 
-{
+export function validarDadosCadastro(nome: string, email: string, senha: string): { valido: boolean; erro?: string } {
+  if (nome.trim() === '') {
+    return { valido: false, erro: 'Nome não pode ser vazio.' };
+  }
+
   const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailValido) {
+    return { valido: false, erro: 'E-mail em formato inválido.' };
+  }
 
   const temTamanhoMinimo = senha.length >= 8;
   const temMaiuscula = /[A-Z]/.test(senha);
   const temNumero = /\d/.test(senha);
 
-  return (nome.trim() !== '' && emailValido && temTamanhoMinimo && temMaiuscula && temNumero);
+  if (!temTamanhoMinimo || !temMaiuscula || !temNumero) {
+    return { valido: false, erro: 'A senha não atende aos requisitos.' };
+  }
+
+  return { valido: true };
 }
 
 export function verificarEmailInstitucional(email: string): boolean 
