@@ -19,8 +19,14 @@ export default function LoginPage() {
   const informarCredenciaisInvalidas = () => setError('Credenciais Inválidas');
   const informarDadosInvalidos = () => setError('Por favor, preencha o email e a senha corretamente.');
   const informarErroLogin = () => setError('Erro de conexão com o servidor.');
-  const exibirSessao = (perfilUsuario: string) => {
-    router.push('/dashboard');
+  const exibirSessao = (data: any) => {
+    if (data.role === 'ADMINISTRADOR') {
+      router.push('/admin');
+    } else if (data.isColetor === 'true' || data.isColetor === true || data.role === 'COLETORDEPRESENCA') {
+      router.push('/coletor');
+    } else {
+      router.push('/dashboard');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +47,7 @@ export default function LoginPage() {
     const res = await solicitarLogin(formData);
     
     if (res.success) {
-      exibirSessao(res.data.role);
+      exibirSessao(res.data);
     } else {
       if (res.error === 'Credenciais inválidas') {
         informarCredenciaisInvalidas();

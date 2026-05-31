@@ -1,5 +1,6 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { validarDados } from '../../utils/validation';
 
 const API_BASE = process.env.API_URL || 'http://localhost:8080/api';
@@ -24,10 +25,54 @@ export async function solicitarLogin(formData: FormData) {
     }
     
     const data = await res.json();
+    
+    if (data.token) {
+      const cookieStore = await cookies();
+      const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 2, // 2 hours
+        path: '/',
+      };
+      
+      cookieStore.set('auth_token', data.token, options);
+      
+      if (data.role) {
+        cookieStore.set('user_role', data.role, options);
+      }
+      if (data.isColetor) {
+        cookieStore.set('is_coletor', data.isColetor, options);
+      }
+    }
+
     return { success: true, data };
   } catch (error: any) {
     return { success: false, error: 'Erro ao conectar com o servidor.' };
   }
+}
+
+export async function solicitarLogout() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+
+  if (token) {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json' 
+        },
+      });
+    } catch (e) {
+      console.error('Erro ao chamar o logout no backend', e);
+    }
+  }
+
+  cookieStore.delete('auth_token');
+  cookieStore.delete('user_role');
+  cookieStore.delete('is_coletor');
+  return { success: true };
 }
 
 export async function solicitarCadastro(formData: FormData) {
@@ -74,6 +119,32 @@ export async function recuperarSenhaAction(formData: FormData) {
     if (!res.ok) return { success: false, error: 'E-mail não encontrado' };
     return { success: true };
   } catch (e) {
+    return { success: false, error: 'Erro de conexão.' };
+  }
+}
+
+export async function buscarPerfilUsuario() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+
+  if (!token) return { success: false, error: 'Não autenticado' };
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+    });
+
+    if (!res.ok) {
+      return { success: false, error: 'Sessão inválida' };
+    }
+
+    const data = await res.json();
+    return { success: true, data };
+  } catch (error) {
     return { success: false, error: 'Erro de conexão.' };
   }
 }
