@@ -14,6 +14,7 @@ export default function CadastroPage() {
     nome: '', email: '', ra: '', senha: '', confirmarSenha: ''
   });
   const [error, setError] = useState('');
+  const [sucess, setSucess] = useState('');
   const [loading, setLoading] = useState(false);
   
   // Estado para controlar os requisitos da senha
@@ -29,9 +30,12 @@ export default function CadastroPage() {
   const informarEmailDuplicado = () => setError('Este e-mail já está em uso.');
   const informarErroCadastro = () => setError('Erro ao realizar cadastro.');
   const informarSucesso = () => {
-    alert('Cadastro realizado com sucesso!');
-    router.push('/login');
-  };
+    setSucess('Cadastro realizado com sucesso.');
+
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000); 
+  }
 
   // Efeito para validar a senha em tempo real conforme o usuário digita
   useEffect(() => {
@@ -66,6 +70,7 @@ export default function CadastroPage() {
     
     setLoading(true);
     setError('');
+    setSucess('');
 
     const formPayload = new FormData();
     formPayload.append('nome', formData.nome);
@@ -102,6 +107,12 @@ export default function CadastroPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {sucess && (
+            <div className="bg-emerald-500/20 border border-emerald-500/50 p-3 rounded text-emerald-200 text-sm animate-fade-in">
+              {sucess}
+            </div>
+          )}
+          
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 p-3 rounded text-red-200 text-sm">
               {error}
