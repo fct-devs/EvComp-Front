@@ -16,7 +16,7 @@ export default function CadastroPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // --- MÉTODOS DA CadastrarParticipanteUI (ASTAH) ---
+  
   const isInstitucional = verificarEmailInstitucional(formData.email);
   const informarDadosInvalidos = () => setError('Dados inválidos. Verifique os campos.');
   const informarEmailDuplicado = () => setError('Este e-mail já está em uso.');

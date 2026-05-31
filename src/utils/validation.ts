@@ -1,15 +1,20 @@
-// --- MÉTODOS DE VALIDAÇÃO (ASTAH) ---
-// Extraídos para um arquivo utilitário porque o Next.js exige que Server Actions sejam puramente assíncronas (async).
-
 export function validarDados(email: string, senha: string): boolean {
   return email.trim() !== '' && senha.trim() !== '';
 }
 
-export function validarDadosCadastro(nome: string, email: string, senha: string): boolean {
-  return nome.trim() !== '' && email.includes('@') && senha.length >= 6;
+export function validarDadosCadastro(nome: string, email: string, senha: string): boolean 
+{
+  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const temTamanhoMinimo = senha.length >= 8;
+  const temMaiuscula = /[A-Z]/.test(senha);
+  const temNumero = /\d/.test(senha);
+
+  return (nome.trim() !== '' && emailValido && temTamanhoMinimo && temMaiuscula && temNumero);
 }
 
-export function verificarEmailInstitucional(email: string): boolean {
+export function verificarEmailInstitucional(email: string): boolean 
+{
   return email.includes('unesp.br');
 }
 
