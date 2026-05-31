@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthLayout from '../../components/layout/AuthLayout';
@@ -16,6 +16,13 @@ export default function CadastroPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
+  // Estado para controlar os requisitos da senha
+  const [senhaRequisitos, setSenhaRequisitos] = useState({
+    minCaracteres: false,
+    temMaiuscula: false,
+    temNumero: false,
+  });
+
   
   const isInstitucional = verificarEmailInstitucional(formData.email);
   const informarDadosInvalidos = () => setError('Dados inválidos. Verifique os campos.');
@@ -25,6 +32,16 @@ export default function CadastroPage() {
     alert('Cadastro realizado com sucesso!');
     router.push('/login');
   };
+
+  // Efeito para validar a senha em tempo real conforme o usuário digita
+  useEffect(() => {
+    const { senha } = formData;
+    setSenhaRequisitos({
+      minCaracteres: senha.length >= 8,
+      temMaiuscula: /[A-Z]/.test(senha),
+      temNumero: /[0-9]/.test(senha),
+    });
+  }, [formData.senha]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -99,7 +116,24 @@ export default function CadastroPage() {
             </div>
           )}
 
-          <InputField label="Senha" id="senha" type="password" placeholder="Senha" value={formData.senha} onChange={handleChange} required />
+         <div>
+            <InputField label="Senha" id="senha" type="password" placeholder="Senha" value={formData.senha} onChange={handleChange} required />
+            
+            {/**Bloco visual dos requisitos da senha **/}
+            {formData.senha && (
+              <ul className="mt-2 space-y-1 text-xs transition-all duration-300">
+                <li className={`flex items-center gap-2 ${senhaRequisitos.minCaracteres ? 'text-sky-400 line-through opacity-60' : 'text-gray-400'}`}>
+                  <span>{senhaRequisitos.minCaracteres ? '✓' : '○'}</span> Mínimo de 8 caracteres
+                </li>
+                <li className={`flex items-center gap-2 ${senhaRequisitos.temMaiuscula ? 'text-sky-400 line-through opacity-60' : 'text-gray-400'}`}>
+                  <span>{senhaRequisitos.temMaiuscula ? '✓' : '○'}</span> Pelo menos uma letra maiúscula
+                </li>
+                <li className={`flex items-center gap-2 ${senhaRequisitos.temNumero ? 'text-sky-400 line-through opacity-60' : 'text-gray-400'}`}>
+                  <span>{senhaRequisitos.temNumero ? '✓' : '○'}</span> Pelo menos um número
+                </li>
+              </ul>
+            )}
+          </div>
           <InputField label="Confirmar senha" id="confirmarSenha" type="password" placeholder="Confirmar senha" value={formData.confirmarSenha} onChange={handleChange} required />
 
           <div className="flex items-center space-x-2 pt-2">
