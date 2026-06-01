@@ -13,6 +13,10 @@ export default function AdminEventosPage() {
   const [expandedEvento, setExpandedEvento] = useState<number | null>(null);
   const [expandedAtividade, setExpandedAtividade] = useState<number | null>(null);
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'PRIMARY' | 'SECONDARY'>('PRIMARY');
+  const [atividadeToExcluir, setAtividadeToExcluir] = useState<number | null>(null);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -63,6 +67,42 @@ export default function AdminEventosPage() {
     }
   };
 
+  const handleExcluirAtividadeBtnClick = (atividadeId: number) => {
+    setAtividadeToExcluir(atividadeId);
+    setModalMode('PRIMARY');
+    setModalOpen(true);
+  };
+
+  const handleConfirmExcluir = async () => {
+    if (atividadeToExcluir === null) return;
+    const isSecondary = modalMode === 'SECONDARY';
+
+    try {
+      let url = `http://localhost:8080/api/atividades/${atividadeToExcluir}`;
+      if (isSecondary) url += '?confirmar=true';
+
+      const res = await fetch(url, { method: 'DELETE' });
+
+      if (res.status === 409 && !isSecondary) {
+        setModalMode('SECONDARY');
+        return;
+      }
+
+      if (res.ok) {
+        setAtividades(prev => prev.filter(a => a.id !== atividadeToExcluir));
+        setModalOpen(false);
+        setAtividadeToExcluir(null);
+      } else {
+        const errorData = await res.json();
+        alert(`Erro ao excluir: ${errorData.error}`);
+        setModalOpen(false);
+      }
+    } catch (err) {
+      alert("Erro de conexão ao tentar excluir a atividade.");
+      setModalOpen(false);
+    }
+  };
+
   const getAtividadesDoEvento = (eventoId: number) => {
     return atividades.filter(a => a.evento && String(a.evento.id) === String(eventoId));
   };
@@ -98,7 +138,12 @@ export default function AdminEventosPage() {
                     <div>
                       <h3 className="text-lg font-bold text-white">{ev.titulo}</h3>
                       <p className="text-sm text-gray-400 mt-1">
-                        {ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'} a {ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}
+                        {(() => {
+                          const dIn = ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                          const dFi = ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                          if (dIn && dFi) return dIn === dFi ? dIn : `${dIn} a ${dFi}`;
+                          return dIn || dFi || '-';
+                        })()}
                       </p>
                     </div>
                     <div>
@@ -161,19 +206,26 @@ export default function AdminEventosPage() {
                                       <div className="grid grid-cols-2 gap-4 mb-4">
                                         <div>
                                           <span className="block text-xs text-gray-500 uppercase">Data</span>
-                                          {atv.dataInicio ? new Date(atv.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}
+                                          {(() => {
+                                            const dIn = atv.dataInicio ? new Date(atv.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                                            const dFi = atv.dataFim ? new Date(atv.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                                            if (dIn && dFi) return dIn === dFi ? dIn : `${dIn} até ${dFi}`;
+                                            return dIn || dFi || '-';
+                                          })()}
                                         </div>
                                         <div>
                                           <span className="block text-xs text-gray-500 uppercase">Horário</span>
-                                          {atv.dataHoraInicio ? new Date(atv.dataHoraInicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : '-'} às {atv.dataHoraFim ? new Date(atv.dataHoraFim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : '-'}
+                                          {atv.horarioInicio ? atv.horarioInicio.substring(0, 5) : '--:--'} às {atv.horarioFim ? atv.horarioFim.substring(0, 5) : '--:--'}
                                         </div>
                                         <div>
                                           <span className="block text-xs text-gray-500 uppercase">Vagas</span>
                                           {atv.maxParticipantes}
                                         </div>
                                         <div>
-                                          <span className="block text-xs text-gray-500 uppercase">Carga Horária</span>
+                                          <span className="block text-xs text-gray-500 uppercase">Carga Hor. (Participantes)</span>
                                           {atv.cargaHorariaTotal}h
+                                          <span className="block text-xs text-gray-500 uppercase mt-2">Carga Hor. (Ministrantes)</span>
+                                          {atv.cargaHorariaMinistrante}h
                                         </div>
                                         {atv.ministrantes && atv.ministrantes.length > 0 && (
                                           <div className="col-span-2">
@@ -182,7 +234,13 @@ export default function AdminEventosPage() {
                                           </div>
                                         )}
                                       </div>
-                                      <div className="flex justify-end">
+                                      <div className="flex justify-end gap-2">
+                                        <Button 
+                                          className="text-xs py-1 px-3 hover:!bg-red-600 hover:!text-white hover:!border-red-600 transition-colors"
+                                          onClick={() => handleExcluirAtividadeBtnClick(atv.id)}
+                                        >
+                                          Excluir
+                                        </Button>
                                         <Link href={`/admin/eventos/${ev.id}/atividades/editar?atividadeId=${atv.id}`}>
                                           <Button variant="secondary" className="text-xs py-1 px-3">Editar Atividade</Button>
                                         </Link>
@@ -212,6 +270,27 @@ export default function AdminEventosPage() {
           )}
         </div>
       </main>
+
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <GlassCard className="max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-bold text-white mb-4">
+              {modalMode === 'PRIMARY' ? 'Excluir Atividade' : 'Atenção: Participantes Inscritos!'}
+            </h3>
+            <p className="text-gray-300 mb-8">
+              {modalMode === 'PRIMARY' 
+                ? 'Tem certeza que deseja excluir esta atividade permanentemente? Esta ação não pode ser desfeita.'
+                : 'Esta atividade já possui participantes inscritos. Excluí-la apagará também os registros de inscrição e presença. Deseja forçar a exclusão?'}
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
+              <Button className="hover:!bg-red-600 hover:!text-white hover:!border-red-600 transition-colors" onClick={handleConfirmExcluir}>
+                {modalMode === 'PRIMARY' ? 'Sim, Excluir' : 'Forçar Exclusão'}
+              </Button>
+            </div>
+          </GlassCard>
+        </div>
+      )}
     </div>
   );
 }

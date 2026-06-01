@@ -32,11 +32,12 @@ export default function CriarAtividadePage() {
       titulo: formData.get('titulo'),
       data_inicio: formData.get('dataInicio'),
       data_termino: formData.get('dataTermino'),
-      horario_inicio: formData.get('horaInicio')?.toString().replace(':', ''),
-      horario_termino: formData.get('horaTermino')?.toString().replace(':', ''),
+      horario_inicio: formData.get('horaInicio')?.toString().substring(0, 5).replace(':', ''),
+      horario_termino: formData.get('horaTermino')?.toString().substring(0, 5).replace(':', ''),
       max_participantes: formData.get('vagas'),
-      ministrante_id: formData.get('ministranteId'),
-      carga_horaria_ministrantes: formData.get('cargaHoraria'),
+      ministrantes_ids: formData.getAll('ministranteId'),
+      carga_horaria_total: formData.get('cargaHorariaTotal'),
+      carga_horaria_ministrantes: formData.get('cargaHorariaMinistrante'),
     };
 
     try {
@@ -109,19 +110,25 @@ export default function CriarAtividadePage() {
                   <input id="vagas" name="vagas" type="number" min="1" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
                 </div>
                 <div>
-                  <label htmlFor="cargaHoraria" className="text-sm font-medium text-gray-300">Carga Horária (h)</label>
-                  <input id="cargaHoraria" name="cargaHoraria" type="number" min="1" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+                  <label htmlFor="cargaHorariaTotal" className="text-sm font-medium text-gray-300">Carga Horária do Participante (h)</label>
+                  <input id="cargaHorariaTotal" name="cargaHorariaTotal" type="number" min="1" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+                </div>
+                <div>
+                  <label htmlFor="cargaHorariaMinistrante" className="text-sm font-medium text-gray-300">Carga Horária do Ministrante (h)</label>
+                  <input id="cargaHorariaMinistrante" name="cargaHorariaMinistrante" type="number" min="1" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="ministranteId" className="text-sm font-medium text-gray-300">Ministrante</label>
-                <select id="ministranteId" name="ministranteId" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent">
-                  <option value="">Selecione um ministrante...</option>
+                <label className="text-sm font-medium text-gray-300 mb-1 block">Ministrante(s)</label>
+                <div className="mt-1 max-h-48 overflow-y-auto bg-slate-900/50 border border-gray-600 rounded-md p-3 space-y-2">
                   {participantes.map(p => (
-                    <option key={p.id} value={p.id}>{p.nome}</option>
+                    <label key={p.id} className="flex items-center space-x-3 text-white cursor-pointer hover:bg-white/5 p-1 rounded transition-colors">
+                      <input type="checkbox" name="ministranteId" value={p.id} className="w-4 h-4 text-brand-accent bg-slate-800 border-gray-600 rounded focus:ring-brand-accent focus:ring-2" />
+                      <span className="text-sm">{p.nome}</span>
+                    </label>
                   ))}
-                </select>
+                </div>
               </div>
 
               <div className="flex justify-end gap-4 pt-4">
