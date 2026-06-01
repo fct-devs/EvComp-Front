@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navbar } from '../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../components/ui/Core';
-import { registrarPresenca } from '../../../actions/admin';
 
 export default function ColetorScanPage() {
   // --- MÉTODOS DA RegistrarPresencaUI (ASTAH) ---

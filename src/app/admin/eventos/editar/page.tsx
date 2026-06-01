@@ -1,0 +1,112 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Navbar } from '../../../../components/ui/Navbar';
+import { GlassCard, Button, InputField } from '../../../../components/ui/Core';
+
+export default function EditarEventoPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
+
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [error, setError] = useState('');
+  const [evento, setEvento] = useState<any>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    fetch(`http://localhost:8080/api/eventos`) // In real app, we might use findById directly. But currently only findAll or buscar by titulo is in API. Wait, I didn't add findById endpoint. Let's fetch all and filter or add findById in controller if needed. Actually we have @GetMapping and @PutMapping in backend! We can filter from findAll.
+      .then(res => res.json())
+      .then(data => {
+        const ev = data.find((e: any) => String(e.id) === id);
+        if (ev) setEvento(ev);
+        else setError('Evento não encontrado');
+        setFetching(false);
+      })
+      .catch(() => setFetching(false));
+  }, [id]);
+
+  const handleEditar = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const formData = new FormData(e.currentTarget);
+    const payload = {
+      titulo: formData.get('titulo'),
+      dataInicio: formData.get('dataInicio'),
+      dataTermino: formData.get('dataTermino'),
+      descricao: formData.get('descricao'),
+      link: formData.get('link'),
+      tipoContabilizacao: formData.get('tipoContabilizacao')
+    };
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/eventos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro ao editar evento');
+      }
+
+      router.push('/admin/eventos');
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  if (fetching) return <div className="min-h-screen bg-brand-dark p-8 text-white">Carregando...</div>;
+  if (!evento) return <div className="min-h-screen bg-brand-dark p-8 text-white">{error || 'Erro'}</div>;
+
+  return (
+    <div className="min-h-screen bg-brand-dark flex flex-col relative overflow-hidden">
+      <Navbar role="ADMIN" />
+
+      <main className="flex-1 w-full max-w-2xl mx-auto py-12 px-6 relative z-10">
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-3xl font-extrabold text-white">Editar Evento</h1>
+          <Button variant="secondary" onClick={() => router.back()}>Voltar</Button>
+        </div>
+
+        <GlassCard className="p-8 bg-slate-800/80 border border-white/10">
+          <form onSubmit={handleEditar} className="space-y-4">
+            {error && <div className="p-3 bg-red-500/20 border border-red-500 text-red-200 rounded-md text-sm">{error}</div>}
+            
+            <InputField label="Título do Evento" id="titulo" type="text" defaultValue={evento.titulo} required />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <InputField label="Data de Início" id="dataInicio" type="date" defaultValue={evento.dataInicio ? evento.dataInicio.split('T')[0] : ''} required />
+              <InputField label="Data de Término" id="dataTermino" type="date" defaultValue={evento.dataFim ? evento.dataFim.split('T')[0] : ''} required />
+            </div>
+
+            <InputField label="Link" id="link" type="url" defaultValue={evento.link || ''} />
+
+            <div className="flex flex-col space-y-1 mb-4">
+              <label htmlFor="tipoContabilizacao" className="text-sm font-medium text-gray-300">Tipo de Contabilização</label>
+              <select id="tipoContabilizacao" name="tipoContabilizacao" defaultValue={evento.tipoContabilizacao} className="w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                <option value="POR_ATIVIDADE">Por Atividade</option>
+                <option value="POR_CARGA_TOTAL">Por Carga Total</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col space-y-1 mb-4">
+              <label htmlFor="descricao" className="text-sm font-medium text-gray-300">Descrição</label>
+              <textarea id="descricao" name="descricao" rows={4} defaultValue={evento.descricao} required className="w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"></textarea>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Salvando...' : 'Confirmar Edição'}
+            </Button>
+          </form>
+        </GlassCard>
+      </main>
+    </div>
+  );
+}

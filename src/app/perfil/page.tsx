@@ -41,7 +41,7 @@ export default function PerfilPage() {
 
   return (
     <div className="min-h-screen bg-brand-dark flex flex-col">
-      <Navbar role={userData.role} />
+      <Navbar role={userData.role as "PARTICIPANTE" | "COLETOR" | "ADMIN"} />
       
       <main className="flex-1 w-full max-w-3xl mx-auto py-12 px-6">
         <h1 className="text-3xl font-extrabold text-white mb-8">Minha Conta</h1>
