@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthLayout from '../../components/layout/AuthLayout';
 import { Button, InputField } from '../../components/ui/Core';
-import { solicitarLogin } from '../actions/auth';
+import { solicitarLogin, solicitarLogout } from '../actions/auth';
 import { validarDados } from '../../utils/validation';
 
 export default function LoginPage() {
@@ -15,17 +15,22 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Limpa qualquer sessão que tenha ficado para trás
+  useEffect(() => {
+    solicitarLogout();
+  }, []);
+
   // --- MÉTODOS DA LoginUI (ASTAH) ---
   const informarCredenciaisInvalidas = () => setError('Credenciais Inválidas');
   const informarDadosInvalidos = () => setError('Por favor, preencha o email e a senha corretamente.');
   const informarErroLogin = () => setError('Erro de conexão com o servidor.');
   const exibirSessao = (data: any) => {
     if (data.role === 'ADMINISTRADOR') {
-      router.push('/admin');
+      window.location.href = '/admin';
     } else if (data.isColetor === 'true' || data.isColetor === true || data.role === 'COLETORDEPRESENCA') {
-      router.push('/coletor');
+      window.location.href = '/coletor';
     } else {
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     }
   };
 
@@ -99,7 +104,7 @@ export default function LoginPage() {
               required
             />
             <div className="flex justify-end">
-              <Link href="/esqueci-senha" className="text-sm text-brand-accent hover:text-blue-400 transition-colors">
+              <Link href="/recuperar-senha" className="text-sm text-brand-accent hover:text-blue-400 transition-colors">
                 Esqueci minha senha
               </Link>
             </div>
