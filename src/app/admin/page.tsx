@@ -18,7 +18,7 @@ export default function AdminDashboardPage() {
             <h2 className="text-xl font-bold text-white mb-4">Eventos</h2>
             <p className="text-gray-400 text-sm mb-6">Crie e gerencie os eventos da instituição.</p>
             <div className="space-y-3">
-              <Link href="/admin/eventos/novo"><Button className="w-full">Novo Evento</Button></Link>
+              <Link href="/admin/eventos/criar"><Button className="w-full">Novo Evento</Button></Link>
             </div>
           </GlassCard>
 
@@ -26,7 +26,7 @@ export default function AdminDashboardPage() {
             <h2 className="text-xl font-bold text-white mb-4">Atividades</h2>
             <p className="text-gray-400 text-sm mb-6">Vincule minicursos e palestras aos eventos.</p>
             <div className="space-y-3">
-              <Link href="/admin/atividades/nova"><Button className="w-full" variant="secondary">Nova Atividade</Button></Link>
+              <Link href="/admin/eventos"><Button className="w-full" variant="secondary">Nova Atividade</Button></Link>
             </div>
           </GlassCard>
 

@@ -16,6 +16,7 @@ function EditarAtividadeContent() {
   const [atividade, setAtividade] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     async function loadData() {
@@ -46,6 +47,7 @@ function EditarAtividadeContent() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     const formData = new FormData(e.currentTarget);
     const data = {
@@ -74,14 +76,17 @@ function EditarAtividadeContent() {
         throw new Error(errorData.error || 'Erro ao editar atividade');
       }
 
-      router.push('/admin/eventos');
+      setSuccess('Atividade editada com sucesso! Redirecionando...');
+      setTimeout(() => {
+        router.push('/admin/eventos');
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
     }
   };
 
-  if (loading) return <div className="text-center text-white p-12">Carregando dados da atividade...</div>;
+  if (loading && !atividade) return <div className="text-center text-white p-12">Carregando dados da atividade...</div>;
   if (!atividade) return <div className="text-center text-red-400 p-12">{error}</div>;
 
   return (
@@ -92,6 +97,15 @@ function EditarAtividadeContent() {
         {error && (
           <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-md mb-6">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="fixed bottom-10 right-10 z-50 bg-green-600 border border-green-400 text-white px-6 py-4 rounded-md shadow-2xl shadow-green-900/50 animate-in fade-in slide-in-from-bottom-8 duration-300 font-medium">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+              {success}
+            </div>
           </div>
         )}
 

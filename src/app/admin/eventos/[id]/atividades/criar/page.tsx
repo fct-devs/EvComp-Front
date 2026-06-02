@@ -13,6 +13,7 @@ export default function CriarAtividadePage() {
   const [participantes, setParticipantes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     // Fetch all users to select as Ministrante
@@ -26,6 +27,7 @@ export default function CriarAtividadePage() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     const formData = new FormData(e.currentTarget);
     const data = {
@@ -54,7 +56,10 @@ export default function CriarAtividadePage() {
         throw new Error(errorData.error || 'Erro ao criar atividade');
       }
 
-      router.push('/admin/eventos');
+      setSuccess('Atividade criada com sucesso! Redirecionando...');
+      setTimeout(() => {
+        router.push('/admin/eventos');
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -73,6 +78,15 @@ export default function CriarAtividadePage() {
             {error && (
               <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-md mb-6">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="fixed bottom-10 right-10 z-50 bg-green-600 border border-green-400 text-white px-6 py-4 rounded-md shadow-2xl shadow-green-900/50 animate-in fade-in slide-in-from-bottom-8 duration-300 font-medium">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                  {success}
+                </div>
               </div>
             )}
 

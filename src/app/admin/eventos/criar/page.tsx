@@ -9,11 +9,13 @@ export default function CriarEventoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleCriar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     const formData = new FormData(e.currentTarget);
     const payload = {
@@ -37,7 +39,10 @@ export default function CriarEventoPage() {
         throw new Error(data.error || 'Erro ao criar evento');
       }
 
-      router.push('/admin/eventos');
+      setSuccess('Evento criado com sucesso! Redirecionando...');
+      setTimeout(() => {
+        router.push('/admin/eventos');
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -57,6 +62,14 @@ export default function CriarEventoPage() {
         <GlassCard className="p-8 bg-slate-800/80 border border-white/10">
           <form onSubmit={handleCriar} className="space-y-4">
             {error && <div className="p-3 bg-red-500/20 border border-red-500 text-red-200 rounded-md text-sm">{error}</div>}
+            {success && (
+              <div className="fixed bottom-10 right-10 z-50 bg-green-600 border border-green-400 text-white px-6 py-4 rounded-md shadow-2xl shadow-green-900/50 animate-in fade-in slide-in-from-bottom-8 duration-300 font-medium">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                  {success}
+                </div>
+              </div>
+            )}
             
             <InputField label="Título do Evento" id="titulo" type="text" required />
             

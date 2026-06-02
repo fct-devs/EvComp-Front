@@ -16,37 +16,36 @@ export default function AdminEventosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'PRIMARY' | 'SECONDARY'>('PRIMARY');
   const [atividadeToExcluir, setAtividadeToExcluir] = useState<number | null>(null);
+  const [success, setSuccess] = useState('');
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchError, setSearchError] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
+  const fetchTodosEventosEAtividades = async () => {
+    setLoading(true);
+    try {
+      const [resEventos, resAtividades] = await Promise.all([
+        fetch('http://localhost:8080/api/eventos'),
+        fetch('http://localhost:8080/api/atividades')
+      ]);
+      const dataEventos = await resEventos.json();
+      const dataAtividades = await resAtividades.json();
+      
+      if (Array.isArray(dataEventos)) setEventos(dataEventos);
+      else setEventos([]);
+      
+      if (Array.isArray(dataAtividades)) setAtividades(dataAtividades);
+      else setAtividades([]);
+    } catch (err) {
+      console.error('Erro ao buscar dados:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [resEventos, resAtividades] = await Promise.all([
-          fetch('http://localhost:8080/api/eventos'),
-          fetch('http://localhost:8080/api/atividades')
-        ]);
-        const dataEventos = await resEventos.json();
-        const dataAtividades = await resAtividades.json();
-        
-        if (Array.isArray(dataEventos)) {
-          setEventos(dataEventos);
-        } else {
-          console.error("API /eventos retornou erro:", dataEventos);
-          setEventos([]);
-        }
-        
-        if (Array.isArray(dataAtividades)) {
-          setAtividades(dataAtividades);
-        } else {
-          console.error("API /atividades retornou erro:", dataAtividades);
-          setAtividades([]);
-        }
-      } catch (err) {
-        console.error('Erro ao buscar dados:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
+    fetchTodosEventosEAtividades();
   }, []);
 
   const toggleEvento = (id: number) => {
@@ -92,6 +91,8 @@ export default function AdminEventosPage() {
         setAtividades(prev => prev.filter(a => a.id !== atividadeToExcluir));
         setModalOpen(false);
         setAtividadeToExcluir(null);
+        setSuccess('Atividade excluída com sucesso!');
+        setTimeout(() => setSuccess(''), 3000);
       } else {
         const errorData = await res.json();
         alert(`Erro ao excluir: ${errorData.error}`);
@@ -101,6 +102,35 @@ export default function AdminEventosPage() {
       alert("Erro de conexão ao tentar excluir a atividade.");
       setModalOpen(false);
     }
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    
+    setIsSearching(true);
+    setSearchError('');
+    try {
+      const res = await fetch(`http://localhost:8080/api/eventos/buscar?titulo=${encodeURIComponent(searchQuery)}`);
+      if (!res.ok) {
+        const errData = await res.json();
+        setSearchError(errData.error || 'Nenhum evento encontrado.');
+        setEventos([]);
+      } else {
+        const data = await res.json();
+        setEventos(Array.isArray(data) ? data : [data]);
+      }
+    } catch (err) {
+      setSearchError('Erro de conexão ao buscar evento.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchError('');
+    fetchTodosEventosEAtividades();
   };
 
   const getAtividadesDoEvento = (eventoId: number) => {
@@ -118,6 +148,39 @@ export default function AdminEventosPage() {
             <Button>Novo Evento</Button>
           </Link>
         </div>
+
+        <form onSubmit={handleSearch} className="mb-8 flex gap-4">
+          <input 
+            type="text" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar evento por título..." 
+            className="flex-1 bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition-colors"
+          />
+          <Button type="submit" disabled={isSearching || !searchQuery.trim()}>
+            {isSearching ? 'Buscando...' : 'Pesquisar'}
+          </Button>
+          {(searchQuery || searchError) && (
+            <Button type="button" variant="secondary" onClick={handleClearSearch}>
+              Limpar
+            </Button>
+          )}
+        </form>
+
+        {searchError && (
+          <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-md mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
+            {searchError}
+          </div>
+        )}
+
+        {success && (
+          <div className="fixed bottom-10 right-10 z-50 bg-green-600 border border-green-400 text-white px-6 py-4 rounded-md shadow-2xl shadow-green-900/50 animate-in fade-in slide-in-from-bottom-8 duration-300 font-medium">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+              {success}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           {loading ? (
