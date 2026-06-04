@@ -163,7 +163,7 @@ export default function GerenciarAtividadesPage() {
                     <tr key={atv.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
                       <td className="py-3 px-4 font-semibold">{atv.titulo}</td>
                       <td className="py-3 px-4 text-sm text-gray-300">
-                        {atv.dataInicio ? new Date(atv.dataInicio).toLocaleDateString('pt-BR') : ''} <br/>
+                        {atv.dataInicio ? new Date(atv.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : ''} <br/>
                         {atv.horarioInicio?.slice(0,5)} até {atv.horarioFim?.slice(0,5)}
                       </td>
                       <td className="py-3 px-4 text-gray-300">{atv.maxParticipantes}</td>

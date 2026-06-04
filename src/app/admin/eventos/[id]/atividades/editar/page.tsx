@@ -76,10 +76,14 @@ function EditarAtividadeContent() {
         throw new Error(errorData.error || 'Erro ao editar atividade');
       }
 
-      setSuccess('Atividade editada com sucesso! Redirecionando...');
+      const resData = await res.json();
+      const successMsg = resData.message || 'Atividade editada com sucesso! Redirecionando...';
+      setSuccess(successMsg);
+      const readTime = Math.max(2500, successMsg.length * 50);
+      
       setTimeout(() => {
         router.push('/admin/eventos');
-      }, 1500);
+      }, readTime);
     } catch (err: any) {
       setError(err.message);
       setLoading(false);

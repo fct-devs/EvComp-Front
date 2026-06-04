@@ -139,12 +139,22 @@ export async function buscarPerfilUsuario() {
     });
 
     if (!res.ok) {
+      try {
+        cookieStore.delete('auth_token');
+        cookieStore.delete('user_role');
+        cookieStore.delete('is_coletor');
+      } catch (err) {}
       return { success: false, error: 'Sessão inválida' };
     }
 
     const data = await res.json();
     return { success: true, data };
   } catch (error) {
+    try {
+      cookieStore.delete('auth_token');
+      cookieStore.delete('user_role');
+      cookieStore.delete('is_coletor');
+    } catch (err) {}
     return { success: false, error: 'Erro de conexão.' };
   }
 }

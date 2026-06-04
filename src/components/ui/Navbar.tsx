@@ -10,7 +10,11 @@ export const Navbar = ({ role = 'PARTICIPANTE' }: { role?: 'PARTICIPANTE' | 'COL
       </div>
 
       <div className="hidden md:flex items-center space-x-8 text-sm font-semibold">
-        <Link href={role === 'ADMIN' ? '/admin' : '/dashboard'} className="text-gray-300 hover:text-white transition-colors">HOME / EVENTOS</Link>
+        <Link href={role === 'ADMIN' ? '/admin' : '/dashboard'} className="text-gray-300 hover:text-white transition-colors">HOME</Link>
+        <Link href={role === 'ADMIN' ? '/admin/eventos' : '/dashboard/eventos'} className="text-gray-300 hover:text-white transition-colors">EVENTOS</Link>
+        {role === 'PARTICIPANTE' && (
+          <Link href="/dashboard/minhas-inscricoes" className="text-gray-300 hover:text-white transition-colors">MINHAS INSCRIÇÕES</Link>
+        )}
         
         {role === 'ADMIN' && (
           <>
