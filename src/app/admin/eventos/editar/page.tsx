@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '../../../../components/ui/Navbar';
 import { GlassCard, Button, InputField } from '../../../../components/ui/Core';
 
-export default function EditarEventoPage() {
+function EditarEventoForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
@@ -121,5 +121,13 @@ export default function EditarEventoPage() {
         </GlassCard>
       </main>
     </div>
+  );
+}
+
+export default function EditarEventoPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-brand-dark p-8 text-white">Carregando...</div>}>
+      <EditarEventoForm />
+    </Suspense>
   );
 }

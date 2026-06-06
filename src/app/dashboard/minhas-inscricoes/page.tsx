@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../components/ui/Core';
+import dynamic from 'next/dynamic';
+const QRCodeModal = dynamic(() => import('../../../components/ui/QRCodeModal').then(mod => mod.QRCodeModal), { ssr: false });
 import { buscarPerfilUsuario } from '../../actions/auth';
 
 export default function MinhasInscricoesPage() {
@@ -11,6 +13,9 @@ export default function MinhasInscricoesPage() {
   const [inscricoes, setInscricoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedAtividade, setSelectedAtividade] = useState<{ id: number, participanteId: number } | null>(null);
+  const [secretSeed, setSecretSeed] = useState<string>('');
+  const [presencas, setPresencas] = useState<number[]>([]);
 
   useEffect(() => {
     async function carregarDados() {
@@ -28,6 +33,17 @@ export default function MinhasInscricoesPage() {
         
         const data = await res.json();
         setInscricoes(data);
+        
+        if (data && data.length > 0 && data[0].participante?.secretSeed) {
+          setSecretSeed(data[0].participante.secretSeed);
+        }
+
+        // Busca presenças do participante
+        const resPresencas = await fetch(`http://localhost:8080/api/presencas/participante/${perfilRes.data.id}`);
+        if (resPresencas.ok) {
+          const presencasData = await resPresencas.json();
+          setPresencas(presencasData);
+        }
       } catch (err: any) {
         setError(err.message || 'Erro desconhecido');
       } finally {
@@ -77,16 +93,33 @@ export default function MinhasInscricoesPage() {
                   <h3 className="text-lg font-bold text-white mb-3">Atividades Selecionadas</h3>
                   {inscricao.atividade && inscricao.atividade.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {inscricao.atividade.map((atv: any) => (
-                        <div key={atv.id} className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                          <h4 className="font-bold text-white text-md">{atv.titulo}</h4>
-                          <div className="mt-2 space-y-1 text-sm text-gray-400">
+                      {inscricao.atividade.map((atv: any) => {
+                        const isPresente = presencas.includes(atv.id);
+                        return (
+                        <div key={atv.id} className={`bg-slate-900/50 p-4 rounded-lg border relative ${isPresente ? 'border-emerald-500/50' : 'border-white/5'}`}>
+                          {isPresente && (
+                            <div className="absolute top-4 right-4 flex items-center space-x-1 text-emerald-400 bg-emerald-950/80 px-2 py-1 rounded border border-emerald-500/30 text-xs font-bold shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                              <span>PRESENÇA COLETADA</span>
+                            </div>
+                          )}
+                          
+                          <h4 className={`font-bold text-white text-md ${isPresente ? 'pr-40' : ''}`}>{atv.titulo}</h4>
+                          <div className="mt-2 space-y-1 text-sm text-gray-400 mb-4">
                             <p><strong>Data:</strong> {atv.dataInicio ? new Date(atv.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'} {atv.dataFim && atv.dataFim !== atv.dataInicio ? ` até ${new Date(atv.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}` : ''}</p>
                             <p><strong>Horário:</strong> {atv.horarioInicio?.slice(0,5)} às {atv.horarioFim?.slice(0,5)}</p>
                             <p><strong>Carga Horária:</strong> {atv.cargaHorariaTotal}h</p>
                           </div>
+                          
+                          <button 
+                            onClick={() => setSelectedAtividade({ id: atv.id, participanteId: inscricao.participante?.id || 0 })}
+                            className="w-full mt-auto bg-brand-accent/20 hover:bg-brand-accent/40 text-brand-accent border border-brand-accent/50 rounded-lg py-2 text-sm font-bold transition-all flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                            Exibir Ingresso (QR Code)
+                          </button>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   ) : (
                     <p className="text-red-400 text-sm italic">Nenhuma atividade selecionada (Inconsistência de dados).</p>
@@ -97,6 +130,14 @@ export default function MinhasInscricoesPage() {
           </div>
         )}
       </main>
+
+      <QRCodeModal 
+        isOpen={selectedAtividade !== null}
+        onClose={() => setSelectedAtividade(null)}
+        atividadeId={selectedAtividade?.id || 0}
+        participanteId={selectedAtividade?.participanteId || 0}
+        secretSeed={secretSeed}
+      />
     </div>
   );
 }

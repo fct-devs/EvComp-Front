@@ -37,11 +37,13 @@ export async function solicitarLogin(formData: FormData) {
       
       cookieStore.set('auth_token', data.token, options);
       
+      const publicOptions = { ...options, httpOnly: false };
+      
       if (data.role) {
-        cookieStore.set('user_role', data.role, options);
+        cookieStore.set('user_role', data.role, publicOptions);
       }
       if (data.isColetor) {
-        cookieStore.set('is_coletor', data.isColetor, options);
+        cookieStore.set('is_coletor', data.isColetor, publicOptions);
       }
     }
 

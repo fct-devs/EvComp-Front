@@ -23,7 +23,7 @@ export default function proxy(request: NextRequest) {
   }
 
   // Admin pages protection
-  if (request.nextUrl.pathname.startsWith('/admin') && userRole !== 'ADMINISTRADOR') {
+  if (request.nextUrl.pathname.startsWith('/admin') && userRole !== 'ADMIN') {
     if (isServerAction) return NextResponse.next();
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
@@ -36,11 +36,11 @@ export default function proxy(request: NextRequest) {
 
   // If user is already logged in and tries to access login/cadastro, redirect to correct dashboard
   if (isAuthRoute && token) {
-    if (userRole === 'ADMINISTRADOR') {
+    if (userRole === 'ADMIN') {
       return NextResponse.redirect(new URL('/admin', request.url));
     }
-    if (isColetor === 'true' || userRole === 'COLETORDEPRESENCA') {
-      return NextResponse.redirect(new URL('/coletor', request.url));
+    if (isColetor === 'true' || userRole === 'COLETOR') {
+      return NextResponse.redirect(new URL('/coletor/scan', request.url));
     }
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
