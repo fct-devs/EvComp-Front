@@ -35,7 +35,9 @@ export const Navbar = ({ role = 'PARTICIPANTE' }: { role?: 'PARTICIPANTE' | 'COL
 
       <div className="hidden md:flex items-center space-x-8 text-sm font-semibold">
         <Link href={displayRole === 'ADMIN' ? '/admin' : '/dashboard'} className="text-gray-300 hover:text-white transition-colors">HOME</Link>
-        <Link href={displayRole === 'ADMIN' ? '/admin/eventos' : '/dashboard/eventos'} className="text-gray-300 hover:text-white transition-colors">EVENTOS</Link>
+        {displayRole !== 'ADMIN' && (
+          <Link href="/dashboard/eventos" className="text-gray-300 hover:text-white transition-colors">EVENTOS</Link>
+        )}
         {(displayRole === 'PARTICIPANTE' || displayRole === 'COLETOR') && (
           <Link href="/dashboard/minhas-inscricoes" className="text-gray-300 hover:text-white transition-colors">MINHAS INSCRIÇÕES</Link>
         )}
