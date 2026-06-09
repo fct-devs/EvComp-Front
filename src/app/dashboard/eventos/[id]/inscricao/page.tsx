@@ -123,6 +123,22 @@ export default function InscricaoEventoPage() {
     return false;
   };
 
+  const isAtividadeIniciadaOuEncerrada = (atv: any) => {
+    if (!atv.dataInicio) return false;
+    
+    const [ano, mes, dia] = atv.dataInicio.split('-');
+    const dtInicio = new Date(Number(ano), Number(mes) - 1, Number(dia));
+    
+    if (atv.horarioInicio) {
+      const [h, m] = atv.horarioInicio.split(':');
+      dtInicio.setHours(Number(h), Number(m), 0, 0);
+    } else {
+      dtInicio.setHours(23, 59, 59, 999);
+    }
+    
+    return new Date() > dtInicio;
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-brand-dark flex items-center justify-center text-white font-bold text-xl">Carregando...</div>;
   }
@@ -180,28 +196,37 @@ export default function InscricaoEventoPage() {
           ) : (
             <div className="space-y-4 mb-8">
               {atividades.map((atv) => {
+                const isIniciada = isAtividadeIniciadaOuEncerrada(atv);
                 const isSelecionada = selecionadas.has(atv.id);
                 const isConflitante = !isSelecionada && temConflitoHorario(atv);
+                const isDisabled = isConflitante || isIniciada;
 
                 return (
-                  <label key={atv.id} className={`flex items-start space-x-4 p-4 rounded-lg border ${isConflitante ? 'border-red-500/20 bg-slate-900/30 opacity-60 cursor-not-allowed' : 'border-white/5 bg-slate-900/50 hover:bg-slate-900 cursor-pointer'} transition-colors`}>
+                  <label key={atv.id} className={`flex items-start space-x-4 p-4 rounded-lg border ${isDisabled ? 'border-red-500/20 bg-slate-900/30 opacity-60 cursor-not-allowed' : 'border-white/5 bg-slate-900/50 hover:bg-slate-900 cursor-pointer'} transition-colors`}>
                     <input
                       type="checkbox"
                       className="w-5 h-5 mt-1 bg-transparent border-gray-500 rounded focus:ring-brand-accent text-brand-accent disabled:opacity-50 disabled:cursor-not-allowed"
                       checked={isSelecionada}
-                      disabled={isConflitante}
+                      disabled={isDisabled}
                       onChange={() => {
-                        if (!isConflitante) toggleAtividade(atv.id);
+                        if (!isDisabled) toggleAtividade(atv.id);
                       }}
                     />
                     <div className="flex-1">
                       <div className="flex justify-between items-center">
-                        <h4 className={`font-bold ${isConflitante ? 'text-gray-400 line-through' : 'text-white'}`}>{atv.titulo}</h4>
-                        {isConflitante && (
-                          <span className="text-xs font-bold text-red-400 bg-red-400/10 px-2 py-1 rounded">
-                            Conflito de Horário
-                          </span>
-                        )}
+                        <h4 className={`font-bold ${isDisabled ? 'text-gray-400 line-through' : 'text-white'}`}>{atv.titulo}</h4>
+                        <div className="space-x-2">
+                          {isIniciada && (
+                            <span className="text-xs font-bold text-red-400 bg-red-400/10 px-2 py-1 rounded">
+                              Encerrada/Iniciada
+                            </span>
+                          )}
+                          {isConflitante && (
+                            <span className="text-xs font-bold text-orange-400 bg-orange-400/10 px-2 py-1 rounded">
+                              Conflito de Horário
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-gray-400">
                         Horário: {atv.horarioInicio?.slice(0,5)} - {atv.horarioFim?.slice(0,5)} | Data: {atv.dataInicio ? new Date(atv.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : ''}{atv.dataFim && atv.dataFim !== atv.dataInicio ? ` até ${new Date(atv.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}` : ''}

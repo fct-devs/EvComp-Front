@@ -57,15 +57,7 @@ export default function PerfilPage() {
                 <span className="px-3 py-1 bg-blue-900/50 text-blue-300 text-xs rounded-full border border-blue-800">{userData.role}</span>
              </GlassCard>
 
-             {/* Barra de progresso da imagem 5 */}
-             <GlassCard className="mt-6 p-6 bg-slate-800/80 border-white/5">
-                <h3 className="text-sm font-bold text-white mb-4">Minha Presença na SECCOMP</h3>
-                <div className="w-full bg-slate-700 rounded-full h-4 mb-2 overflow-hidden">
-                  <div className="bg-emerald-500 h-4 rounded-full" style={{ width: '0%' }}></div>
-                </div>
-                <p className="text-xs text-right text-emerald-400 font-bold">0% Concluído</p>
-             </GlassCard>
-             
+
              <div className="mt-6">
                 <Button variant="danger" className="w-full" onClick={handleLogout}>Sair da Conta</Button>
              </div>
