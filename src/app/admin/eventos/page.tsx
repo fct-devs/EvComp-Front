@@ -324,6 +324,9 @@ export default function AdminEventosPage() {
                         <Link href={`/admin/eventos/${ev.id}/atividades/criar`}>
                           <Button>Adicionar Atividade</Button>
                         </Link>
+                        <Link href={`/admin/eventos/${ev.id}/participantes`}>
+                          <Button variant="secondary" className="border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/20">Participantes Inscritos</Button>
+                        </Link>
                       </div>
                     </div>
                   )}
