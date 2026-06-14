@@ -39,7 +39,10 @@ export const Navbar = ({ role = 'PARTICIPANTE' }: { role?: 'PARTICIPANTE' | 'COL
           <Link href="/dashboard/eventos" className="text-gray-300 hover:text-white transition-colors">EVENTOS</Link>
         )}
         {(displayRole === 'PARTICIPANTE' || displayRole === 'COLETOR') && (
-          <Link href="/dashboard/minhas-inscricoes" className="text-gray-300 hover:text-white transition-colors">MINHAS INSCRIÇÕES</Link>
+          <>
+            <Link href="/dashboard/minhas-inscricoes" className="text-gray-300 hover:text-white transition-colors">MINHAS INSCRIÇÕES</Link>
+            <Link href="/dashboard/certificados" className="text-gray-300 hover:text-white transition-colors">CERTIFICADOS</Link>
+          </>
         )}
         
         {displayRole === 'ADMIN' && (
