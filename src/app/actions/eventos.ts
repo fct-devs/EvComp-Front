@@ -8,7 +8,7 @@ const API_BASE = process.env.API_URL || 'http://localhost:8080/api';
 
 export async function solicitarConsultaEvento() {
   try {
-    const res = await fetch(`${API_BASE}/eventos`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE}/eventos`, { credentials: 'include',  cache: 'no-store' });
     if (!res.ok) return { success: false, data: [] };
     const data = await res.json();
     return { success: true, data };
@@ -22,7 +22,7 @@ export async function buscarEventosDoColetor() {
   if (!token) return { success: false, error: 'Não autorizado', data: [] };
 
   try {
-    const res = await fetch(`${API_BASE}/eventos/coletor`, {
+    const res = await fetch(`${API_BASE}/eventos/coletor`, { credentials: 'include', 
       headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store'
     });
@@ -41,7 +41,7 @@ export async function solicitarEventosDisponiveis(participanteId: string) {
 
 export async function selecionarAtividade(atividadeId: string) {
   try {
-    const res = await fetch(`${API_BASE}/atividades/${atividadeId}`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE}/atividades/${atividadeId}`, { credentials: 'include',  cache: 'no-store' });
     if (!res.ok) return { success: false, data: null };
     const data = await res.json();
     return { success: true, data };

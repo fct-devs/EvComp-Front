@@ -46,7 +46,7 @@ export default function GestaoColetoresPage() {
     
     // Buscar eventos
     try {
-      const resEv = await fetch('http://localhost:8080/api/eventos');
+      const resEv = await fetch('http://localhost:8080/api/eventos', { credentials: 'include' });
       const dataEv = await resEv.json();
       setEventos(dataEv);
       if (dataEv.length > 0 && !selectedEventoId) {

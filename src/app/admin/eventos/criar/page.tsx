@@ -28,7 +28,7 @@ export default function CriarEventoPage() {
     };
 
     try {
-      const res = await fetch('http://localhost:8080/api/eventos', {
+      const res = await fetch('http://localhost:8080/api/eventos', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

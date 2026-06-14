@@ -33,8 +33,8 @@ export default function InscricaoEventoPage() {
         }
 
         const [evRes, atvRes] = await Promise.all([
-          fetch('http://localhost:8080/api/eventos'),
-          fetch('http://localhost:8080/api/atividades')
+          fetch('http://localhost:8080/api/eventos', { credentials: 'include' }),
+          fetch('http://localhost:8080/api/atividades', { credentials: 'include' })
         ]);
 
         const evData = await evRes.json();
@@ -46,7 +46,7 @@ export default function InscricaoEventoPage() {
         setAtividades(filtradas);
         
         // Verifica se o participante já está inscrito
-        const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`);
+        const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
         if (minRes.ok) {
           const minData = await minRes.json();
           if (minData.inscritos && minData.inscritos.includes(parseInt(String(eventoId)))) {
@@ -83,7 +83,7 @@ export default function InscricaoEventoPage() {
         atividadeIds: Array.from(selecionadas)
       };
 
-      const res = await fetch('http://localhost:8080/api/inscricoes', {
+      const res = await fetch('http://localhost:8080/api/inscricoes', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

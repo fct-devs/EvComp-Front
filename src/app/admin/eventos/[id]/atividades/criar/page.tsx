@@ -17,7 +17,7 @@ export default function CriarAtividadePage() {
 
   useEffect(() => {
     // Fetch all users to select as Ministrante
-    fetch('http://localhost:8080/api/participantes')
+    fetch('http://localhost:8080/api/participantes', { credentials: 'include' })
       .then(res => res.json())
       .then(data => setParticipantes(data))
       .catch(err => console.error('Erro ao buscar participantes', err));
@@ -43,7 +43,7 @@ export default function CriarAtividadePage() {
     };
 
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/evento/${eventoId}`, {
+      const res = await fetch(`http://localhost:8080/api/atividades/evento/${eventoId}`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

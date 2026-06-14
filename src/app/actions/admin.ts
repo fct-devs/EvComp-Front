@@ -5,7 +5,7 @@ const API_BASE = process.env.API_URL || 'http://localhost:8080/api';
 // --- MÉTODOS DA RegistrarPresencaUI (ASTAH) ---
 export async function registrarPresenca(atividadeId: string, codigoParticipante: string) {
   try {
-    const res = await fetch(`${API_BASE}/presenca`, {
+    const res = await fetch(`${API_BASE}/presenca`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ atividadeId, ra: codigoParticipante }),
@@ -30,7 +30,7 @@ export async function solicitarCriacaoEvento(formData: FormData) {
   };
   
   try {
-    const res = await fetch(`${API_BASE}/eventos`, {
+    const res = await fetch(`${API_BASE}/eventos`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -51,7 +51,7 @@ export async function solicitarCriacaoEvento(formData: FormData) {
 export async function solicitarCriacaoAtividade(formData: FormData) {
   const payload = Object.fromEntries(formData.entries());
   try {
-    const res = await fetch(`${API_BASE}/atividades`, {
+    const res = await fetch(`${API_BASE}/atividades`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -67,7 +67,7 @@ export async function solicitarCriacaoAtividade(formData: FormData) {
 // --- MÉTODOS DA AtribuirColetorUI e RemoverColetorUI (ASTAH) ---
 export async function exibirParticipantes() {
   try {
-    const res = await fetch(`${API_BASE}/participantes`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE}/participantes`, { credentials: 'include',  cache: 'no-store' });
     if (!res.ok) return { success: false, data: [] };
     const data = await res.json();
     return { success: true, data };
@@ -78,7 +78,7 @@ export async function exibirParticipantes() {
 
 export async function tornarColetor(eventoId: string, participanteRa: string) {
   try {
-    const res = await fetch(`${API_BASE}/eventos/${eventoId}/coletores/${participanteRa}`, {
+    const res = await fetch(`${API_BASE}/eventos/${eventoId}/coletores/${participanteRa}`, { credentials: 'include', 
       method: 'POST',
     });
     if (!res.ok) return { success: false, error: 'Não foi possível atribuir o coletor.' };
@@ -90,7 +90,7 @@ export async function tornarColetor(eventoId: string, participanteRa: string) {
 
 export async function removerColetor(eventoId: string, coletorId: string) {
   try {
-    const res = await fetch(`${API_BASE}/eventos/${eventoId}/coletores/${coletorId}`, {
+    const res = await fetch(`${API_BASE}/eventos/${eventoId}/coletores/${coletorId}`, { credentials: 'include', 
       method: 'DELETE',
     });
     if (!res.ok) return { success: false, error: 'Não foi possível remover o coletor.' };
@@ -103,7 +103,7 @@ export async function removerColetor(eventoId: string, coletorId: string) {
 // --- MÉTODOS DA GerarRelatorioUI (ASTAH) ---
 export async function solicitarGerarRelatorio(eventoId: string) {
   try {
-    const res = await fetch(`${API_BASE}/relatorios/gerar?eventoId=${eventoId}`, {
+    const res = await fetch(`${API_BASE}/relatorios/gerar?eventoId=${eventoId}`, { credentials: 'include', 
       method: 'GET',
     });
     if (!res.ok) return { success: false, error: 'Erro ao gerar relatório.' };
@@ -118,7 +118,7 @@ export async function solicitarGerarRelatorio(eventoId: string) {
 // --- MÉTODOS DA EmitirCertificadosUI (ASTAH) ---
 export async function emitirCertificado(participanteId: string, eventoId: string, atividadeId: string) {
   try {
-    const res = await fetch(`${API_BASE}/certificados/emitir`, {
+    const res = await fetch(`${API_BASE}/certificados/emitir`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ participanteId, eventoId, atividadeId }),

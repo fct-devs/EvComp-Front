@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   let inscritos: number[] = [];
   if (perfilRes.success) {
     try {
-      const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`);
+      const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
       if (minRes.ok) {
         const minData = await minRes.json();
         if (minData.inscritos) inscritos = minData.inscritos;
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
                 
                 <div className="flex flex-row md:flex-col items-center justify-between md:items-end min-w-[120px]">
                   <div className="flex items-center space-x-2">
-                    <span className="font-bold text-white text-lg">{ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'TBA'}</span>
+                    <span className="font-bold text-white text-lg">{ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { credentials: 'include',  timeZone: 'UTC' }) : 'TBA'}</span>
                   </div>
                   <span className="text-gray-400 text-sm mt-1">{ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'TBA'}</span>
                   

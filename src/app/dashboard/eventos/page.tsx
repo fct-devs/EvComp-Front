@@ -17,7 +17,7 @@ export default function ParticipanteEventosPage() {
         const perfilRes = await buscarPerfilUsuario();
         let minInscritos: number[] = [];
         if (perfilRes.success) {
-          const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`);
+          const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
           if (minRes.ok) {
             const minData = await minRes.json();
             if (minData.inscritos) minInscritos = minData.inscritos;
@@ -25,7 +25,7 @@ export default function ParticipanteEventosPage() {
         }
         setInscritos(minInscritos);
 
-        const evRes = await fetch('http://localhost:8080/api/eventos/disponiveis');
+        const evRes = await fetch('http://localhost:8080/api/eventos/disponiveis', { credentials: 'include' });
         const evData = await evRes.json();
         
         // Os eventos já vêm filtrados por data do backend (evitando erros de TimeZone)

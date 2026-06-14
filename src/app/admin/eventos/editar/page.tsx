@@ -18,7 +18,7 @@ function EditarEventoForm() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`http://localhost:8080/api/eventos`) // In real app, we might use findById directly. But currently only findAll or buscar by titulo is in API. Wait, I didn't add findById endpoint. Let's fetch all and filter or add findById in controller if needed. Actually we have @GetMapping and @PutMapping in backend! We can filter from findAll.
+    fetch(`http://localhost:8080/api/eventos`, { credentials: 'include' }) // In real app, we might use findById directly. But currently only findAll or buscar by titulo is in API. Wait, I didn't add findById endpoint. Let's fetch all and filter or add findById in controller if needed. Actually we have @GetMapping and @PutMapping in backend! We can filter from findAll.
       .then(res => res.json())
       .then(data => {
         const ev = data.find((e: any) => String(e.id) === id);
@@ -46,7 +46,7 @@ function EditarEventoForm() {
     };
 
     try {
-      const res = await fetch(`http://localhost:8080/api/eventos/${id}`, {
+      const res = await fetch(`http://localhost:8080/api/eventos/${id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

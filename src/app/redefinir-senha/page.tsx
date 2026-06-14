@@ -65,7 +65,7 @@ function RedefinirSenhaContent() {
         return;
       }
       try {
-        const response = await fetch(`http://localhost:8080/api/redefinicao-senha/validar?tokenRecebido=${token}`, {
+        const response = await fetch(`http://localhost:8080/api/redefinicao-senha/validar?tokenRecebido=${token}`, { credentials: 'include', 
           method: 'POST'
         });
         const isValid = await response.json();
@@ -98,7 +98,7 @@ function RedefinirSenhaContent() {
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/redefinicao-senha/confirmar?tokenRecebido=${token}&novaSenha=${encodeURIComponent(novaSenha)}`, {
+      const response = await fetch(`http://localhost:8080/api/redefinicao-senha/confirmar?tokenRecebido=${token}&novaSenha=${encodeURIComponent(novaSenha, { credentials: 'include' })}`, { credentials: 'include', 
         method: 'POST'
       });
       const result = await response.json();
@@ -172,7 +172,7 @@ function RedefinirSenhaContent() {
                disabled={tokenInput.length !== 6}
                onClick={async () => {
                  try {
-                   const response = await fetch(`http://localhost:8080/api/redefinicao-senha/validar?tokenRecebido=${tokenInput}`, { method: 'POST' });
+                   const response = await fetch(`http://localhost:8080/api/redefinicao-senha/validar?tokenRecebido=${tokenInput}`, { credentials: 'include',  method: 'POST' });
                    const isValid = await response.json();
                    if (isValid) {
                      window.history.replaceState(null, '', `/redefinir-senha?token=${tokenInput}`);

@@ -51,7 +51,7 @@ export default function ColetorScanPage() {
       setPaused(true);
       setScanFeedback(null); // Clear previous feedback while loading
 
-      const res = await fetch('http://localhost:8080/api/presencas/registrar', {
+      const res = await fetch('http://localhost:8080/api/presencas/registrar', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -96,7 +96,7 @@ export default function ColetorScanPage() {
     setShowManualInput(false);
 
     try {
-      const res = await fetch('http://localhost:8080/api/presencas/registrar', {
+      const res = await fetch('http://localhost:8080/api/presencas/registrar', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -156,7 +156,7 @@ export default function ColetorScanPage() {
     if (eventoSelecionado) {
       async function fetchAtividades() {
         try {
-          const res = await fetch('http://localhost:8080/api/atividades');
+          const res = await fetch('http://localhost:8080/api/atividades', { credentials: 'include' });
           if (res.ok) {
             const data = await res.json();
             const atividadesDoEvento = data.filter((a: any) => a.evento && a.evento.id === eventoSelecionado);
@@ -179,7 +179,7 @@ export default function ColetorScanPage() {
     setValidating(true);
     
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/${atividadeId}/selecionar`);
+      const res = await fetch(`http://localhost:8080/api/atividades/${atividadeId}/selecionar`, { credentials: 'include' });
       if (res.ok) {
         setAtividadeSelecionada(atividadeId);
         setSuccessMsg('Atividade selecionada com sucesso! Você já pode registrar as presenças.');

@@ -22,8 +22,8 @@ function EditarAtividadeContent() {
     async function loadData() {
       try {
         const [resPart, resAtv] = await Promise.all([
-          fetch('http://localhost:8080/api/participantes'),
-          fetch(`http://localhost:8080/api/atividades/${atividadeId}`)
+          fetch('http://localhost:8080/api/participantes', { credentials: 'include' }),
+          fetch(`http://localhost:8080/api/atividades/${atividadeId}`, { credentials: 'include' })
         ]);
 
         if (!resAtv.ok) throw new Error('Atividade não encontrada.');
@@ -63,7 +63,7 @@ function EditarAtividadeContent() {
     };
 
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/${atividadeId}`, {
+      const res = await fetch(`http://localhost:8080/api/atividades/${atividadeId}`, { credentials: 'include', 
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

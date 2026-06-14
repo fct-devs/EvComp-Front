@@ -31,7 +31,7 @@ export default function EditarParticipantePage() {
       }
 
       try {
-        const res = await fetch(`http://localhost:8080/api/participantes/${participanteId}`);
+        const res = await fetch(`http://localhost:8080/api/participantes/${participanteId}`, { credentials: 'include' });
         if (!res.ok) {
           throw new Error('Falha ao carregar dados do participante');
         }
@@ -86,7 +86,7 @@ export default function EditarParticipantePage() {
     setSubmitting(true);
     try {
       const payload = { nome, ra };
-      const res = await fetch(`http://localhost:8080/api/participantes/${participanteId}`, {
+      const res = await fetch(`http://localhost:8080/api/participantes/${participanteId}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

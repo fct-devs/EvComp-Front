@@ -20,7 +20,7 @@ export default function ConsultarEventoPage() {
     async function fetchDados() {
       try {
         // Fetch evento details
-        const evRes = await fetch('http://localhost:8080/api/eventos');
+        const evRes = await fetch('http://localhost:8080/api/eventos', { credentials: 'include' });
         const evData = await evRes.json();
         const ev = evData.find((e: any) => String(e.id) === String(eventoId));
         
@@ -32,7 +32,7 @@ export default function ConsultarEventoPage() {
         setEvento(ev);
 
         // Fetch atividades for this evento
-        const atRes = await fetch('http://localhost:8080/api/atividades');
+        const atRes = await fetch('http://localhost:8080/api/atividades', { credentials: 'include' });
         const atData = await atRes.json();
         const filtradas = atData.filter((a: any) => a.evento && String(a.evento.id) === String(eventoId));
         setAtividades(filtradas);
