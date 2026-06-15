@@ -111,7 +111,7 @@ export default function AdminEventosPage() {
     setIsSearching(true);
     setSearchError('');
     try {
-      const res = await fetch(`http://localhost:8080/api/eventos/buscar?titulo=${encodeURIComponent(searchQuery, { credentials: 'include' })}`);
+      const res = await fetch(`http://localhost:8080/api/eventos/buscar?titulo=${encodeURIComponent(searchQuery)}`, { credentials: 'include' });
       if (!res.ok) {
         const errData = await res.json();
         setSearchError(errData.error || 'Nenhum evento encontrado.');
@@ -202,7 +202,7 @@ export default function AdminEventosPage() {
                       <h3 className="text-lg font-bold text-white">{ev.titulo}</h3>
                       <p className="text-sm text-gray-400 mt-1">
                         {(() => {
-                          const dIn = ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { credentials: 'include',  timeZone: 'UTC' }) : null;
+                          const dIn = ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
                           const dFi = ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
                           if (dIn && dFi) return dIn === dFi ? dIn : `${dIn} a ${dFi}`;
                           return dIn || dFi || '-';

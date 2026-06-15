@@ -98,7 +98,7 @@ function RedefinirSenhaContent() {
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/redefinicao-senha/confirmar?tokenRecebido=${token}&novaSenha=${encodeURIComponent(novaSenha, { credentials: 'include' })}`, { credentials: 'include', 
+      const response = await fetch(`http://localhost:8080/api/redefinicao-senha/confirmar?tokenRecebido=${token}&novaSenha=${encodeURIComponent(novaSenha)}`, { credentials: 'include', 
         method: 'POST'
       });
       const result = await response.json();

@@ -1,7 +1,3 @@
-'use server';
-
-import { cookies } from 'next/headers';
-
 const API_BASE = process.env.API_URL || 'http://localhost:8080/api';
 
 // --- MÉTODOS DA ConsultarEventoUI E InscricaoUI (ASTAH) ---
@@ -17,13 +13,8 @@ export async function solicitarConsultaEvento() {
   }
 }
 export async function buscarEventosDoColetor() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
-  if (!token) return { success: false, error: 'Não autorizado', data: [] };
-
   try {
     const res = await fetch(`${API_BASE}/eventos/coletor`, { credentials: 'include', 
-      headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store'
     });
     if (!res.ok) return { success: false, error: 'Erro ao carregar eventos', data: [] };
