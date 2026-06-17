@@ -14,7 +14,7 @@ export async function solicitarLogin(formData: FormData) {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/auth`, {
+    const res = await fetch(`${API_BASE}/auth`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha }),
@@ -37,11 +37,13 @@ export async function solicitarLogin(formData: FormData) {
       
       cookieStore.set('auth_token', data.token, options);
       
+      const publicOptions = { ...options, httpOnly: false };
+      
       if (data.role) {
-        cookieStore.set('user_role', data.role, options);
+        cookieStore.set('user_role', data.role, publicOptions);
       }
       if (data.isColetor) {
-        cookieStore.set('is_coletor', data.isColetor, options);
+        cookieStore.set('is_coletor', data.isColetor, publicOptions);
       }
     }
 
@@ -57,7 +59,7 @@ export async function solicitarLogout() {
 
   if (token) {
     try {
-      await fetch(`${API_BASE}/auth/logout`, {
+      await fetch(`${API_BASE}/auth/logout`, { credentials: 'include', 
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -84,7 +86,7 @@ export async function solicitarCadastro(formData: FormData) {
   };
 
   try {
-    const res = await fetch(`${API_BASE}/cadastro`, {
+    const res = await fetch(`${API_BASE}/cadastro`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -111,7 +113,7 @@ export async function solicitarCadastro(formData: FormData) {
 export async function recuperarSenhaAction(formData: FormData) {
   const email = formData.get('email');
   try {
-    const res = await fetch(`${API_BASE}/redefinir-senha`, {
+    const res = await fetch(`${API_BASE}/redefinir-senha`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -130,7 +132,7 @@ export async function buscarPerfilUsuario() {
   if (!token) return { success: false, error: 'Não autenticado' };
 
   try {
-    const res = await fetch(`${API_BASE}/auth/me`, {
+    const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include', 
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -139,12 +141,22 @@ export async function buscarPerfilUsuario() {
     });
 
     if (!res.ok) {
+      try {
+        cookieStore.delete('auth_token');
+        cookieStore.delete('user_role');
+        cookieStore.delete('is_coletor');
+      } catch (err) {}
       return { success: false, error: 'Sessão inválida' };
     }
 
     const data = await res.json();
     return { success: true, data };
   } catch (error) {
+    try {
+      cookieStore.delete('auth_token');
+      cookieStore.delete('user_role');
+      cookieStore.delete('is_coletor');
+    } catch (err) {}
     return { success: false, error: 'Erro de conexão.' };
   }
 }

@@ -29,7 +29,7 @@ export function verificarEmailInstitucional(email: string): boolean
 }
 
 export function validarRa(ra: string): boolean {
-  return !ra || ra.length >= 6;
+  return !ra || ra.length === 9;
 }
 
 export function validarDadosEvento(titulo: string, dataInicio: Date, dataTermino: Date, descricao: string, link: string): boolean {

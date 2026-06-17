@@ -3,11 +3,24 @@ import Link from 'next/link';
 import { Navbar } from '../../components/ui/Navbar';
 import { Button } from '../../components/ui/Core';
 import { solicitarConsultaEvento } from '../actions/eventos';
+import { buscarPerfilUsuario } from '../actions/auth';
 
 export default async function DashboardPage() {
   // --- MÉTODOS DA ConsultarEventoUI (ASTAH) ---
   const response = await solicitarConsultaEvento();
   const eventos = response.success ? response.data : [];
+  
+  const perfilRes = await buscarPerfilUsuario();
+  let inscritos: number[] = [];
+  if (perfilRes.success) {
+    try {
+      const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
+      if (minRes.ok) {
+        const minData = await minRes.json();
+        if (minData.inscritos) inscritos = minData.inscritos;
+      }
+    } catch(e) {}
+  }
   
   const exibirDadosEvento = () => eventos;
   const informarEventoNaoEncontrado = () => (
@@ -37,17 +50,27 @@ export default async function DashboardPage() {
                 
                 <div className="flex flex-row md:flex-col items-center justify-between md:items-end min-w-[120px]">
                   <div className="flex items-center space-x-2">
-                    <span className="font-bold text-white text-lg">{ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString() : 'TBA'}</span>
+                    <span className="font-bold text-white text-lg">{ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'TBA'}</span>
                   </div>
-                  <span className="text-gray-400 text-sm mt-1">{ev.dataFim ? new Date(ev.dataFim).toLocaleDateString() : 'TBA'}</span>
+                  <span className="text-gray-400 text-sm mt-1">{ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'TBA'}</span>
+                  
+                  {inscritos.includes(ev.id) ? (
+                    <span className="mt-4 md:mt-0 md:ml-6 block w-full text-center px-6 py-2 rounded-full font-bold transition-all duration-300 bg-gray-500/50 text-gray-300 cursor-not-allowed border border-gray-400/20 text-sm">
+                       INSCRITO
+                    </span>
+                  ) : (
+                    <Link href={`/dashboard/eventos/${ev.id}/inscricao`} className="mt-4 md:mt-0 md:ml-6 block w-full text-center px-6 py-2 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 bg-white text-slate-900 hover:bg-gray-200 text-sm">
+                       INSCREVER-SE
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
           <div className="mt-8 flex justify-center">
-            <Link href="/atividades/1">
-               <Button className="w-full max-w-sm text-lg py-3">VER ATIVIDADES / INSCREVA-SE</Button>
+            <Link href="/dashboard/eventos">
+               <Button variant="secondary" className="w-full max-w-sm text-lg py-3">VER TODOS OS EVENTOS</Button>
             </Link>
           </div>
         </div>
