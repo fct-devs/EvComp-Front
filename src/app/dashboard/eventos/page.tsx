@@ -25,9 +25,14 @@ export default function ParticipanteEventosPage() {
         }
         setInscritos(minInscritos);
 
-        const evRes = await fetch('http://localhost:8080/api/eventos/disponiveis', { credentials: 'include' });
-        const evData = await evRes.json();
+        let evRes;
+        if (perfilRes.success && perfilRes.data.id) {
+          evRes = await fetch(`http://localhost:8080/api/eventos/disponiveis/${perfilRes.data.id}`, { credentials: 'include' });
+        } else {
+          evRes = await fetch('http://localhost:8080/api/eventos/disponiveis', { credentials: 'include' });
+        }
         
+        const evData = await evRes.json();
         // Os eventos já vêm filtrados por data do backend (evitando erros de TimeZone)
         // Só garantimos que não mostra nenhum erro de estrutura
         setEventos(evData);

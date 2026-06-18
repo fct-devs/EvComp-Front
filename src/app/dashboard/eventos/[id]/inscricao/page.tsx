@@ -77,10 +77,44 @@ export default function InscricaoEventoPage() {
     setError('');
     
     try {
+      const atividadesArray = Array.from(selecionadas);
+
+      // Validação de Vagas via API
+      for (const atvId of atividadesArray) {
+        const vagasRes = await fetch(`http://localhost:8080/api/atividades/${atvId}/vagas`, { credentials: 'include' });
+        if (vagasRes.ok) {
+          const vagasData = await vagasRes.json();
+          if (vagasData.vagasDisponiveis <= 0) {
+            const atvObj = atividades.find(a => a.id === atvId);
+            throw new Error(`A atividade '${atvObj?.titulo || atvId}' não possui mais vagas disponíveis.`);
+          }
+        }
+      }
+
+      // Validação de Conflitos via API
+      for (const atvId of atividadesArray) {
+        const confRes = await fetch('http://localhost:8080/api/atividades/verificar-conflitos', { 
+          credentials: 'include',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ atividades: atividadesArray, atividadeId: atvId })
+        });
+        
+        if (confRes.ok) {
+          const confData = await confRes.json();
+          if (confData.conflitoDetectado) {
+            throw new Error(confData.mensagem);
+          }
+        } else if (confRes.status === 400) {
+          const errData = await confRes.json();
+          throw new Error(errData.error || 'Erro ao verificar conflitos de horário.');
+        }
+      }
+
       const payload = {
         participanteId: participanteId,
         eventoId: parseInt(String(eventoId)),
-        atividadeIds: Array.from(selecionadas)
+        atividadeIds: atividadesArray
       };
 
       const res = await fetch('http://localhost:8080/api/inscricoes', { credentials: 'include', 
