@@ -79,6 +79,10 @@ export default function InscricaoEventoPage() {
     try {
       const atividadesArray = Array.from(selecionadas);
 
+      if (atividadesArray.length === 0) {
+        throw new Error('Ao menos uma atividade deve ser escolhida.');
+      }
+
       // Validação de Vagas via API
       for (const atvId of atividadesArray) {
         const vagasRes = await fetch(`http://localhost:8080/api/atividades/${atvId}/vagas`, { credentials: 'include' });

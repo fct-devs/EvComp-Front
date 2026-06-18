@@ -15,6 +15,11 @@ export default function ParticipantesDoEventoPage() {
   const [participantes, setParticipantes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedParticipante, setExpandedParticipante] = useState<number | null>(null);
+
+  const toggleParticipante = (id: number) => {
+    setExpandedParticipante(expandedParticipante === id ? null : id);
+  };
 
   useEffect(() => {
     async function carregarParticipantes() {
@@ -76,31 +81,38 @@ export default function ParticipantesDoEventoPage() {
           {participantes.length === 0 ? (
              <p className="text-gray-400 text-center py-8">Nenhum participante inscrito neste evento.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-gray-300">
-                <thead className="text-xs uppercase bg-slate-900/50 text-gray-400 border-b border-white/5">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 font-semibold tracking-wider">Nome</th>
-                    <th scope="col" className="px-6 py-3 font-semibold tracking-wider">E-mail</th>
-                    <th scope="col" className="px-6 py-3 font-semibold tracking-wider">RA</th>
-                    <th scope="col" className="px-6 py-3 font-semibold tracking-wider text-right">Ação</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {participantes.map((p) => (
-                    <tr key={p.id} className="hover:bg-slate-800/50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-white">{p.nome}</td>
-                      <td className="px-6 py-4">{p.email}</td>
-                      <td className="px-6 py-4">{p.ra || '-'}</td>
-                      <td className="px-6 py-4 text-right">
+            <div className="space-y-3">
+              {participantes.map((p) => {
+                const isExpanded = expandedParticipante === p.id;
+                return (
+                  <div key={p.id} className="bg-slate-900/50 border border-white/5 rounded-lg overflow-hidden transition-all duration-300">
+                    <div 
+                      className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5"
+                      onClick={() => toggleParticipante(p.id)}
+                    >
+                      <h4 className="font-bold text-white text-lg">{p.nome}</h4>
+                      {isExpanded ? (
+                        <svg className="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      )}
+                    </div>
+                    {isExpanded && (
+                      <div className="p-4 border-t border-white/5 bg-slate-900/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-300"><strong className="text-gray-400">E-mail:</strong> {p.email}</p>
+                          <p className="text-sm text-gray-300"><strong className="text-gray-400">RA:</strong> {p.ra || '-'}</p>
+                        </div>
                         <Link href={`/admin/eventos/${eventoId}/participantes/${p.id}/editar`}>
-                          <Button variant="secondary" className="py-1 px-3 text-xs border-brand-accent/50 text-brand-accent hover:bg-brand-accent/20">Editar</Button>
+                          <Button variant="secondary" className="py-2 px-4 border-brand-accent/50 text-brand-accent hover:bg-brand-accent/20">
+                            Editar
+                          </Button>
                         </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </GlassCard>
