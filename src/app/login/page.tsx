@@ -34,7 +34,6 @@ export default function LoginPage() {
     solicitarLogout();
   }, []);
 
-  // --- MÉTODOS DA LoginUI (ASTAH) ---
   const informarCredenciaisInvalidas = () => setError('Credenciais Inválidas');
   const informarDadosInvalidos = () => setError('Por favor, preencha o email e a senha corretamente.');
   const informarErroLogin = () => setError('Erro de conexão com o servidor.');
