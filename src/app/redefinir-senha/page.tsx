@@ -69,7 +69,7 @@ function RedefinirSenhaContent() {
           method: 'POST'
         });
         const isValid = await response.json();
-        if (isValid) {
+        if (isValid === true) {
           solicitarNovaSenha();
         } else {
           informarTokenInvalido();
@@ -103,7 +103,7 @@ function RedefinirSenhaContent() {
       });
       const result = await response.json();
       
-      if (result) {
+      if (result === true) {
         mensagemSucesso();
       } else {
         informarTokenInvalido();
@@ -174,7 +174,7 @@ function RedefinirSenhaContent() {
                  try {
                    const response = await fetch(`http://localhost:8080/api/redefinicao-senha/validar?tokenRecebido=${tokenInput}`, { credentials: 'include',  method: 'POST' });
                    const isValid = await response.json();
-                   if (isValid) {
+                   if (isValid === true) {
                      window.history.replaceState(null, '', `/redefinir-senha?token=${tokenInput}`);
                      setTokenValido(true);
                      setErro('');

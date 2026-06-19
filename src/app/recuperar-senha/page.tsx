@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthLayout from '../../components/layout/AuthLayout';
@@ -12,6 +12,14 @@ export default function RecuperarSenhaPage() {
   const [tokenInput, setTokenInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [sucesso, setSucesso] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
 
   // --- MÉTODOS DA RedefinicaoSenhaUI (ASTAH) ---
   const solicitarEmailRedefinicao = () => {
@@ -31,9 +39,11 @@ export default function RecuperarSenhaPage() {
         method: 'POST',
       });
       mensagemGenericaEnvioInstrucoes();
+      setCooldown(30);
     } catch (error) {
       console.error(error);
       mensagemGenericaEnvioInstrucoes();
+      setCooldown(30);
     } finally {
       setLoading(false);
     }
@@ -50,7 +60,7 @@ export default function RecuperarSenhaPage() {
           method: 'POST'
         });
         const isValid = await response.json();
-        if (isValid) {
+        if (isValid === true) {
           router.push(`/redefinir-senha?token=${tokenInput}`);
         } else {
           setErroValidacao('Código inválido ou expirado.');
@@ -104,6 +114,24 @@ export default function RecuperarSenhaPage() {
               <Button type="submit" className="w-full mt-2" disabled={tokenInput.length !== 6}>
                 Validar Código
               </Button>
+              
+              {erroValidacao && (
+                <div className="pt-4 pb-2 text-center">
+                  <div className="relative flex items-center mb-4">
+                    <div className="flex-grow border-t border-emerald-500/30"></div>
+                    <span className="flex-shrink-0 mx-4 text-emerald-300/50 text-xs uppercase">ou</span>
+                    <div className="flex-grow border-t border-emerald-500/30"></div>
+                  </div>
+                  <Button 
+                    type="button"
+                    onClick={handleSubmit} 
+                    disabled={loading || cooldown > 0}
+                    className="w-full bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 border-emerald-500/50 disabled:opacity-50"
+                  >
+                    {loading ? 'Reenviando...' : cooldown > 0 ? `Aguarde ${cooldown}s para reenviar` : 'Solicitar Envio de um Novo Código'}
+                  </Button>
+                </div>
+              )}
             </form>
 
             <div className="pt-6">
