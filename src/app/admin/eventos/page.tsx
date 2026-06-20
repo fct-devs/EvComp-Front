@@ -306,7 +306,7 @@ export default function AdminEventosPage() {
                                         {atv.ministrantes && atv.ministrantes.length > 0 && (
                                           <div className="col-span-2">
                                             <span className="block text-xs text-gray-500 uppercase">Ministrante(s)</span>
-                                            {atv.ministrantes.map((m: any) => m.nome).join(', ')}
+                                            {atv.ministrantes.map((m: any) => m.nomeCompleto).join(', ')}
                                           </div>
                                         )}
                                       </div>

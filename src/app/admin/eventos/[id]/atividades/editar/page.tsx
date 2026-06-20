@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useEventoStore } from '../../../../../../store/useEventoStore';
+import { validarDadosAtividade } from '../../../../../../utils/validation';
 import { Navbar } from '../../../../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../../../../components/ui/Core';
 
@@ -12,6 +14,7 @@ function EditarAtividadeContent() {
   const eventoId = params.id;
   const atividadeId = searchParams.get('atividadeId');
 
+  const { evento, setEvento } = useEventoStore();
   const [participantes, setParticipantes] = useState<any[]>([]);
   const [atividade, setAtividade] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -41,7 +44,18 @@ function EditarAtividadeContent() {
     }
 
     if (atividadeId) loadData();
-  }, [atividadeId]);
+
+    if (!evento && eventoId) {
+      fetch(`http://localhost:8080/api/eventos/${eventoId}/detalhes`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+            if(data.dadosEvento) {
+                setEvento(data.dadosEvento);
+            }
+        })
+        .catch(err => console.error('Erro ao buscar evento', err));
+    }
+  }, [atividadeId, eventoId]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,16 +65,27 @@ function EditarAtividadeContent() {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      titulo: formData.get('titulo'),
-      data_inicio: formData.get('dataInicio'),
-      data_termino: formData.get('dataTermino'),
-      horario_inicio: formData.get('horaInicio')?.toString().substring(0, 5).replace(':', ''),
-      horario_termino: formData.get('horaTermino')?.toString().substring(0, 5).replace(':', ''),
-      max_participantes: formData.get('vagas'),
-      ministrantes_ids: formData.getAll('ministranteId'),
-      carga_horaria_total: formData.get('cargaHorariaTotal'),
-      carga_horaria_ministrantes: formData.get('cargaHorariaMinistrante'),
+      titulo: formData.get('titulo') as string,
+      data_inicio: formData.get('dataInicio') as string,
+      data_termino: formData.get('dataTermino') as string,
+      horario_inicio: formData.get('horaInicio')?.toString().substring(0, 5) as string,
+      horario_termino: formData.get('horaTermino')?.toString().substring(0, 5) as string,
+      max_participantes: parseInt(formData.get('vagas') as string),
+      ministrantes_ids: formData.getAll('ministranteId').map(id => parseInt(id.toString())),
+      carga_horaria_total: parseInt(formData.get('cargaHorariaTotal') as string),
+      carga_horaria_ministrantes: parseInt(formData.get('cargaHorariaMinistrante') as string),
     };
+
+    const erroValidacao = validarDadosAtividade(
+        data.titulo, data.data_inicio, data.data_termino, data.horario_inicio, data.horario_termino,
+        evento?.dataInicio, evento?.dataFim
+    );
+
+    if (erroValidacao) {
+        setError(erroValidacao);
+        setLoading(false);
+        return;
+    }
 
     try {
       const res = await fetch(`http://localhost:8080/api/atividades/${atividadeId}`, { credentials: 'include', 
@@ -122,22 +147,22 @@ function EditarAtividadeContent() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="dataInicio" className="text-sm font-medium text-gray-300">Data de Início</label>
-              <input id="dataInicio" name="dataInicio" type="date" defaultValue={atividade.dataInicio} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="dataInicio" name="dataInicio" type="date" defaultValue={atividade.dataInicio} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
             <div>
               <label htmlFor="dataTermino" className="text-sm font-medium text-gray-300">Data de Término</label>
-              <input id="dataTermino" name="dataTermino" type="date" defaultValue={atividade.dataFim} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="dataTermino" name="dataTermino" type="date" defaultValue={atividade.dataFim} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="horaInicio" className="text-sm font-medium text-gray-300">Horário de Início</label>
-              <input id="horaInicio" name="horaInicio" type="time" defaultValue={atividade.horarioInicio} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="horaInicio" name="horaInicio" type="time" defaultValue={atividade.horarioInicio} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
             <div>
               <label htmlFor="horaTermino" className="text-sm font-medium text-gray-300">Horário de Término</label>
-              <input id="horaTermino" name="horaTermino" type="time" defaultValue={atividade.horarioFim} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="horaTermino" name="horaTermino" type="time" defaultValue={atividade.horarioFim} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
           </div>
 
@@ -160,11 +185,11 @@ function EditarAtividadeContent() {
             <label className="text-sm font-medium text-gray-300 mb-1 block">Ministrante(s)</label>
             <div className="mt-1 max-h-48 overflow-y-auto bg-slate-900/50 border border-gray-600 rounded-md p-3 space-y-2">
               {participantes.map(p => {
-                const isChecked = atividade.ministrantes?.some((m: any) => String(m.id) === String(p.id));
+                const isChecked = atividade.ministrantes_ids?.some((id: any) => String(id) === String(p.id));
                 return (
                   <label key={p.id} className="flex items-center space-x-3 text-white cursor-pointer hover:bg-white/5 p-1 rounded transition-colors">
                     <input type="checkbox" name="ministranteId" value={p.id} defaultChecked={isChecked} className="w-4 h-4 text-brand-accent bg-slate-800 border-gray-600 rounded focus:ring-brand-accent focus:ring-2" />
-                    <span className="text-sm">{p.nome}</span>
+                    <span className="text-sm">{p.nomeCompleto}</span>
                   </label>
                 );
               })}

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useEventoStore } from '../../../../../../store/useEventoStore';
+import { validarDadosAtividade } from '../../../../../../utils/validation';
 import { Navbar } from '../../../../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../../../../components/ui/Core';
 
@@ -35,57 +36,6 @@ export default function CriarAtividadePage() {
     }
   }, [eventoId]);
 
-  const validarDadosAtividade = (titulo: string, data_inicio: string, data_termino: string, horario_inicio: string, horario_termino: string, evInicio?: string, evFim?: string) => {
-    if (!titulo || !data_inicio || !data_termino || !horario_inicio || !horario_termino) {
-        return 'Campos obrigatórios ausentes.';
-    }
-    
-    const dtIn = new Date(`${data_inicio}T${horario_inicio}`);
-    const dtFi = new Date(`${data_termino}T${horario_termino}`);
-    if (dtIn > dtFi) {
-        return 'A data e hora de início não podem ser posteriores ao término.';
-    }
-
-    if (evInicio && evFim) {
-        const parseDateFallback = (dt: any) => {
-            try {
-                if (!dt) return null;
-                if (Array.isArray(dt)) {
-                    return new Date(dt[0], dt[1] - 1, dt[2]);
-                }
-                
-                // Tratamento especial para formato YYYY-MM-DD
-                if (typeof dt === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dt.trim())) {
-                    const parts = dt.trim().split('-');
-                    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                }
-                
-                const d = new Date(dt);
-                if (isNaN(d.getTime())) return null;
-                return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-            } catch { return null; }
-        };
-
-        const eventoIn = parseDateFallback(evInicio);
-        const eventoFi = parseDateFallback(evFim);
-
-        if (eventoIn && eventoFi) {
-            const partsIn = data_inicio.split('-');
-            const partsFi = data_termino.split('-');
-            const dtIn = new Date(parseInt(partsIn[0]), parseInt(partsIn[1]) - 1, parseInt(partsIn[2]));
-            const dtFi = new Date(parseInt(partsFi[0]), parseInt(partsFi[1]) - 1, parseInt(partsFi[2]));
-
-            if (dtIn.getTime() < eventoIn.getTime()) {
-                return 'A data de início da atividade não pode ser anterior ao evento.';
-            }
-            if (dtFi.getTime() > eventoFi.getTime()) {
-                return 'A data de término da atividade não pode ser posterior ao evento.';
-            }
-        }
-    }
-
-    return null;
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

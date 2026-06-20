@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Navbar } from '../../../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../../../components/ui/Core';
 import { buscarPerfilUsuario } from '../../../../actions/auth';
+import { verificarConflitos } from '../../../../../utils/validation';
 
 export default function InscricaoEventoPage() {
   const router = useRouter();
@@ -36,7 +37,20 @@ export default function InscricaoEventoPage() {
         if (res.ok) {
           const data = await res.json();
           setEvento(data.dadosEvento);
-          setAtividades(data.atividades);
+          
+          const atividadesComVagas = await Promise.all(
+            (data.atividades || []).map(async (atv: any) => {
+              try {
+                const vagasRes = await fetch(`http://localhost:8080/api/atividades/${atv.id}/vagas`, { credentials: 'include' });
+                if (vagasRes.ok) {
+                  const vagasData = await vagasRes.json();
+                  return { ...atv, vagasDisponiveis: vagasData.vagasDisponiveis };
+                }
+              } catch (e) {}
+              return { ...atv, vagasDisponiveis: 0 };
+            })
+          );
+          setAtividades(atividadesComVagas);
         } else {
           setError('Evento não encontrado');
         }
@@ -91,23 +105,12 @@ export default function InscricaoEventoPage() {
         }
       }
 
-      // Validação de Conflitos via API
+      // Validação de Conflitos Local
+      const atividadesSelecionadas = atividadesArray.map(id => atividades.find(a => a.id === id)).filter(Boolean);
       for (const atvId of atividadesArray) {
-        const confRes = await fetch('http://localhost:8080/api/atividades/verificar-conflitos', { 
-          credentials: 'include',
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ atividades: atividadesArray, atividadeId: atvId })
-        });
-        
-        if (confRes.ok) {
-          const confData = await confRes.json();
-          if (confData.conflitoDetectado) {
-            throw new Error(confData.mensagem);
-          }
-        } else if (confRes.status === 400) {
-          const errData = await confRes.json();
-          throw new Error(errData.error || 'Erro ao verificar conflitos de horário.');
+        const atv = atividades.find(a => a.id === atvId);
+        if (atv && verificarConflitos(atv, atividadesSelecionadas)) {
+          throw new Error(`Conflito de horários detectado com a atividade: ${atv.titulo}`);
         }
       }
 
@@ -136,26 +139,6 @@ export default function InscricaoEventoPage() {
     }
   };
 
-  const temConflitoHorario = (atv: any) => {
-    if (!atv.dataInicio || !atv.horarioInicio || !atv.horarioFim) return false;
-    
-    const dtInicioAtv = new Date(`${atv.dataInicio}T${atv.horarioInicio}`);
-    const dtFimAtv = new Date(`${atv.dataFim || atv.dataInicio}T${atv.horarioFim}`);
-
-    for (const selId of selecionadas) {
-      if (selId === atv.id) continue;
-      const selAtv = atividades.find(a => a.id === selId);
-      if (!selAtv || !selAtv.dataInicio || !selAtv.horarioInicio || !selAtv.horarioFim) continue;
-      
-      const dtInicioSel = new Date(`${selAtv.dataInicio}T${selAtv.horarioInicio}`);
-      const dtFimSel = new Date(`${selAtv.dataFim || selAtv.dataInicio}T${selAtv.horarioFim}`);
-
-      if (dtInicioAtv < dtFimSel && dtFimAtv > dtInicioSel) {
-        return true;
-      }
-    }
-    return false;
-  };
 
   const isAtividadeIniciadaOuEncerrada = (atv: any) => {
     if (!atv.dataInicio) return false;
@@ -229,11 +212,14 @@ export default function InscricaoEventoPage() {
             <p className="text-gray-400 text-center py-8">Não há atividades disponíveis para este evento no momento.</p>
           ) : (
             <div className="space-y-4 mb-8">
-              {atividades.map((atv) => {
-                const isIniciada = isAtividadeIniciadaOuEncerrada(atv);
-                const isSelecionada = selecionadas.has(atv.id);
-                const isConflitante = !isSelecionada && temConflitoHorario(atv);
-                const isDisabled = isConflitante || isIniciada;
+              {(() => {
+                const atividadesSelecionadas = Array.from(selecionadas).map(id => atividades.find(a => a.id === id)).filter(Boolean);
+                return atividades.map((atv) => {
+                  const isIniciada = isAtividadeIniciadaOuEncerrada(atv);
+                  const isSemVagas = atv.vagasDisponiveis <= 0;
+                  const isSelecionada = selecionadas.has(atv.id);
+                  const isConflitante = !isSelecionada && verificarConflitos(atv, atividadesSelecionadas);
+                  const isDisabled = isConflitante || isIniciada || (!isSelecionada && isSemVagas);
 
                 return (
                   <label key={atv.id} className={`flex items-start space-x-4 p-4 rounded-lg border ${isDisabled ? 'border-red-500/20 bg-slate-900/30 opacity-60 cursor-not-allowed' : 'border-white/5 bg-slate-900/50 hover:bg-slate-900 cursor-pointer'} transition-colors`}>
@@ -255,6 +241,11 @@ export default function InscricaoEventoPage() {
                               Encerrada/Iniciada
                             </span>
                           )}
+                          {isSemVagas && !isSelecionada && (
+                            <span className="text-xs font-bold text-red-400 bg-red-400/10 px-2 py-1 rounded">
+                              Esgotada
+                            </span>
+                          )}
                           {isConflitante && (
                             <span className="text-xs font-bold text-orange-400 bg-orange-400/10 px-2 py-1 rounded">
                               Conflito de Horário
@@ -265,11 +256,11 @@ export default function InscricaoEventoPage() {
                       <p className="text-sm text-gray-400">
                         Horário: {atv.horarioInicio?.slice(0,5)} - {atv.horarioFim?.slice(0,5)} | Data: {atv.dataInicio ? new Date(atv.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : ''}{atv.dataFim && atv.dataFim !== atv.dataInicio ? ` até ${new Date(atv.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}` : ''}
                       </p>
-                      <p className="text-xs text-brand-accent mt-1">Vagas totais: {atv.maxParticipantes}</p>
+                      <p className="text-xs text-brand-accent mt-1">Vagas Disponíveis: {atv.vagasDisponiveis}</p>
                     </div>
                   </label>
                 );
-              })}
+              })})()}
             </div>
           )}
 
