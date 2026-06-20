@@ -19,23 +19,17 @@ export default function ConsultarEventoPage() {
   useEffect(() => {
     async function fetchDados() {
       try {
-        // Fetch evento details
-        const evRes = await fetch('http://localhost:8080/api/eventos', { credentials: 'include' });
-        const evData = await evRes.json();
-        const ev = evData.find((e: any) => String(e.id) === String(eventoId));
+        const res = await fetch(`http://localhost:8080/api/eventos/${eventoId}/detalhes`, { credentials: 'include' });
         
-        if (!ev) {
+        if (!res.ok) {
           setError('Evento não encontrado.');
           setLoading(false);
           return;
         }
-        setEvento(ev);
-
-        // Fetch atividades for this evento
-        const atRes = await fetch('http://localhost:8080/api/atividades', { credentials: 'include' });
-        const atData = await atRes.json();
-        const filtradas = atData.filter((a: any) => a.evento && String(a.evento.id) === String(eventoId));
-        setAtividades(filtradas);
+        
+        const data = await res.json();
+        setEvento(data.dadosEvento);
+        setAtividades(data.atividades);
         setLoading(false);
       } catch (err: any) {
         setError('Erro ao carregar dados do evento.');

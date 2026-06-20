@@ -32,18 +32,14 @@ export default function InscricaoEventoPage() {
           return;
         }
 
-        const [evRes, atvRes] = await Promise.all([
-          fetch('http://localhost:8080/api/eventos', { credentials: 'include' }),
-          fetch('http://localhost:8080/api/atividades', { credentials: 'include' })
-        ]);
-
-        const evData = await evRes.json();
-        const ev = evData.find((e: any) => String(e.id) === String(eventoId));
-        if (ev) setEvento(ev);
-
-        const atvData = await atvRes.json();
-        const filtradas = atvData.filter((a: any) => a.evento && String(a.evento.id) === String(eventoId));
-        setAtividades(filtradas);
+        const res = await fetch(`http://localhost:8080/api/eventos/${eventoId}/detalhes`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setEvento(data.dadosEvento);
+          setAtividades(data.atividades);
+        } else {
+          setError('Evento não encontrado');
+        }
         
         // Verifica se o participante já está inscrito
         const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
