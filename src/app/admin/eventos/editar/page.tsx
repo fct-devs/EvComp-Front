@@ -124,7 +124,7 @@ function EditarEventoForm() {
               <InputField label="Data de Término" id="dataTermino" type="date" defaultValue={evento.dataFim ? evento.dataFim.split('T')[0] : ''} required />
             </div>
 
-            <InputField label="Link" id="link" type="url" defaultValue={evento.link || ''} />
+            <InputField label="Link (opcional)" id="link" type="url" defaultValue={evento.link || ''} />
 
             <div className="flex flex-col space-y-1 mb-4">
               <label htmlFor="tipoContabilizacao" className="text-sm font-medium text-gray-300">Tipo de Contabilização</label>

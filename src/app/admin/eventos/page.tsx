@@ -111,7 +111,7 @@ export default function AdminEventosPage() {
     setIsSearching(true);
     setSearchError('');
     try {
-      const res = await fetch(`http://localhost:8080/api/eventos/buscar?titulo=${encodeURIComponent(searchQuery)}`, { credentials: 'include' });
+      const res = await fetch(`http://localhost:8080/api/eventos/buscar?tituloEvento=${encodeURIComponent(searchQuery)}`, { credentials: 'include' });
       if (!res.ok) {
         const errData = await res.json();
         setSearchError(errData.error || 'Nenhum evento encontrado.');

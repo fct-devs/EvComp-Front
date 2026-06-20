@@ -31,7 +31,7 @@ export default function GerenciarAtividadesPage() {
 
   useEffect(() => {
     if (!eventoId) return;
-    fetch(`http://localhost:8080/api/eventos/buscar?titulo=`, { credentials: 'include' }) // We can just fetch all to find the event title
+    fetch(`http://localhost:8080/api/eventos/buscar?tituloEvento=`, { credentials: 'include' }) // We can just fetch all to find the event title
       .then(res => res.json())
       .then(data => {
         // If API doesn't support findById easily, we can just leave evento null or use a specific endpoint
