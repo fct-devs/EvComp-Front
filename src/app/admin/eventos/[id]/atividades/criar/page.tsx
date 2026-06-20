@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useEventoStore } from '../../../../../../store/useEventoStore';
 import { Navbar } from '../../../../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../../../../components/ui/Core';
 
@@ -11,17 +12,80 @@ export default function CriarAtividadePage() {
   const eventoId = params.id;
 
   const [participantes, setParticipantes] = useState<any[]>([]);
+  const { evento, setEvento } = useEventoStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    // Fetch all users to select as Ministrante
     fetch('http://localhost:8080/api/participantes', { credentials: 'include' })
       .then(res => res.json())
       .then(data => setParticipantes(data))
       .catch(err => console.error('Erro ao buscar participantes', err));
-  }, []);
+
+    if (!evento) {
+      fetch(`http://localhost:8080/api/eventos/${eventoId}/detalhes`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+            if(data.dadosEvento) {
+                setEvento(data.dadosEvento);
+            }
+        })
+        .catch(err => console.error('Erro ao buscar evento', err));
+    }
+  }, [eventoId]);
+
+  const validarDadosAtividade = (titulo: string, data_inicio: string, data_termino: string, horario_inicio: string, horario_termino: string, evInicio?: string, evFim?: string) => {
+    if (!titulo || !data_inicio || !data_termino || !horario_inicio || !horario_termino) {
+        return 'Campos obrigatórios ausentes.';
+    }
+    
+    const dtIn = new Date(`${data_inicio}T${horario_inicio}`);
+    const dtFi = new Date(`${data_termino}T${horario_termino}`);
+    if (dtIn > dtFi) {
+        return 'A data e hora de início não podem ser posteriores ao término.';
+    }
+
+    if (evInicio && evFim) {
+        const parseDateFallback = (dt: any) => {
+            try {
+                if (!dt) return null;
+                if (Array.isArray(dt)) {
+                    return new Date(dt[0], dt[1] - 1, dt[2]);
+                }
+                
+                // Tratamento especial para formato YYYY-MM-DD
+                if (typeof dt === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dt.trim())) {
+                    const parts = dt.trim().split('-');
+                    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                }
+                
+                const d = new Date(dt);
+                if (isNaN(d.getTime())) return null;
+                return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            } catch { return null; }
+        };
+
+        const eventoIn = parseDateFallback(evInicio);
+        const eventoFi = parseDateFallback(evFim);
+
+        if (eventoIn && eventoFi) {
+            const partsIn = data_inicio.split('-');
+            const partsFi = data_termino.split('-');
+            const dtIn = new Date(parseInt(partsIn[0]), parseInt(partsIn[1]) - 1, parseInt(partsIn[2]));
+            const dtFi = new Date(parseInt(partsFi[0]), parseInt(partsFi[1]) - 1, parseInt(partsFi[2]));
+
+            if (dtIn.getTime() < eventoIn.getTime()) {
+                return 'A data de início da atividade não pode ser anterior ao evento.';
+            }
+            if (dtFi.getTime() > eventoFi.getTime()) {
+                return 'A data de término da atividade não pode ser posterior ao evento.';
+            }
+        }
+    }
+
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,19 +95,31 @@ export default function CriarAtividadePage() {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      titulo: formData.get('titulo'),
-      data_inicio: formData.get('dataInicio'),
-      data_termino: formData.get('dataTermino'),
-      horario_inicio: formData.get('horaInicio')?.toString().substring(0, 5).replace(':', ''),
-      horario_termino: formData.get('horaTermino')?.toString().substring(0, 5).replace(':', ''),
-      max_participantes: formData.get('vagas'),
-      ministrantes_ids: formData.getAll('ministranteId'),
-      carga_horaria_total: formData.get('cargaHorariaTotal'),
-      carga_horaria_ministrantes: formData.get('cargaHorariaMinistrante'),
+      evento_id: parseInt(eventoId as string),
+      titulo: formData.get('titulo') as string,
+      data_inicio: formData.get('dataInicio') as string,
+      data_termino: formData.get('dataTermino') as string,
+      horario_inicio: formData.get('horaInicio')?.toString().substring(0, 5) as string,
+      horario_termino: formData.get('horaTermino')?.toString().substring(0, 5) as string,
+      max_participantes: parseInt(formData.get('vagas') as string),
+      ministrantes_ids: formData.getAll('ministranteId').map(id => parseInt(id.toString())),
+      carga_horaria_total: parseInt(formData.get('cargaHorariaTotal') as string),
+      carga_horaria_ministrantes: parseInt(formData.get('cargaHorariaMinistrante') as string),
     };
 
+    const erroValidacao = validarDadosAtividade(
+      data.titulo, data.data_inicio, data.data_termino, data.horario_inicio, data.horario_termino,
+      evento?.dataInicio, evento?.dataFim
+    );
+
+    if (erroValidacao) {
+      setError(erroValidacao);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/evento/${eventoId}`, { credentials: 'include', 
+      const res = await fetch(`http://localhost:8080/api/atividades`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,22 +175,22 @@ export default function CriarAtividadePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="dataInicio" className="text-sm font-medium text-gray-300">Data de Início</label>
-                  <input id="dataInicio" name="dataInicio" type="date" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+                  <input id="dataInicio" name="dataInicio" type="date" required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
                 </div>
                 <div>
                   <label htmlFor="dataTermino" className="text-sm font-medium text-gray-300">Data de Término</label>
-                  <input id="dataTermino" name="dataTermino" type="date" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+                  <input id="dataTermino" name="dataTermino" type="date" required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="horaInicio" className="text-sm font-medium text-gray-300">Horário de Início</label>
-                  <input id="horaInicio" name="horaInicio" type="time" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+                  <input id="horaInicio" name="horaInicio" type="time" required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
                 </div>
                 <div>
                   <label htmlFor="horaTermino" className="text-sm font-medium text-gray-300">Horário de Término</label>
-                  <input id="horaTermino" name="horaTermino" type="time" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+                  <input id="horaTermino" name="horaTermino" type="time" required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
                 </div>
               </div>
 
@@ -139,7 +215,7 @@ export default function CriarAtividadePage() {
                   {participantes.map(p => (
                     <label key={p.id} className="flex items-center space-x-3 text-white cursor-pointer hover:bg-white/5 p-1 rounded transition-colors">
                       <input type="checkbox" name="ministranteId" value={p.id} className="w-4 h-4 text-brand-accent bg-slate-800 border-gray-600 rounded focus:ring-brand-accent focus:ring-2" />
-                      <span className="text-sm">{p.nome}</span>
+                      <span className="text-sm">{p.nomeCompleto}</span>
                     </label>
                   ))}
                 </div>

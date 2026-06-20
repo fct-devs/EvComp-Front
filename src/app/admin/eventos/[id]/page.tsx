@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useEventoStore } from '../../../../store/useEventoStore';
 import { Navbar } from '../../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../../components/ui/Core';
 
@@ -11,7 +12,7 @@ export default function ConsultarEventoPage() {
   const params = useParams();
   const eventoId = params.id;
 
-  const [evento, setEvento] = useState<any>(null);
+  const { evento, setEvento } = useEventoStore();
   const [atividades, setAtividades] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

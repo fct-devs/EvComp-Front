@@ -23,6 +23,7 @@ export const InputField = ({ label, id, error, ...props }: any) => {
       <input
         id={id}
         name={id}
+        style={{ colorScheme: 'dark' }}
         className={`w-full bg-transparent border rounded-md p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-accent transition-all ${error ? 'border-red-500' : 'border-gray-600'}`}
         {...props}
       />
