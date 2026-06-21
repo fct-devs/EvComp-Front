@@ -36,7 +36,7 @@ export default function EditarParticipantePage() {
           throw new Error('Falha ao carregar dados do participante');
         }
         const data = await res.json();
-        setNome(data.nome || '');
+        setNome(data.nomeCompleto || data.nome || '');
         setRa(data.ra || '');
         setEmail(data.email || '');
       } catch (err: any) {

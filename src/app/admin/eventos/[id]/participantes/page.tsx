@@ -90,7 +90,7 @@ export default function ParticipantesDoEventoPage() {
                       className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5"
                       onClick={() => toggleParticipante(p.id)}
                     >
-                      <h4 className="font-bold text-white text-lg">{p.nome}</h4>
+                      <h4 className="font-bold text-white text-lg">{p.nomeCompleto || p.nome}</h4>
                       {isExpanded ? (
                         <svg className="w-5 h-5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
                       ) : (

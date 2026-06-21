@@ -101,7 +101,7 @@ export default function GestaoColetoresPage() {
                   return (
                   <div key={p.id} className="flex justify-between items-center p-4 bg-slate-800 rounded-lg border border-white/5">
                     <div>
-                      <p className="text-white font-bold">{p.nome}</p>
+                      <p className="text-white font-bold">{p.nomeCompleto || p.nome}</p>
                       <p className="text-sm text-gray-400">RA: {p.ra || 'N/A'}</p>
                     </div>
                     <div>

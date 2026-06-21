@@ -87,9 +87,23 @@ export default function GerenciarAtividadesPage() {
   const handleExcluir = async (id: number) => {
     if (!confirm('Deseja excluir esta atividade?')) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/${id}`, { credentials: 'include',  method: 'DELETE' });
-      if (res.ok) fetchAtividades();
-      else alert('Erro ao excluir atividade');
+      let res = await fetch(`http://localhost:8080/api/atividades/${id}`, { credentials: 'include',  method: 'DELETE' });
+      
+      if (res.status === 409) {
+        const data = await res.json();
+        const confirmacaoAdicional = confirm(data.error || 'Atividade com participantes inscritos. Confirmar exclusão?');
+        if (!confirmacaoAdicional) return;
+        
+        res = await fetch(`http://localhost:8080/api/atividades/${id}?confirmar=true`, { credentials: 'include',  method: 'DELETE' });
+      }
+
+      if (res.ok) {
+        alert('Atividade excluída com sucesso!');
+        fetchAtividades();
+      } else if (res.status !== 409) {
+         const data = await res.json();
+         alert(data.error || 'Erro ao excluir atividade');
+      }
     } catch (err) {
       alert('Erro na requisição de exclusão');
     }
