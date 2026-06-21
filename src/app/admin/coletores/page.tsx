@@ -17,9 +17,9 @@ export default function GestaoColetoresPage() {
     setTimeout(() => setMessage({ text: '', type: '' }), 5000);
   };
 
-  const solicitarAtribuicaoColetor = async (participanteRa: string) => {
+  const solicitarAtribuicaoColetor = async (participanteId: string) => {
     if (!selectedEventoId) return showMessage("Selecione um evento primeiro!", 'error');
-    const res = await tornarColetor(selectedEventoId, participanteRa);
+    const res = await tornarColetor(selectedEventoId, participanteId);
     if (res.success) {
       showMessage(res.message || "Coletor atribuído com sucesso!", 'success');
       fetchData();
@@ -108,7 +108,7 @@ export default function GestaoColetoresPage() {
                       {isColetorDesteEvento ? (
                         <Button variant="danger" onClick={() => solicitarRemocaoColetor(p.id)}>Remover Cargo</Button>
                       ) : (
-                        <Button variant="primary" onClick={() => solicitarAtribuicaoColetor(p.ra)}>Tornar Coletor</Button>
+                        <Button variant="primary" onClick={() => solicitarAtribuicaoColetor(String(p.id))}>Tornar Coletor</Button>
                       )}
                     </div>
                   </div>
