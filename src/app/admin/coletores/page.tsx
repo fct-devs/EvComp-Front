@@ -11,6 +11,11 @@ export default function GestaoColetoresPage() {
   const [selectedEventoId, setSelectedEventoId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' | '' }>({ text: '', type: '' });
+  const [expandedParticipantId, setExpandedParticipantId] = useState<string | null>(null);
+
+  const toggleParticipant = (id: string) => {
+    setExpandedParticipantId(prev => prev === id ? null : id);
+  };
 
   const showMessage = (text: string, type: 'success' | 'error') => {
     setMessage({ text, type });
@@ -98,19 +103,41 @@ export default function GestaoColetoresPage() {
                 
                 {participantes.map(p => {
                   const isColetorDesteEvento = p.role === 'COLETOR' && p.eventosColetados && p.eventosColetados.some((ev: any) => String(ev.id) === String(selectedEventoId));
+                  const isExpanded = expandedParticipantId === String(p.id);
                   return (
-                  <div key={p.id} className="flex justify-between items-center p-4 bg-slate-800 rounded-lg border border-white/5">
-                    <div>
-                      <p className="text-white font-bold">{p.nomeCompleto || p.nome}</p>
-                      <p className="text-sm text-gray-400">RA: {p.ra || 'N/A'}</p>
+                  <div key={p.id} className={`bg-slate-800 rounded-lg overflow-hidden transition-all duration-300 ${isColetorDesteEvento ? 'border border-brand-accent/30 border-l-4 border-l-brand-accent shadow-[0_0_15px_rgba(34,197,94,0.05)]' : 'border border-white/5'}`}>
+                    <div 
+                      className={`flex justify-between items-center p-4 cursor-pointer hover:bg-slate-700/50 ${isColetorDesteEvento ? 'bg-brand-accent/5' : ''}`}
+                      onClick={() => toggleParticipant(String(p.id))}
+                    >
+                      <div className="flex items-center gap-3">
+                        <p className="text-white font-bold text-lg">{p.nomeCompleto || p.nome}</p>
+                        {isColetorDesteEvento && (
+                          <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-brand-accent/20 text-brand-accent border border-brand-accent/30">
+                            COLETOR
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-gray-400 font-bold text-sm flex items-center gap-2">
+                        <span>Detalhes</span>
+                        {isExpanded ? '▲' : '▼'}
+                      </div>
                     </div>
-                    <div>
-                      {isColetorDesteEvento ? (
-                        <Button variant="danger" onClick={() => solicitarRemocaoColetor(p.id)}>Remover Cargo</Button>
-                      ) : (
-                        <Button variant="primary" onClick={() => solicitarAtribuicaoColetor(String(p.id))}>Tornar Coletor</Button>
-                      )}
-                    </div>
+                    
+                    {isExpanded && (
+                      <div className="p-4 bg-slate-900/50 border-t border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="text-sm text-gray-300 bg-slate-800/80 px-4 py-2 rounded-md border border-white/5">
+                          <p><span className="font-semibold text-gray-500">RA do Aluno:</span> <span className="text-white">{p.ra || 'Não informado'}</span></p>
+                        </div>
+                        <div>
+                          {isColetorDesteEvento ? (
+                            <Button variant="danger" onClick={() => solicitarRemocaoColetor(p.id)}>Remover Cargo de Coletor</Button>
+                          ) : (
+                            <Button variant="primary" onClick={() => solicitarAtribuicaoColetor(String(p.id))}>Atribuir Papel de Coletor</Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )})}
               </div>
