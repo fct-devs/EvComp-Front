@@ -330,15 +330,15 @@ export default function AdminEventosPage() {
                         )}
                       </div>
 
-                      <div className="flex gap-4 pt-4 border-t border-white/10">
-                        <Link href={`/admin/eventos/editar?id=${ev.id}`}>
-                          <Button variant="secondary">Editar Evento</Button>
+                      <div className="flex flex-col sm:flex-row flex-wrap gap-4 pt-4 border-t border-white/10">
+                        <Link href={`/admin/eventos/editar?id=${ev.id}`} className="w-full sm:w-auto flex-1">
+                          <Button variant="secondary" className="w-full">Editar Evento</Button>
                         </Link>
-                        <Link href={`/admin/eventos/${ev.id}/atividades/criar`}>
-                          <Button>Adicionar Atividade</Button>
+                        <Link href={`/admin/eventos/${ev.id}/atividades/criar`} className="w-full sm:w-auto flex-1">
+                          <Button className="w-full">Adicionar Atividade</Button>
                         </Link>
-                        <Link href={`/admin/eventos/${ev.id}/participantes`}>
-                          <Button variant="secondary" className="border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/20">Participantes Inscritos</Button>
+                        <Link href={`/admin/eventos/${ev.id}/participantes`} className="w-full sm:w-auto flex-1">
+                          <Button variant="secondary" className="w-full border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/20">Participantes Inscritos</Button>
                         </Link>
                       </div>
                     </div>

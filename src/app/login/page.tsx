@@ -40,8 +40,6 @@ export default function LoginPage() {
   const exibirSessao = (data: any) => {
     if (data.role === 'ADMIN') {
       window.location.href = '/admin';
-    } else if (data.isColetor === 'true' || data.isColetor === true || data.role === 'COLETOR') {
-      window.location.href = '/coletor/scan';
     } else {
       window.location.href = '/dashboard';
     }

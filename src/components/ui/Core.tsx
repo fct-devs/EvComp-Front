@@ -1,4 +1,7 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export const Button = ({ children, variant = 'primary', className = '', ...props }: any) => {
   const baseStyle = "px-6 py-2 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95";
@@ -17,16 +20,33 @@ export const Button = ({ children, variant = 'primary', className = '', ...props
 };
 
 export const InputField = ({ label, id, error, ...props }: any) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = props.type === 'password';
+  const inputType = isPassword ? (showPassword ? 'text' : 'password') : props.type;
+
   return (
-    <div className="flex flex-col space-y-1 mb-4">
+    <div className="flex flex-col space-y-1 mb-4 relative">
       <label htmlFor={id} className="text-sm font-medium text-gray-300">{label}</label>
-      <input
-        id={id}
-        name={id}
-        style={{ colorScheme: 'dark' }}
-        className={`w-full bg-transparent border rounded-md p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-accent transition-all ${error ? 'border-red-500' : 'border-gray-600'}`}
-        {...props}
-      />
+      <div className="relative">
+        <input
+          id={id}
+          name={id}
+          style={{ colorScheme: 'dark' }}
+          className={`w-full bg-transparent border rounded-md p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-accent transition-all ${error ? 'border-red-500' : 'border-gray-600'} ${isPassword ? 'pr-12' : ''}`}
+          {...props}
+          type={inputType}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 focus:outline-none flex items-center justify-center h-full px-1"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        )}
+      </div>
       {error && <span className="text-xs text-red-400 mt-1">{error}</span>}
     </div>
   );

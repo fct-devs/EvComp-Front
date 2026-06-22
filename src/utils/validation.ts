@@ -76,11 +76,12 @@ export function validarDadosAtividade(titulo: string, data_inicio: string, data_
                 if (Array.isArray(dt)) {
                     return new Date(dt[0], dt[1] - 1, dt[2]);
                 }
-                if (typeof dt === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dt.trim())) {
-                    const parts = dt.trim().split('-');
-                    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                }
                 if (typeof dt === 'string') {
+                    const datePart = dt.split('T')[0].trim();
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+                        const parts = datePart.split('-');
+                        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                    }
                     const parsed = new Date(dt);
                     if (!isNaN(parsed.getTime())) {
                         return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
