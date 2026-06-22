@@ -11,9 +11,7 @@ export default function ColetorScanPage() {
   const router = useRouter();
   
   // --- Estados de Seleção de Evento e Atividade ---
-  const [eventos, setEventos] = useState<any[]>([]);
   const [atividades, setAtividades] = useState<any[]>([]);
-  const [eventoSelecionado, setEventoSelecionado] = useState<number | null>(null);
   const [atividadeSelecionada, setAtividadeSelecionada] = useState<number | null>(null);
   
   const [error, setError] = useState('');
@@ -55,8 +53,8 @@ export default function ColetorScanPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          atividadeId: payload.a,
-          codigoAuth: payload.t,
+          atividadeId: atividadeSelecionada,
+          codigoParticipante: decodedText,
           timestampLido: Date.now()
         })
       });
@@ -101,7 +99,7 @@ export default function ColetorScanPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           atividadeId: atividadeSelecionada,
-          codigoAuth: manualPin,
+          codigoParticipante: manualPin,
           timestampLido: Date.now()
         })
       });
@@ -130,48 +128,28 @@ export default function ColetorScanPage() {
   };
 
   useEffect(() => {
-    async function fetchEventos() {
+    async function fetchAtividadesAtivas() {
       try {
-        const response = await buscarEventosDoColetor();
+        const response = await fetch('http://localhost:8080/api/atividades/ativas-coletor', { credentials: 'include' });
         
-        if (!response.success && response.error === 'Não autorizado') {
+        if (response.status === 401 || response.status === 403) {
           return router.push('/login');
         }
 
-        if (response.success) {
-          setEventos(response.data);
+        if (response.ok) {
+          const data = await response.json();
+          setAtividades(data);
         } else {
-          setError(response.error || 'Não foi possível carregar os eventos. Verifique suas permissões.');
+          setError('Não foi possível carregar as atividades. Verifique suas permissões.');
         }
       } catch (err) {
-        setError('Erro de conexão ao carregar eventos.');
+        setError('Erro de conexão ao carregar atividades.');
       } finally {
         setLoading(false);
       }
     }
-    fetchEventos();
+    fetchAtividadesAtivas();
   }, [router]);
-
-  useEffect(() => {
-    if (eventoSelecionado) {
-      async function fetchAtividades() {
-        try {
-          const res = await fetch('http://localhost:8080/api/atividades', { credentials: 'include' });
-          if (res.ok) {
-            const data = await res.json();
-            const atividadesDoEvento = data.filter((a: any) => a.evento && a.evento.id === eventoSelecionado);
-            setAtividades(atividadesDoEvento);
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      }
-      fetchAtividades();
-    } else {
-      setAtividades([]);
-      setAtividadeSelecionada(null);
-    }
-  }, [eventoSelecionado]);
 
   const handleSelecionarAtividade = async (atividadeId: number) => {
     setError('');
@@ -212,38 +190,22 @@ export default function ColetorScanPage() {
           ) : (
             <div className="w-full space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">Evento Ativo:</label>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Atividade (de Eventos Ativos):</label>
                 <select 
                   className="w-full p-3 bg-slate-800 border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-accent text-white transition-all hover:bg-slate-700"
-                  onChange={(e) => setEventoSelecionado(Number(e.target.value) || null)}
+                  onChange={(e) => handleSelecionarAtividade(Number(e.target.value))}
                   defaultValue=""
+                  disabled={validating}
                 >
-                  <option value="" disabled>-- Selecione um Evento --</option>
-                  {eventos.map((ev) => (
-                    <option key={ev.id} value={ev.id}>{ev.titulo}</option>
+                  <option value="" disabled>-- Selecione a Atividade --</option>
+                  {atividades.map((atv) => (
+                    <option key={atv.id} value={atv.id}>{atv.titulo} ({atv.evento?.titulo})</option>
                   ))}
                 </select>
-                {eventos.length === 0 && !loading && (
-                  <p className="text-sm text-red-400 mt-2">Você não possui eventos ativos para coleta no momento.</p>
+                {atividades.length === 0 && !loading && (
+                  <p className="text-sm text-red-400 mt-2">Você não possui atividades rolando no momento.</p>
                 )}
               </div>
-
-              {eventoSelecionado && (
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">Atividade:</label>
-                  <select 
-                    className="w-full p-3 bg-slate-800 border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-accent text-white transition-all hover:bg-slate-700"
-                    onChange={(e) => handleSelecionarAtividade(Number(e.target.value))}
-                    defaultValue=""
-                    disabled={validating}
-                  >
-                    <option value="" disabled>-- Selecione a Atividade --</option>
-                    {atividades.map((atv) => (
-                      <option key={atv.id} value={atv.id}>{atv.titulo}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
 
               {error && (
                 <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded text-sm mt-4 text-center">
