@@ -35,7 +35,7 @@ export default function RecuperarSenhaPage() {
     setLoading(true);
     
     try {
-      await fetch(`http://localhost:8080/api/redefinicao-senha/solicitar?email=${encodeURIComponent(email)}`, { credentials: 'include', 
+      await fetch(`/api/redefinicao-senha/solicitar?email=${encodeURIComponent(email)}`, { credentials: 'include', 
         method: 'POST',
       });
       mensagemGenericaEnvioInstrucoes();
@@ -56,7 +56,7 @@ export default function RecuperarSenhaPage() {
     setErroValidacao('');
     if (tokenInput.length === 6) {
       try {
-        const response = await fetch(`http://localhost:8080/api/redefinicao-senha/validar?tokenRecebido=${tokenInput}`, { credentials: 'include', 
+        const response = await fetch(`/api/redefinicao-senha/validar?tokenRecebido=${tokenInput}`, { credentials: 'include', 
           method: 'POST'
         });
         const isValid = await response.json();

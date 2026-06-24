@@ -26,8 +26,8 @@ export default function AdminEventosPage() {
     setLoading(true);
     try {
       const [resEventos, resAtividades] = await Promise.all([
-        fetch('http://localhost:8080/api/eventos', { credentials: 'include' }),
-        fetch('http://localhost:8080/api/atividades', { credentials: 'include' })
+        fetch('/api/eventos', { credentials: 'include' }),
+        fetch('/api/atividades', { credentials: 'include' })
       ]);
       const dataEventos = await resEventos.json();
       const dataAtividades = await resAtividades.json();
@@ -77,7 +77,7 @@ export default function AdminEventosPage() {
     const isSecondary = modalMode === 'SECONDARY';
 
     try {
-      let url = `http://localhost:8080/api/atividades/${atividadeToExcluir}`;
+      let url = `/api/atividades/${atividadeToExcluir}`;
       if (isSecondary) url += '?confirmar=true';
 
       const res = await fetch(url, { credentials: 'include',  method: 'DELETE' });
@@ -111,7 +111,7 @@ export default function AdminEventosPage() {
     setIsSearching(true);
     setSearchError('');
     try {
-      const res = await fetch(`http://localhost:8080/api/eventos/buscar?tituloEvento=${encodeURIComponent(searchQuery)}`, { credentials: 'include' });
+      const res = await fetch(`/api/eventos/buscar?tituloEvento=${encodeURIComponent(searchQuery)}`, { credentials: 'include' });
       if (!res.ok) {
         const errData = await res.json();
         setSearchError(errData.error || 'Nenhum evento encontrado.');

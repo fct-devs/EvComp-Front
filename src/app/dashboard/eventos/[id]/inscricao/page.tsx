@@ -33,7 +33,7 @@ export default function InscricaoEventoPage() {
           return;
         }
 
-        const res = await fetch(`http://localhost:8080/api/eventos/${eventoId}/detalhes`, { credentials: 'include' });
+        const res = await fetch(`/api/eventos/${eventoId}/detalhes`, { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           setEvento(data.dadosEvento);
@@ -41,7 +41,7 @@ export default function InscricaoEventoPage() {
           const atividadesComVagas = await Promise.all(
             (data.atividades || []).map(async (atv: any) => {
               try {
-                const vagasRes = await fetch(`http://localhost:8080/api/atividades/${atv.id}/vagas`, { credentials: 'include' });
+                const vagasRes = await fetch(`/api/atividades/${atv.id}/vagas`, { credentials: 'include' });
                 if (vagasRes.ok) {
                   const vagasData = await vagasRes.json();
                   return { ...atv, vagasDisponiveis: vagasData.vagasDisponiveis };
@@ -56,7 +56,7 @@ export default function InscricaoEventoPage() {
         }
         
         // Verifica se o participante já está inscrito
-        const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
+        const minRes = await fetch(`/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
         if (minRes.ok) {
           const minData = await minRes.json();
           if (minData.inscritos && minData.inscritos.includes(parseInt(String(eventoId)))) {
@@ -95,7 +95,7 @@ export default function InscricaoEventoPage() {
 
       // Validação de Vagas via API
       for (const atvId of atividadesArray) {
-        const vagasRes = await fetch(`http://localhost:8080/api/atividades/${atvId}/vagas`, { credentials: 'include' });
+        const vagasRes = await fetch(`/api/atividades/${atvId}/vagas`, { credentials: 'include' });
         if (vagasRes.ok) {
           const vagasData = await vagasRes.json();
           if (vagasData.vagasDisponiveis <= 0) {
@@ -120,7 +120,7 @@ export default function InscricaoEventoPage() {
         atividadeIds: atividadesArray
       };
 
-      const res = await fetch('http://localhost:8080/api/inscricoes', { credentials: 'include', 
+      const res = await fetch('/api/inscricoes', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

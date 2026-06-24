@@ -49,7 +49,7 @@ export default function ColetorScanPage() {
       setPaused(true);
       setScanFeedback(null); // Clear previous feedback while loading
 
-      const res = await fetch('http://localhost:8080/api/presencas/registrar', { credentials: 'include', 
+      const res = await fetch('/api/presencas/registrar', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,7 +94,7 @@ export default function ColetorScanPage() {
     setShowManualInput(false);
 
     try {
-      const res = await fetch('http://localhost:8080/api/presencas/registrar', { credentials: 'include', 
+      const res = await fetch('/api/presencas/registrar', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -130,7 +130,7 @@ export default function ColetorScanPage() {
   useEffect(() => {
     async function fetchAtividadesAtivas() {
       try {
-        const response = await fetch('http://localhost:8080/api/atividades/ativas-coletor', { credentials: 'include' });
+        const response = await fetch('/api/atividades/ativas-coletor', { credentials: 'include' });
         
         if (response.status === 401 || response.status === 403) {
           return router.push('/login');
@@ -157,7 +157,7 @@ export default function ColetorScanPage() {
     setValidating(true);
     
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/${atividadeId}/selecionar`, { credentials: 'include' });
+      const res = await fetch(`/api/atividades/${atividadeId}/selecionar`, { credentials: 'include' });
       if (res.ok) {
         setAtividadeSelecionada(atividadeId);
         setSuccessMsg('Atividade selecionada com sucesso! Você já pode registrar as presenças.');

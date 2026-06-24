@@ -20,7 +20,7 @@ export default function ConsultarEventoPage() {
   useEffect(() => {
     async function fetchDados() {
       try {
-        const res = await fetch(`http://localhost:8080/api/eventos/${eventoId}/detalhes`, { credentials: 'include' });
+        const res = await fetch(`/api/eventos/${eventoId}/detalhes`, { credentials: 'include' });
         
         if (!res.ok) {
           setError('Evento não encontrado.');

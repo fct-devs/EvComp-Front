@@ -34,7 +34,7 @@ export default function CertificadosPage() {
         const perfil = await buscarPerfilUsuario();
         if (perfil && perfil.success && perfil.data) {
           setParticipanteId(perfil.data.id);
-          const response = await fetch(`http://localhost:8080/api/certificados/disponiveis/${perfil.data.id}`, { credentials: 'include' });
+          const response = await fetch(`/api/certificados/disponiveis/${perfil.data.id}`, { credentials: 'include' });
           if (response.ok) {
             const data = await response.json();
             setEventos(data.eventos || []);
@@ -62,7 +62,7 @@ export default function CertificadosPage() {
     ));
 
     try {
-      const response = await fetch('http://localhost:8080/api/certificados/selecionar', {
+      const response = await fetch('/api/certificados/selecionar', {
         credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -90,7 +90,7 @@ export default function CertificadosPage() {
     if (!participanteId) return;
 
     try {
-      const response = await fetch('http://localhost:8080/api/certificados/emitir', { 
+      const response = await fetch('/api/certificados/emitir', { 
         credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

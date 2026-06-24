@@ -8,7 +8,7 @@ import { solicitarLogout, buscarPerfilUsuario } from '../actions/auth';
 
 export default function PerfilPage() {
   const router = useRouter();
-  const [userData, setUserData] = useState({ nome: '', email: '', ra: '', role: 'PARTICIPANTE' });
+  const [userData, setUserData] = useState({ nome: '', nomeCompleto: '', email: '', ra: '', role: 'PARTICIPANTE' });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

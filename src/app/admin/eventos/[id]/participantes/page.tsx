@@ -30,7 +30,7 @@ export default function ParticipantesDoEventoPage() {
       }
 
       try {
-        const res = await fetch(`http://localhost:8080/api/eventos/${eventoId}/participantes`, { credentials: 'include' });
+        const res = await fetch(`/api/eventos/${eventoId}/participantes`, { credentials: 'include' });
         if (!res.ok) {
           throw new Error('Falha ao carregar participantes');
         }

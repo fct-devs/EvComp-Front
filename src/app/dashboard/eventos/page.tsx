@@ -17,7 +17,7 @@ export default function ParticipanteEventosPage() {
         const perfilRes = await buscarPerfilUsuario();
         let minInscritos: number[] = [];
         if (perfilRes.success) {
-          const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
+          const minRes = await fetch(`/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
           if (minRes.ok) {
             const minData = await minRes.json();
             if (minData.inscritos) minInscritos = minData.inscritos;
@@ -27,9 +27,9 @@ export default function ParticipanteEventosPage() {
 
         let evRes;
         if (perfilRes.success && perfilRes.data.id) {
-          evRes = await fetch(`http://localhost:8080/api/eventos/disponiveis/${perfilRes.data.id}`, { credentials: 'include' });
+          evRes = await fetch(`/api/eventos/disponiveis/${perfilRes.data.id}`, { credentials: 'include' });
         } else {
-          evRes = await fetch('http://localhost:8080/api/eventos/disponiveis', { credentials: 'include' });
+          evRes = await fetch('/api/eventos/disponiveis', { credentials: 'include' });
         }
         
         const evData = await evRes.json();
