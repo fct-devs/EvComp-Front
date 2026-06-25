@@ -11,7 +11,7 @@ ARG API_URL
 ENV API_URL=$API_URL
 RUN npm run build
 
-# Imagem final super leve para rodar o app
+# Imagem final para rodar o app
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV production
