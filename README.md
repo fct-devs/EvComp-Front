@@ -7,20 +7,17 @@
 
 Este repositório contém o código-fonte do Frontend do sistema **EvComp**, construído em **React** e **Next.js**. O sistema provê toda a interface de usuário (UI) para participantes, coletores de presença e administradores, conectando-se diretamente à API do repositório Backend.
 
-## 🛠️ Tecnologias a serem Instaladas
+## Tecnologias a serem Instaladas
 
 Para rodar o projeto localmente da forma mais fácil e limpa possível, você só precisa ter instalado na sua máquina:
 
 - [Docker](https://www.docker.com/products/docker-desktop)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-*(Não é necessário instalar Node.js, NPM ou nenhuma biblioteca Javascript nativamente no seu computador, o Docker cuidará de tudo!)*
-
-## 🚀 Como Rodar o Projeto
+## Como Rodar o Projeto
 
 Este projeto utiliza containers Docker para garantir que o ambiente seja idêntico em qualquer máquina e contornar erros de CORS. 
 
-> [!WARNING]
 > **Atenção sobre a Ordem de Execução:** 
 > O Backend (`EvComp`) **DEVE** ser inicializado **PRIMEIRO**, antes que você inicie este Frontend! O Next.js depende da rede interna criada pelo Backend para se comunicar via Proxy.
 
@@ -30,14 +27,13 @@ Para ligar a Interface Gráfica, siga os seguintes passos (após ter ligado o ba
 2. Execute o comando de inicialização do Docker Compose:
 
    ```bash
-   sudo docker compose up -d --build
+   docker compose up -d --build
    ```
-   *(No Windows, você pode rodar apenas `docker compose up -d --build` sem o `sudo`).*
 
 3. O Docker fará o download das bibliotecas (NPM), fará a compilação de produção e iniciará o Frontend na porta `3000`.
 4. Abra o seu navegador de preferência e acesse: [http://localhost:3000](http://localhost:3000)
 
-## 📂 Estrutura do Repositório
+## Estrutura do Repositório
 
 - **src/app/**: Todas as páginas da aplicação divididas por rotas (Dashboard, Coletor, Admin).
 - **src/components/**: Componentes React reutilizáveis de interface.
