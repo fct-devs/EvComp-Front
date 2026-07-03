@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        API_URL: http://evcomp-api:8080/api
+    container_name: evcomp-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://evcomp-api:8080/api
+    networks:
+      - evcomp_default
+
+networks:
+  evcomp_default:
+    external: true

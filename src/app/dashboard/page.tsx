@@ -1,78 +1,80 @@
 import React from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../components/ui/Navbar';
-import { Button } from '../../components/ui/Core';
-import { solicitarConsultaEvento } from '../actions/eventos';
+import { GlassCard, Button } from '../../components/ui/Core';
 import { buscarPerfilUsuario } from '../actions/auth';
 
 export default async function DashboardPage() {
-  // --- MÉTODOS DA ConsultarEventoUI (ASTAH) ---
-  const response = await solicitarConsultaEvento();
-  const eventos = response.success ? response.data : [];
-  
   const perfilRes = await buscarPerfilUsuario();
-  let inscritos: number[] = [];
-  if (perfilRes.success) {
-    try {
-      const minRes = await fetch(`http://localhost:8080/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
-      if (minRes.ok) {
-        const minData = await minRes.json();
-        if (minData.inscritos) inscritos = minData.inscritos;
-      }
-    } catch(e) {}
-  }
   
-  const exibirDadosEvento = () => eventos;
-  const informarEventoNaoEncontrado = () => (
-    <p className="text-gray-400 text-center py-4">Nenhum evento encontrado no sistema.</p>
-  );
+  let role = 'PARTICIPANTE';
+  let isColetor = false;
+  let userName = 'Participante';
+
+  if (perfilRes.success && perfilRes.data) {
+    if (perfilRes.data.role) role = perfilRes.data.role;
+    if (perfilRes.data.isColetor !== undefined) {
+      isColetor = perfilRes.data.isColetor === true || perfilRes.data.isColetor === 'true';
+    }
+    if (perfilRes.data.nome) userName = perfilRes.data.nome.split(' ')[0];
+  }
+
+  // Define se o usuário tem privilégios de coletor (role COLETOR explícita ou flag isColetor)
+  const temModoColetor = role === 'COLETOR' || isColetor;
+
   return (
-    <div className="min-h-screen bg-brand-dark flex flex-col">
-      <Navbar role="PARTICIPANTE" />
+    <div className="min-h-screen bg-brand-dark flex flex-col relative overflow-hidden">
+      <Navbar role={role as any} />
       
-      <main className="flex-1 w-full max-w-5xl mx-auto py-12 px-6">
-        <div className="border border-white/20 rounded-2xl bg-slate-800/50 backdrop-blur-sm p-8 shadow-xl">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">Inscrições em Eventos</h2>
-          
-          <div className="flex justify-between border-b border-white/10 pb-2 mb-4 text-sm font-semibold text-gray-300">
-            <span>Evento</span>
-            <span>Data/Horário</span>
-          </div>
-
-          <div className="space-y-4">
-            {eventos.length === 0 && informarEventoNaoEncontrado()}
-            {exibirDadosEvento().map((ev: any) => (
-              <div key={ev.id} className="flex flex-col md:flex-row md:items-center justify-between bg-slate-900/80 p-4 rounded-xl border border-white/5 hover:border-brand-accent/50 transition-colors">
-                <div className="mb-4 md:mb-0 md:pr-4">
-                  <h3 className="text-white font-bold">{ev.nome || ev.titulo || `Evento #${ev.id}`}</h3>
-                  <p className="text-gray-400 text-sm mt-1">{ev.descricao || 'Sem descrição'}</p>
-                </div>
-                
-                <div className="flex flex-row md:flex-col items-center justify-between md:items-end min-w-[120px]">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-bold text-white text-lg">{ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'TBA'}</span>
-                  </div>
-                  <span className="text-gray-400 text-sm mt-1">{ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'TBA'}</span>
-                  
-                  {inscritos.includes(ev.id) ? (
-                    <span className="mt-4 md:mt-0 md:ml-6 block w-full text-center px-6 py-2 rounded-full font-bold transition-all duration-300 bg-gray-500/50 text-gray-300 cursor-not-allowed border border-gray-400/20 text-sm">
-                       INSCRITO
-                    </span>
-                  ) : (
-                    <Link href={`/dashboard/eventos/${ev.id}/inscricao`} className="mt-4 md:mt-0 md:ml-6 block w-full text-center px-6 py-2 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 bg-white text-slate-900 hover:bg-gray-200 text-sm">
-                       INSCREVER-SE
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 flex justify-center">
+      <main className="flex-1 w-full max-w-5xl mx-auto py-12 px-6 relative z-10">
+        <h1 className="text-3xl font-extrabold text-white mb-2">Olá, {userName}!</h1>
+        <p className="text-gray-400 mb-8">Bem-vindo(a) ao seu painel. O que deseja fazer hoje?</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <GlassCard className="p-6 bg-slate-800/80 border border-white/10 hover:border-brand-accent/50 transition-colors flex flex-col justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-2">Explorar Eventos</h2>
+              <p className="text-gray-400 text-sm mb-6">Descubra e inscreva-se nos próximos eventos da instituição.</p>
+            </div>
             <Link href="/dashboard/eventos">
-               <Button variant="secondary" className="w-full max-w-sm text-lg py-3">VER TODOS OS EVENTOS</Button>
+              <Button className="w-full">Ver Eventos</Button>
             </Link>
-          </div>
+          </GlassCard>
+
+          <GlassCard className="p-6 bg-slate-800/80 border border-white/10 hover:border-brand-accent/50 transition-colors flex flex-col justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-2">Minhas Inscrições</h2>
+              <p className="text-gray-400 text-sm mb-6">Acesse suas credenciais e os seus passaportes de entrada (QR Code).</p>
+            </div>
+            <Link href="/dashboard/minhas-inscricoes">
+              <Button className="w-full" variant="secondary">Minhas Inscrições</Button>
+            </Link>
+          </GlassCard>
+
+          <GlassCard className="p-6 bg-slate-800/80 border border-white/10 hover:border-brand-accent/50 transition-colors flex flex-col justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-2">Meus Certificados</h2>
+              <p className="text-gray-400 text-sm mb-6">Visualize e baixe os seus certificados de participação.</p>
+            </div>
+            <Link href="/dashboard/certificados">
+              <Button className="w-full" variant="secondary">Ver Certificados</Button>
+            </Link>
+          </GlassCard>
+
+          {temModoColetor && (
+            <GlassCard className="p-6 bg-emerald-900/40 border border-emerald-500/30 hover:border-emerald-500/60 transition-colors flex flex-col justify-between shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <div>
+                <h2 className="text-xl font-bold text-emerald-300 mb-2 flex items-center space-x-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+                  <span>Modo Coletor</span>
+                </h2>
+                <p className="text-emerald-100/70 text-sm mb-6">Acesse o scanner de QR Code para validar a entrada de participantes.</p>
+              </div>
+              <Link href="/coletor/scan">
+                <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-full transition-colors shadow-lg shadow-emerald-900/50 mt-2">Iniciar Scanner</button>
+              </Link>
+            </GlassCard>
+          )}
         </div>
       </main>
     </div>

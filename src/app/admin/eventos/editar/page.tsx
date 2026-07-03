@@ -18,7 +18,7 @@ function EditarEventoForm() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`http://localhost:8080/api/eventos`, { credentials: 'include' }) // In real app, we might use findById directly. But currently only findAll or buscar by titulo is in API. Wait, I didn't add findById endpoint. Let's fetch all and filter or add findById in controller if needed. Actually we have @GetMapping and @PutMapping in backend! We can filter from findAll.
+    fetch(`/api/eventos`, { credentials: 'include' }) // In real app, we might use findById directly. But currently only findAll or buscar by titulo is in API. Wait, I didn't add findById endpoint. Let's fetch all and filter or add findById in controller if needed. Actually we have @GetMapping and @PutMapping in backend! We can filter from findAll.
       .then(res => res.json())
       .then(data => {
         const ev = data.find((e: any) => String(e.id) === id);
@@ -28,6 +28,16 @@ function EditarEventoForm() {
       })
       .catch(() => setFetching(false));
   }, [id]);
+
+  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, descricao: string, link: string, tipo: string) => {
+    if (!titulo || !dataInicio || !dataTermino || !descricao || !tipo) {
+      return 'Campos obrigatórios ausentes.';
+    }
+    if (new Date(dataTermino) < new Date(dataInicio)) {
+      return 'Data de término não pode ser anterior à data de início.';
+    }
+    return null;
+  };
 
   const handleEditar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,8 +55,23 @@ function EditarEventoForm() {
       tipoContabilizacao: formData.get('tipoContabilizacao')
     };
 
+    const erroValidacao = validarDadosEvento(
+      payload.titulo as string,
+      payload.dataInicio as string,
+      payload.dataTermino as string,
+      payload.descricao as string,
+      payload.link as string,
+      payload.tipoContabilizacao as string
+    );
+
+    if (erroValidacao) {
+      setError(erroValidacao);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`http://localhost:8080/api/eventos/${id}`, { credentials: 'include', 
+      const res = await fetch(`/api/eventos/${id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -99,7 +124,7 @@ function EditarEventoForm() {
               <InputField label="Data de Término" id="dataTermino" type="date" defaultValue={evento.dataFim ? evento.dataFim.split('T')[0] : ''} required />
             </div>
 
-            <InputField label="Link" id="link" type="url" defaultValue={evento.link || ''} />
+            <InputField label="Link (opcional)" id="link" type="url" defaultValue={evento.link || ''} />
 
             <div className="flex flex-col space-y-1 mb-4">
               <label htmlFor="tipoContabilizacao" className="text-sm font-medium text-gray-300">Tipo de Contabilização</label>

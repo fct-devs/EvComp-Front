@@ -34,15 +34,12 @@ export default function LoginPage() {
     solicitarLogout();
   }, []);
 
-  // --- MÉTODOS DA LoginUI (ASTAH) ---
   const informarCredenciaisInvalidas = () => setError('Credenciais Inválidas');
   const informarDadosInvalidos = () => setError('Por favor, preencha o email e a senha corretamente.');
   const informarErroLogin = () => setError('Erro de conexão com o servidor.');
   const exibirSessao = (data: any) => {
     if (data.role === 'ADMIN') {
       window.location.href = '/admin';
-    } else if (data.isColetor === 'true' || data.isColetor === true || data.role === 'COLETOR') {
-      window.location.href = '/coletor/scan';
     } else {
       window.location.href = '/dashboard';
     }

@@ -74,9 +74,9 @@ export async function exibirParticipantes() {
   }
 }
 
-export async function tornarColetor(eventoId: string, participanteRa: string) {
+export async function tornarColetor(eventoId: string, participanteId: string) {
   try {
-    const res = await fetch(`${API_BASE}/eventos/${eventoId}/coletores/${participanteRa}`, { credentials: 'include', 
+    const res = await fetch(`${API_BASE}/eventos/${eventoId}/coletores/${participanteId}`, { credentials: 'include', 
       method: 'POST',
     });
     if (!res.ok) return { success: false, error: 'Não foi possível atribuir o coletor.' };

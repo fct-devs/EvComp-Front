@@ -19,7 +19,7 @@ export default function GerenciarAtividadesPage() {
   const [formLoading, setFormLoading] = useState(false);
 
   const fetchAtividades = () => {
-    fetch('http://localhost:8080/api/atividades', { credentials: 'include' })
+    fetch('/api/atividades', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         const filtradas = data.filter((a: any) => a.evento && String(a.evento.id) === String(eventoId));
@@ -31,14 +31,14 @@ export default function GerenciarAtividadesPage() {
 
   useEffect(() => {
     if (!eventoId) return;
-    fetch(`http://localhost:8080/api/eventos/buscar?titulo=`, { credentials: 'include' }) // We can just fetch all to find the event title
+    fetch(`/api/eventos/buscar?tituloEvento=`, { credentials: 'include' }) // We can just fetch all to find the event title
       .then(res => res.json())
       .then(data => {
         // If API doesn't support findById easily, we can just leave evento null or use a specific endpoint
         // Actually EventoController has /buscar?titulo, but we know the ID, let's just fetch all
       });
     
-    fetch('http://localhost:8080/api/eventos', { credentials: 'include' })
+    fetch('/api/eventos', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         const ev = data.find((e: any) => String(e.id) === String(eventoId));
@@ -66,7 +66,7 @@ export default function GerenciarAtividadesPage() {
     };
 
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/evento/${eventoId}`, { credentials: 'include', 
+      const res = await fetch(`/api/atividades/evento/${eventoId}`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -87,9 +87,23 @@ export default function GerenciarAtividadesPage() {
   const handleExcluir = async (id: number) => {
     if (!confirm('Deseja excluir esta atividade?')) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/atividades/${id}`, { credentials: 'include',  method: 'DELETE' });
-      if (res.ok) fetchAtividades();
-      else alert('Erro ao excluir atividade');
+      let res = await fetch(`/api/atividades/${id}`, { credentials: 'include',  method: 'DELETE' });
+      
+      if (res.status === 409) {
+        const data = await res.json();
+        const confirmacaoAdicional = confirm(data.error || 'Atividade com participantes inscritos. Confirmar exclusão?');
+        if (!confirmacaoAdicional) return;
+        
+        res = await fetch(`/api/atividades/${id}?confirmar=true`, { credentials: 'include',  method: 'DELETE' });
+      }
+
+      if (res.ok) {
+        alert('Atividade excluída com sucesso!');
+        fetchAtividades();
+      } else if (res.status !== 409) {
+         const data = await res.json();
+         alert(data.error || 'Erro ao excluir atividade');
+      }
     } catch (err) {
       alert('Erro na requisição de exclusão');
     }
