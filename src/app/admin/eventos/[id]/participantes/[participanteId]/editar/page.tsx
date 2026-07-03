@@ -31,12 +31,12 @@ export default function EditarParticipantePage() {
       }
 
       try {
-        const res = await fetch(`http://localhost:8080/api/participantes/${participanteId}`, { credentials: 'include' });
+        const res = await fetch(`/api/participantes/${participanteId}`, { credentials: 'include' });
         if (!res.ok) {
           throw new Error('Falha ao carregar dados do participante');
         }
         const data = await res.json();
-        setNome(data.nome || '');
+        setNome(data.nomeCompleto || data.nome || '');
         setRa(data.ra || '');
         setEmail(data.email || '');
       } catch (err: any) {
@@ -86,7 +86,7 @@ export default function EditarParticipantePage() {
     setSubmitting(true);
     try {
       const payload = { nome, ra };
-      const res = await fetch(`http://localhost:8080/api/participantes/${participanteId}`, { credentials: 'include', 
+      const res = await fetch(`/api/participantes/${participanteId}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -164,7 +164,7 @@ export default function EditarParticipantePage() {
               id="nome" 
               type="text" 
               value={nome} 
-              onChange={(e) => setNome(e.target.value)} 
+              onChange={(e: any) => setNome(e.target.value)} 
               placeholder="Digite o nome completo"
             />
 
@@ -173,7 +173,7 @@ export default function EditarParticipantePage() {
               id="ra" 
               type="text" 
               value={ra} 
-              onChange={(e) => setRa(e.target.value)} 
+              onChange={(e: any) => setRa(e.target.value)} 
               placeholder="Digite o RA do aluno"
             />
 

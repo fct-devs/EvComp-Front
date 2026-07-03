@@ -17,7 +17,7 @@ export default function AdminRelatoriosPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/relatorios/eventos', { credentials: 'include' })
+    fetch('/api/relatorios/eventos', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         setEventos(data);
@@ -27,7 +27,7 @@ export default function AdminRelatoriosPage() {
       })
       .catch((err) => setError('Erro ao buscar eventos finalizados'));
 
-    fetch('http://localhost:8080/api/relatorios/tipos', { credentials: 'include' })
+    fetch('/api/relatorios/tipos', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => setTipos(data))
       .catch((err) => setError('Erro ao buscar tipos de relatórios'));
@@ -35,18 +35,19 @@ export default function AdminRelatoriosPage() {
 
   const gerarRelatorio = async (tipo: string) => {
     setError('');
-    if (!eventoSelecionado) {
-      setError('Selecione um evento finalizado.');
+    const evObj = eventos.find(e => String(e.id) === eventoSelecionado);
+    if (!evObj) {
+      setError('Evento não encontrado na lista.');
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8080/api/relatorios/emitir', { credentials: 'include', 
+      const res = await fetch('/api/relatorios/emitir', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventoId: eventoSelecionado, tipo }),
+        body: JSON.stringify({ dadosEvento: { id: evObj.id, titulo: evObj.titulo }, tipo }),
       });
 
       if (!res.ok) {

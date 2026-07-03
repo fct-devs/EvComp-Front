@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useEventoStore } from '../../../../store/useEventoStore';
 import { Navbar } from '../../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../../components/ui/Core';
 
@@ -11,7 +12,7 @@ export default function ConsultarEventoPage() {
   const params = useParams();
   const eventoId = params.id;
 
-  const [evento, setEvento] = useState<any>(null);
+  const { evento, setEvento } = useEventoStore();
   const [atividades, setAtividades] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,23 +20,17 @@ export default function ConsultarEventoPage() {
   useEffect(() => {
     async function fetchDados() {
       try {
-        // Fetch evento details
-        const evRes = await fetch('http://localhost:8080/api/eventos', { credentials: 'include' });
-        const evData = await evRes.json();
-        const ev = evData.find((e: any) => String(e.id) === String(eventoId));
+        const res = await fetch(`/api/eventos/${eventoId}/detalhes`, { credentials: 'include' });
         
-        if (!ev) {
+        if (!res.ok) {
           setError('Evento não encontrado.');
           setLoading(false);
           return;
         }
-        setEvento(ev);
-
-        // Fetch atividades for this evento
-        const atRes = await fetch('http://localhost:8080/api/atividades', { credentials: 'include' });
-        const atData = await atRes.json();
-        const filtradas = atData.filter((a: any) => a.evento && String(a.evento.id) === String(eventoId));
-        setAtividades(filtradas);
+        
+        const data = await res.json();
+        setEvento(data.dadosEvento);
+        setAtividades(data.atividades);
         setLoading(false);
       } catch (err: any) {
         setError('Erro ao carregar dados do evento.');

@@ -10,13 +10,19 @@ interface CertificadoInfo {
   tipo: 'EVENTO' | 'ATIVIDADE';
   id: number;
   titulo: string;
-  cargaHoraria: number;
-  liberado: boolean;
+  cargaHoraria?: number;
+  eventoId?: number;
+  eventoTitulo?: string;
+  liberado?: boolean;
   motivo?: string;
+  loadingStatus?: boolean;
 }
 
 export default function CertificadosPage() {
-  const [certificados, setCertificados] = useState<CertificadoInfo[]>([]);
+  const [eventos, setEventos] = useState<CertificadoInfo[]>([]);
+  const [atividades, setAtividades] = useState<CertificadoInfo[]>([]);
+  const [activeTab, setActiveTab] = useState<'EVENTOS' | 'ATIVIDADES'>('EVENTOS');
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloadError, setDownloadError] = useState('');
@@ -28,10 +34,11 @@ export default function CertificadosPage() {
         const perfil = await buscarPerfilUsuario();
         if (perfil && perfil.success && perfil.data) {
           setParticipanteId(perfil.data.id);
-          const response = await fetch(`http://localhost:8080/api/certificados/disponiveis/${perfil.data.id}`, { credentials: 'include' });
+          const response = await fetch(`/api/certificados/disponiveis/${perfil.data.id}`, { credentials: 'include' });
           if (response.ok) {
             const data = await response.json();
-            setCertificados(data);
+            setEventos(data.eventos || []);
+            setAtividades(data.atividades || []);
           } else {
             setError('Não foi possível carregar os certificados disponíveis.');
           }
@@ -45,18 +52,49 @@ export default function CertificadosPage() {
     carregarDados();
   }, []);
 
+  const selecionarCertificado = async (certId: number, tipo: string, titulo: string) => {
+    if (!participanteId) return;
+
+    const setList = tipo === 'EVENTO' ? setEventos : setAtividades;
+
+    setList(prev => prev.map(c => 
+      (c.id === certId && c.titulo === titulo) ? { ...c, loadingStatus: true } : c
+    ));
+
+    try {
+      const response = await fetch('/api/certificados/selecionar', {
+        credentials: 'include',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ participanteId, tipo, alvoId: certId })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setList(prev => prev.map(c => 
+          (c.id === certId && c.titulo === titulo) ? { ...c, liberado: data.liberado, motivo: data.motivo, loadingStatus: false } : c
+        ));
+      } else {
+        setList(prev => prev.map(c => 
+          (c.id === certId && c.titulo === titulo) ? { ...c, liberado: false, motivo: 'Erro ao validar', loadingStatus: false } : c
+        ));
+      }
+    } catch (err) {
+      setList(prev => prev.map(c => 
+        (c.id === certId && c.titulo === titulo) ? { ...c, liberado: false, motivo: 'Erro de conexão', loadingStatus: false } : c
+      ));
+    }
+  };
+
   const emitirCertificado = async (cert: CertificadoInfo) => {
     if (!participanteId) return;
 
     try {
-      const response = await fetch('http://localhost:8080/api/certificados/emitir', { credentials: 'include', 
+      const response = await fetch('/api/certificados/emitir', { 
+        credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          participanteId: participanteId,
-          tipo: cert.tipo,
-          alvoId: cert.id
-        })
+        body: JSON.stringify({ participanteId, tipo: cert.tipo, alvoId: cert.id })
       });
 
       if (!response.ok) {
@@ -66,23 +104,17 @@ export default function CertificadosPage() {
         return;
       }
 
-      // Download file from response blob
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      
       const a = document.createElement('a');
       a.href = url;
       
-      // Attempt to extract filename from Content-Disposition if present
       let filename = 'Certificado.pdf';
       const disposition = response.headers.get('Content-Disposition');
       if (disposition && disposition.includes('attachment')) {
         const match = disposition.match(/filename="?([^"]+)"?/);
-        if (match && match[1]) {
-          filename = match[1];
-        } else {
-            filename = disposition.split('filename=')[1]?.replace(/['"]/g, '') || filename;
-        }
+        if (match && match[1]) filename = match[1];
+        else filename = disposition.split('filename=')[1]?.replace(/['"]/g, '') || filename;
       }
 
       a.download = filename;
@@ -97,17 +129,72 @@ export default function CertificadosPage() {
     }
   };
 
+  const renderList = (list: CertificadoInfo[]) => {
+    if (list.length === 0) {
+      return (
+        <GlassCard className="text-center py-20 text-gray-400">
+          Nenhum certificado disponível nesta categoria.
+        </GlassCard>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {list.map((cert) => (
+          <GlassCard key={`${cert.tipo}-${cert.id}-${cert.titulo}`} className="p-6 flex flex-col hover:bg-white/5 transition-colors">
+            <div className="flex justify-between items-start mb-2">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cert.tipo === 'EVENTO' ? 'bg-brand-accent/20 text-brand-accent' : 'bg-purple-500/20 text-purple-400'}`}>
+                {cert.tipo === 'EVENTO' ? 'GERAL DO EVENTO' : 'ATIVIDADE ESPECÍFICA'}
+              </span>
+            </div>
+            
+            <h4 className="text-lg font-bold text-white mb-1">{cert.titulo}</h4>
+            {cert.eventoTitulo && <p className="text-sm text-gray-400 mb-4">{cert.eventoTitulo}</p>}
+
+            <div className="mt-auto pt-4 border-t border-white/10">
+              {cert.liberado === undefined && !cert.loadingStatus ? (
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="w-full text-sm py-2"
+                  onClick={() => selecionarCertificado(cert.id, cert.tipo, cert.titulo)}
+                >
+                  Verificar Disponibilidade
+                </Button>
+              ) : cert.loadingStatus ? (
+                <div className="w-full text-center py-2 text-sm text-gray-400 animate-pulse bg-white/5 rounded">
+                  Validando regras de negócio...
+                </div>
+              ) : cert.liberado ? (
+                <Button 
+                  variant="primary" 
+                  size="sm" 
+                  className="w-full text-sm py-2 flex items-center justify-center gap-2"
+                  onClick={() => emitirCertificado(cert)}
+                >
+                  <Download size={16} /> Baixar PDF Oficial
+                </Button>
+              ) : (
+                <div className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm">
+                  <AlertCircle size={16} /> <span className="truncate">{cert.motivo}</span>
+                </div>
+              )}
+            </div>
+          </GlassCard>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-brand-dark flex flex-col">
       <Navbar />
-      <main className="flex-grow p-6 lg:p-12 max-w-7xl mx-auto w-full">
-        <div className="mb-8 flex justify-between items-end">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Meus Certificados</h1>
-            <p className="text-gray-400">
-              Visualize e emita os certificados dos eventos e atividades concluídas.
-            </p>
-          </div>
+      <main className="flex-grow p-6 lg:p-12 max-w-5xl mx-auto w-full">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Meus Certificados</h1>
+          <p className="text-gray-400">
+            Selecione a guia desejada para verificar e emitir seus certificados de Eventos ou Atividades.
+          </p>
         </div>
 
         {downloadError && (
@@ -124,48 +211,27 @@ export default function CertificadosPage() {
             <AlertCircle size={20} />
             {error}
           </div>
-        ) : certificados.length === 0 ? (
-          <GlassCard className="text-center py-20 text-gray-400">
-            Você ainda não possui certificados disponíveis. Confirme sua presença em eventos para gerar certificados.
-          </GlassCard>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certificados.map((cert, index) => (
-              <GlassCard key={`${cert.tipo}-${cert.id}-${index}`} className="flex flex-col relative overflow-hidden group">
+          <>
+            <div className="flex gap-4 border-b border-white/10 mb-6">
+              <button
+                className={`pb-3 px-2 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'EVENTOS' ? 'border-brand-accent text-brand-accent' : 'border-transparent text-gray-400 hover:text-white'}`}
+                onClick={() => setActiveTab('EVENTOS')}
+              >
+                Certificados de Eventos
+              </button>
+              <button
+                className={`pb-3 px-2 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'ATIVIDADES' ? 'border-brand-accent text-brand-accent' : 'border-transparent text-gray-400 hover:text-white'}`}
+                onClick={() => setActiveTab('ATIVIDADES')}
+              >
+                Certificados de Atividades
+              </button>
+            </div>
 
-                <div className="flex justify-between items-start mb-4">
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${cert.tipo === 'EVENTO' ? 'bg-brand-accent/20 text-brand-accent' : 'bg-purple-500/20 text-purple-400'}`}>
-                    {cert.tipo === 'EVENTO' ? 'GERAL' : 'ATIVIDADE'}
-                  </span>
-                  <span className="text-gray-400 text-sm">{cert.cargaHoraria} horas</span>
-                </div>
-                
-                <h3 className="text-xl font-bold text-white mb-2 flex-grow pr-8">{cert.titulo}</h3>
-                
-                <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center">
-                  {!cert.liberado ? (
-                    <span className={`text-sm flex items-center gap-1 ${cert.motivo?.includes('Presença') || cert.motivo?.includes('Frequência') ? 'text-red-400' : 'text-yellow-500'}`}>
-                      <AlertCircle size={16} /> {cert.motivo || 'Em Andamento'}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-green-400">Liberado</span>
-                  )}
-                  
-                  {cert.liberado && (
-                    <Button 
-                      variant="primary" 
-                      size="sm" 
-                      className="flex items-center gap-2"
-                      onClick={() => emitirCertificado(cert)}
-                    >
-                      <Download size={16} />
-                      Emitir PDF
-                    </Button>
-                  )}
-                </div>
-              </GlassCard>
-            ))}
-          </div>
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {activeTab === 'EVENTOS' ? renderList(eventos) : renderList(atividades)}
+            </div>
+          </>
         )}
       </main>
     </div>

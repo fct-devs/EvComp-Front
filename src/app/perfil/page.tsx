@@ -8,7 +8,7 @@ import { solicitarLogout, buscarPerfilUsuario } from '../actions/auth';
 
 export default function PerfilPage() {
   const router = useRouter();
-  const [userData, setUserData] = useState({ nome: '', email: '', ra: '', role: 'PARTICIPANTE' });
+  const [userData, setUserData] = useState({ nome: '', nomeCompleto: '', email: '', ra: '', role: 'PARTICIPANTE' });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function PerfilPage() {
     router.push('/login');
   };
 
-  const iniciais = userData.nome ? userData.nome.substring(0, 2).toUpperCase() : 'US';
+  const iniciais = (userData.nomeCompleto || userData.nome) ? (userData.nomeCompleto || userData.nome).substring(0, 2).toUpperCase() : 'US';
 
   if (loading) {
     return (
@@ -52,7 +52,7 @@ export default function PerfilPage() {
                 <div className="w-24 h-24 bg-brand-accent/20 rounded-full flex items-center justify-center mb-4 border-2 border-brand-accent/50">
                   <span className="text-3xl font-bold text-white">{iniciais}</span>
                 </div>
-                <h2 className="text-xl font-bold text-white">{userData.nome}</h2>
+                <h2 className="text-xl font-bold text-white">{userData.nomeCompleto || userData.nome}</h2>
                 <p className="text-sm text-gray-400 mb-2">{userData.role === 'PARTICIPANTE' ? 'Participante' : userData.role}</p>
                 <span className="px-3 py-1 bg-blue-900/50 text-blue-300 text-xs rounded-full border border-blue-800">{userData.role}</span>
              </GlassCard>
@@ -69,7 +69,7 @@ export default function PerfilPage() {
                 
                 <form className="space-y-4">
                   <div className="pointer-events-none opacity-80">
-                    <InputField label="Nome Completo" id="nome" type="text" value={userData.nome} readOnly />
+                    <InputField label="Nome Completo" id="nome" type="text" value={userData.nomeCompleto || userData.nome} readOnly />
                     <InputField label="Email" id="email" type="email" value={userData.email} readOnly />
                     {userData.ra && (
                        <InputField label="RA / Identificação" id="ra" type="text" value={userData.ra} readOnly />

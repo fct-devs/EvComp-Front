@@ -26,7 +26,7 @@ export default function MinhasInscricoesPage() {
           return;
         }
 
-        const res = await fetch(`http://localhost:8080/api/inscricoes/detalhes?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
+        const res = await fetch(`/api/inscricoes/detalhes?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
         if (!res.ok) {
           throw new Error('Falha ao carregar suas inscrições');
         }
@@ -39,7 +39,7 @@ export default function MinhasInscricoesPage() {
         }
 
         // Busca presenças do participante
-        const resPresencas = await fetch(`http://localhost:8080/api/presencas/participante/${perfilRes.data.id}`, { credentials: 'include' });
+        const resPresencas = await fetch(`/api/presencas/participante/${perfilRes.data.id}`, { credentials: 'include' });
         if (resPresencas.ok) {
           const presencasData = await resPresencas.json();
           setPresencas(presencasData);

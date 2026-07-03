@@ -65,11 +65,11 @@ function RedefinirSenhaContent() {
         return;
       }
       try {
-        const response = await fetch(`http://localhost:8080/api/redefinicao-senha/validar?tokenRecebido=${token}`, { credentials: 'include', 
+        const response = await fetch(`/api/redefinicao-senha/validar?tokenRecebido=${token}`, { credentials: 'include', 
           method: 'POST'
         });
         const isValid = await response.json();
-        if (isValid) {
+        if (isValid === true) {
           solicitarNovaSenha();
         } else {
           informarTokenInvalido();
@@ -98,12 +98,12 @@ function RedefinirSenhaContent() {
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/redefinicao-senha/confirmar?tokenRecebido=${token}&novaSenha=${encodeURIComponent(novaSenha)}`, { credentials: 'include', 
+      const response = await fetch(`/api/redefinicao-senha/confirmar?tokenRecebido=${token}&novaSenha=${encodeURIComponent(novaSenha)}`, { credentials: 'include', 
         method: 'POST'
       });
       const result = await response.json();
       
-      if (result) {
+      if (result === true) {
         mensagemSucesso();
       } else {
         informarTokenInvalido();
@@ -172,9 +172,9 @@ function RedefinirSenhaContent() {
                disabled={tokenInput.length !== 6}
                onClick={async () => {
                  try {
-                   const response = await fetch(`http://localhost:8080/api/redefinicao-senha/validar?tokenRecebido=${tokenInput}`, { credentials: 'include',  method: 'POST' });
+                   const response = await fetch(`/api/redefinicao-senha/validar?tokenRecebido=${tokenInput}`, { credentials: 'include',  method: 'POST' });
                    const isValid = await response.json();
-                   if (isValid) {
+                   if (isValid === true) {
                      window.history.replaceState(null, '', `/redefinir-senha?token=${tokenInput}`);
                      setTokenValido(true);
                      setErro('');

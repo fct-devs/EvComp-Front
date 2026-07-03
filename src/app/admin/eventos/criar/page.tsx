@@ -11,6 +11,16 @@ export default function CriarEventoPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, descricao: string, link: string, tipo: string) => {
+    if (!titulo || !dataInicio || !dataTermino || !descricao || !tipo) {
+      return 'Campos obrigatórios ausentes.';
+    }
+    if (new Date(dataTermino) < new Date(dataInicio)) {
+      return 'Data de término não pode ser anterior à data de início.';
+    }
+    return null;
+  };
+
   const handleCriar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -27,8 +37,23 @@ export default function CriarEventoPage() {
       tipoContabilizacao: formData.get('tipoContabilizacao') || 'POR_ATIVIDADE'
     };
 
+    const erroValidacao = validarDadosEvento(
+      payload.titulo as string,
+      payload.dataInicio as string,
+      payload.dataTermino as string,
+      payload.descricao as string,
+      payload.link as string,
+      payload.tipoContabilizacao as string
+    );
+
+    if (erroValidacao) {
+      setError(erroValidacao);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch('http://localhost:8080/api/eventos', { credentials: 'include', 
+      const res = await fetch('/api/eventos', { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
