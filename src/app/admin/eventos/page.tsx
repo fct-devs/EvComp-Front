@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../components/ui/Core';
+import { formatarBRL } from '../../../utils/formatadores';
 
 
 export default function AdminEventosPage() {
@@ -236,6 +237,17 @@ export default function AdminEventosPage() {
                           <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Detalhes</h4>
                           <ul className="text-sm text-gray-200 space-y-1">
                             <li><strong>Contabilização:</strong> {ev.tipoContabilizacao === 'POR_ATIVIDADE' ? 'Por Atividade' : 'Por Carga Total'}</li>
+                            <li>
+                              <strong>Inscrição:</strong>{' '}
+                              {ev.valorInscricao != null && Number(ev.valorInscricao) > 0 ? (
+                                <span className="text-yellow-400 font-semibold">{formatarBRL(ev.valorInscricao)}</span>
+                              ) : (
+                                <span className="text-green-400 font-semibold">Gratuita</span>
+                              )}
+                            </li>
+                            {ev.chavePix && (
+                              <li><strong>Chave PIX:</strong> <code className="bg-slate-900/60 px-1.5 py-0.5 rounded text-xs">{ev.chavePix}</code></li>
+                            )}
                             {ev.link && (
                               <li><strong>Link:</strong> <a href={ev.link} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">{ev.link}</a></li>
                             )}
