@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Navbar } from '../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../components/ui/Core';
 import { buscarPerfilUsuario } from '../../actions/auth';
+import { formatarBRL } from '../../../utils/formatadores';
 
 export default function ParticipanteEventosPage() {
   const [eventos, setEventos] = useState([]);
@@ -58,9 +59,16 @@ export default function ParticipanteEventosPage() {
           ) : eventos.length === 0 ? (
             <p className="text-gray-400 col-span-full text-center">Nenhum evento disponível no momento.</p>
           ) : (
-            eventos.map((ev: any) => (
+            eventos.map((ev: any) => {
+              const ehPago = ev.valorInscricao != null && Number(ev.valorInscricao) > 0;
+              return (
               <GlassCard key={ev.id} className="p-6 bg-slate-800/80 border border-white/10 flex flex-col">
-                <h2 className="text-xl font-bold text-white mb-2">{ev.titulo}</h2>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h2 className="text-xl font-bold text-white">{ev.titulo}</h2>
+                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${ehPago ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' : 'bg-green-500/20 text-green-400 border-green-500/50'}`}>
+                    {ehPago ? formatarBRL(ev.valorInscricao) : 'Gratuito'}
+                  </span>
+                </div>
                 <p className="text-gray-400 text-sm mb-4 flex-1">{ev.descricao}</p>
                 <div className="text-sm text-gray-300 mb-6 space-y-1">
                   <p><strong>Início:</strong> {ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
@@ -76,7 +84,8 @@ export default function ParticipanteEventosPage() {
                   </Link>
                 )}
               </GlassCard>
-            ))
+              );
+            })
           )}
         </div>
       </main>

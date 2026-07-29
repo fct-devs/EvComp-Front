@@ -6,6 +6,7 @@ import { Navbar } from '../../../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../../../components/ui/Core';
 import { buscarPerfilUsuario } from '../../../../actions/auth';
 import { verificarConflitos } from '../../../../../utils/validation';
+import { formatarBRL } from '../../../../../utils/formatadores';
 
 export default function InscricaoEventoPage() {
   const router = useRouter();
@@ -170,16 +171,29 @@ export default function InscricaoEventoPage() {
           <Button variant="secondary" onClick={() => router.push('/dashboard/eventos')}>Voltar aos Eventos</Button>
         </div>
 
-        {evento && (
-          <GlassCard className="p-8 bg-slate-800/80 border border-white/10 mb-8">
-            <h2 className="text-2xl font-bold text-brand-accent mb-4">{evento.titulo}</h2>
-            <p className="text-gray-300 mb-4">{evento.descricao}</p>
-            <div className="flex gap-4 text-sm text-gray-400">
-              <p><strong>Início:</strong> {evento.dataInicio ? new Date(evento.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
-              <p><strong>Término:</strong> {evento.dataFim ? new Date(evento.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
-            </div>
-          </GlassCard>
-        )}
+        {evento && (() => {
+          const ehPago = evento.valorInscricao != null && Number(evento.valorInscricao) > 0;
+          return (
+            <GlassCard className="p-8 bg-slate-800/80 border border-white/10 mb-8">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <h2 className="text-2xl font-bold text-brand-accent">{evento.titulo}</h2>
+                <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap ${ehPago ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' : 'bg-green-500/20 text-green-400 border-green-500/50'}`}>
+                  {ehPago ? formatarBRL(evento.valorInscricao) : 'Gratuito'}
+                </span>
+              </div>
+              <p className="text-gray-300 mb-4">{evento.descricao}</p>
+              <div className="flex gap-4 text-sm text-gray-400 mb-4">
+                <p><strong>Início:</strong> {evento.dataInicio ? new Date(evento.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
+                <p><strong>Término:</strong> {evento.dataFim ? new Date(evento.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
+              </div>
+              {ehPago && (
+                <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-sm text-yellow-200">
+                  Este evento é pago. Após confirmar a inscrição, acesse a aba <strong>Pagamentos</strong> para ver a chave PIX e enviar o comprovante.
+                </div>
+              )}
+            </GlassCard>
+          );
+        })()}
 
         <GlassCard className="p-8 bg-slate-800/80 border border-white/10">
           <h3 className="text-xl font-bold text-white mb-6">Selecione as Atividades</h3>
