@@ -29,12 +29,15 @@ function EditarEventoForm() {
       .catch(() => setFetching(false));
   }, [id]);
 
-  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, descricao: string, link: string, tipo: string) => {
-    if (!titulo || !dataInicio || !dataTermino || !descricao || !tipo) {
+  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, dataInicioInscricao: string, dataFimInscricao: string, descricao: string, link: string, tipo: string) => {
+    if (!titulo || !dataInicio || !dataTermino || !dataInicioInscricao || !dataFimInscricao || !descricao || !tipo) {
       return 'Campos obrigatórios ausentes.';
     }
     if (new Date(dataTermino) < new Date(dataInicio)) {
-      return 'Data de término não pode ser anterior à data de início.';
+      return 'Data de término do evento não pode ser anterior à data de início.';
+    }
+    if (new Date(dataFimInscricao) < new Date(dataInicioInscricao)) {
+      return 'Data de término das inscrições não pode ser anterior à data de início das inscrições.';
     }
     return null;
   };
@@ -50,6 +53,8 @@ function EditarEventoForm() {
       titulo: formData.get('titulo'),
       dataInicio: formData.get('dataInicio'),
       dataTermino: formData.get('dataTermino'),
+      dataInicioInscricao: formData.get('dataInicioInscricao'),
+      dataFimInscricao: formData.get('dataFimInscricao'),
       descricao: formData.get('descricao'),
       link: formData.get('link'),
       tipoContabilizacao: formData.get('tipoContabilizacao')
@@ -59,6 +64,8 @@ function EditarEventoForm() {
       payload.titulo as string,
       payload.dataInicio as string,
       payload.dataTermino as string,
+      payload.dataInicioInscricao as string,
+      payload.dataFimInscricao as string,
       payload.descricao as string,
       payload.link as string,
       payload.tipoContabilizacao as string
@@ -120,8 +127,13 @@ function EditarEventoForm() {
             <InputField label="Título do Evento" id="titulo" type="text" defaultValue={evento.titulo} required />
             
             <div className="grid grid-cols-2 gap-4">
-              <InputField label="Data de Início" id="dataInicio" type="date" defaultValue={evento.dataInicio ? evento.dataInicio.split('T')[0] : ''} required />
-              <InputField label="Data de Término" id="dataTermino" type="date" defaultValue={evento.dataFim ? evento.dataFim.split('T')[0] : ''} required />
+              <InputField label="Data de Início do Evento" id="dataInicio" type="date" defaultValue={evento.dataInicio ? evento.dataInicio.split('T')[0] : ''} required />
+              <InputField label="Data de Término do Evento" id="dataTermino" type="date" defaultValue={evento.dataFim ? evento.dataFim.split('T')[0] : ''} required />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <InputField label="Início das Inscrições" id="dataInicioInscricao" type="date" defaultValue={evento.dataInicioInscricao ? evento.dataInicioInscricao.split('T')[0] : ''} required />
+              <InputField label="Término das Inscrições" id="dataFimInscricao" type="date" defaultValue={evento.dataFimInscricao ? evento.dataFimInscricao.split('T')[0] : ''} required />
             </div>
 
             <InputField label="Link (opcional)" id="link" type="url" defaultValue={evento.link || ''} />
