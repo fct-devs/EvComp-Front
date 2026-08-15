@@ -36,7 +36,6 @@ export default function CriarAtividadePage() {
     }
   }, [eventoId]);
 
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -47,6 +46,8 @@ export default function CriarAtividadePage() {
     const data = {
       evento_id: parseInt(eventoId as string),
       titulo: formData.get('titulo') as string,
+      descricao: formData.get('descricao') as string,
+      pre_requisitos: formData.get('preRequisitos') as string,
       data_inicio: formData.get('dataInicio') as string,
       data_termino: formData.get('dataTermino') as string,
       horario_inicio: formData.get('horaInicio')?.toString().substring(0, 5) as string,
@@ -122,6 +123,34 @@ export default function CriarAtividadePage() {
                 <input id="titulo" name="titulo" type="text" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
               </div>
 
+              <div className="space-y-4 pt-2 pb-2">
+                <div>
+                  <label htmlFor="descricao" className="text-sm font-medium text-gray-300">
+                    Descrição da Atividade <span className="text-gray-500 font-normal text-xs">(Opcional)</span>
+                  </label>
+                  <textarea
+                    id="descricao"
+                    name="descricao"
+                    rows={3}
+                    placeholder="Resumo sobre o que será abordado na atividade..."
+                    className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-accent resize-y"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="preRequisitos" className="text-sm font-medium text-gray-300">
+                    Pré-requisitos <span className="text-gray-500 font-normal text-xs">(Opcional)</span>
+                  </label>
+                  <textarea
+                    id="preRequisitos"
+                    name="preRequisitos"
+                    rows={2}
+                    placeholder="Ex: Instalar VS Code, trazer notebook..."
+                    className="mt-1 w-full bg-orange-900/10 border border-orange-500/30 rounded-md p-3 text-orange-100 placeholder:text-orange-900/50 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="dataInicio" className="text-sm font-medium text-gray-300">Data de Início</label>
@@ -153,7 +182,7 @@ export default function CriarAtividadePage() {
                   <label htmlFor="cargaHorariaTotal" className="text-sm font-medium text-gray-300">Carga Horária do Participante (h)</label>
                   <input id="cargaHorariaTotal" name="cargaHorariaTotal" type="number" min="1" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
                 </div>
-                <div>
+                <div className="col-span-2">
                   <label htmlFor="cargaHorariaMinistrante" className="text-sm font-medium text-gray-300">Carga Horária do Ministrante (h)</label>
                   <input id="cargaHorariaMinistrante" name="cargaHorariaMinistrante" type="number" min="1" required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
                 </div>
@@ -161,13 +190,16 @@ export default function CriarAtividadePage() {
 
               <div>
                 <label className="text-sm font-medium text-gray-300 mb-1 block">Ministrante(s)</label>
-                <div className="mt-1 max-h-48 overflow-y-auto bg-slate-900/50 border border-gray-600 rounded-md p-3 space-y-2">
+                <div className="mt-1 max-h-48 overflow-y-auto bg-slate-900/50 border border-gray-600 rounded-md p-3 space-y-2 custom-scrollbar">
                   {participantes.map(p => (
                     <label key={p.id} className="flex items-center space-x-3 text-white cursor-pointer hover:bg-white/5 p-1 rounded transition-colors">
                       <input type="checkbox" name="ministranteId" value={p.id} className="w-4 h-4 text-brand-accent bg-slate-800 border-gray-600 rounded focus:ring-brand-accent focus:ring-2" />
                       <span className="text-sm">{p.nomeCompleto}</span>
                     </label>
                   ))}
+                  {participantes.length === 0 && (
+                    <div className="text-gray-500 text-sm italic py-2">Nenhum ministrante cadastrado.</div>
+                  )}
                 </div>
               </div>
 

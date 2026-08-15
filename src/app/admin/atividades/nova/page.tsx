@@ -8,17 +8,20 @@ import { solicitarCriacaoAtividade } from '../../../actions/admin';
 
 export default function CriacaoAtividadePage() {
   const router = useRouter();
+  
   const [formData, setFormData] = useState({
     titulo: '',
     ministrantes: '',
+    descricao: '',
+    preRequisitos: '',
     maxParticipantes: '',
     dataInicio: '',
     dataTermino: ''
   });
+  
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // --- MÉTODOS DA CriacaoAtividadeUI (ASTAH) ---
   const informarDadosInvalidos = () => setError('Dados inválidos. Verifique os campos.');
   const informarAtividadeDuplicada = () => setError('Atividade já existe neste evento.');
   const informarSucessoCriacao = () => {
@@ -48,7 +51,7 @@ export default function CriacaoAtividadePage() {
     
     const payload = new FormData();
     Object.entries(formData).forEach(([key, val]) => payload.append(key, val));
-    // Hardcoded eventoId for mock testing since we aren't fetching the list yet
+    
     payload.append('eventoId', '1');
 
     const res = await solicitarCriacaoAtividade(payload);
@@ -82,6 +85,39 @@ export default function CriacaoAtividadePage() {
             
             <InputField label="Título da Atividade" id="titulo" type="text" value={formData.titulo} onChange={handleChange} required />
             <InputField label="Ministrante(s)" id="ministrantes" type="text" value={formData.ministrantes} onChange={handleChange} required />
+            
+            <div className="space-y-4 pt-2 pb-2">
+              <div>
+                <label htmlFor="descricao" className="text-sm font-medium text-gray-300">
+                  Descrição da Atividade <span className="text-gray-500 font-normal text-xs">(Opcional)</span>
+                </label>
+                <textarea
+                  id="descricao"
+                  name="descricao"
+                  rows={3}
+                  placeholder="Resumo sobre o que será abordado na atividade..."
+                  className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-accent resize-y text-sm"
+                  value={formData.descricao}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="preRequisitos" className="text-sm font-medium text-gray-300">
+                  Pré-requisitos <span className="text-gray-500 font-normal text-xs">(Opcional)</span>
+                </label>
+                <textarea
+                  id="preRequisitos"
+                  name="preRequisitos"
+                  rows={2}
+                  placeholder="Ex: Instalar VS Code, trazer notebook..."
+                  className="mt-1 w-full bg-orange-900/10 border border-orange-500/30 rounded-md p-3 text-orange-100 placeholder:text-orange-900/50 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y text-sm"
+                  value={formData.preRequisitos}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
             <InputField label="Vagas Máximas" id="maxParticipantes" type="number" value={formData.maxParticipantes} onChange={handleChange} required />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
