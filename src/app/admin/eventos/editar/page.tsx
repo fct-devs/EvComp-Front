@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '../../../../components/ui/Navbar';
 import { GlassCard, Button, InputField } from '../../../../components/ui/Core';
+import { Info } from 'lucide-react';
 
 function EditarEventoForm() {
   const router = useRouter();
@@ -139,7 +140,40 @@ function EditarEventoForm() {
             <InputField label="Link (opcional)" id="link" type="url" defaultValue={evento.link || ''} />
 
             <div className="flex flex-col space-y-1 mb-4">
-              <label htmlFor="tipoContabilizacao" className="text-sm font-medium text-gray-300">Tipo de Contabilização</label>
+              <div className="flex items-center gap-2">
+                <label htmlFor="tipoContabilizacao" className="text-sm font-medium text-gray-300">
+                  Tipo de Contabilização
+                </label>
+                <div className="relative group flex items-center">
+                  <button
+                    type="button"
+                    className="text-gray-400 hover:text-brand-accent transition-colors focus:outline-none"
+                    aria-label="Informações sobre tipos de contabilização"
+                  >
+                    <Info size={16} />
+                  </button>
+                  <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block group-focus-within:block z-50 w-80 p-4 bg-slate-900/95 border border-brand-accent/30 rounded-xl shadow-2xl backdrop-blur-md text-xs text-gray-300 pointer-events-none">
+                    <div className="font-bold text-white mb-2 text-xs flex items-center gap-1.5 border-b border-white/10 pb-1.5">
+                      <Info size={14} className="text-brand-accent" />
+                      Como funciona a emissão de certificados?
+                    </div>
+                    <div className="space-y-2.5">
+                      <div>
+                        <span className="font-bold text-brand-accent">🔹 Por Atividade (Padrão):</span>
+                        <p className="text-gray-300 mt-0.5 leading-relaxed text-[11px]">
+                          Emite <strong>certificados individuais para cada atividade</strong> realizada com sua respectiva carga horária, permitindo também o certificado geral.
+                        </p>
+                      </div>
+                      <div className="pt-2 border-t border-white/10">
+                        <span className="font-bold text-emerald-400">🔹 Por Carga Total:</span>
+                        <p className="text-gray-300 mt-0.5 leading-relaxed text-[11px]">
+                          Emite <strong>apenas um certificado geral</strong> somando as horas de todas as atividades com presença confirmada, sem gerar certificados avulsos.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <select id="tipoContabilizacao" name="tipoContabilizacao" defaultValue={evento.tipoContabilizacao} className="w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent">
                 <option value="POR_ATIVIDADE">Por Atividade</option>
                 <option value="POR_CARGA_TOTAL">Por Carga Total</option>
