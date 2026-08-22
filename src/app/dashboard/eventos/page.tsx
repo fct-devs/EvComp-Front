@@ -69,10 +69,19 @@ export default function ParticipanteEventosPage() {
                     {ehPago ? formatarBRL(ev.valorInscricao) : 'Gratuito'}
                   </span>
                 </div>
-                <p className="text-gray-400 text-sm mb-4 flex-1">{ev.descricao}</p>
-                <div className="text-sm text-gray-300 mb-6 space-y-1">
-                  <p><strong>Início:</strong> {ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
-                  <p><strong>Término:</strong> {ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
+                <div className="text-sm text-gray-300 mb-6 space-y-1.5 bg-slate-900/40 p-3 rounded-lg border border-white/5">
+                  <p className="text-xs text-gray-400">
+                    <strong className="text-white">Evento:</strong> {ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'} a {ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}
+                  </p>
+                  <p className="text-xs text-brand-accent">
+                    <strong>Inscrições:</strong>{' '}
+                    {(() => {
+                      const dIn = ev.dataInicioInscricao ? new Date(ev.dataInicioInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                      const dFi = ev.dataFimInscricao ? new Date(ev.dataFimInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                      if (dIn && dFi) return dIn === dFi ? dIn : `${dIn} a ${dFi}`;
+                      return dIn || dFi || 'Não informado';
+                    })()}
+                  </p>
                 </div>
                 {inscritos.includes(ev.id) ? (
                   <span className="block w-full text-center px-6 py-2 rounded-full font-bold transition-all duration-300 bg-gray-500/50 text-gray-300 cursor-not-allowed border border-gray-400/20">

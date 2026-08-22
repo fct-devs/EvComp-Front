@@ -66,6 +66,8 @@ function EditarAtividadeContent() {
     const formData = new FormData(e.currentTarget);
     const data = {
       titulo: formData.get('titulo') as string,
+      descricao: formData.get('descricao') as string,
+      pre_requisitos: formData.get('preRequisitos') as string,
       data_inicio: formData.get('dataInicio') as string,
       data_termino: formData.get('dataTermino') as string,
       horario_inicio: formData.get('horaInicio')?.toString().substring(0, 5) as string,
@@ -144,6 +146,36 @@ function EditarAtividadeContent() {
             <input id="titulo" name="titulo" type="text" defaultValue={atividade.titulo} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
           </div>
 
+          <div className="space-y-4 pt-2 pb-2">
+            <div>
+              <label htmlFor="descricao" className="text-sm font-medium text-gray-300 block mb-1">
+                Descrição da Atividade <span className="text-gray-500 font-normal text-xs">(Opcional)</span>
+              </label>
+              <textarea
+                id="descricao"
+                name="descricao"
+                rows={3}
+                defaultValue={atividade.descricao}
+                placeholder="Resumo sobre o que será abordado na atividade..."
+                className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-accent resize-y text-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="preRequisitos" className="text-sm font-medium text-gray-300 block mb-1">
+                Pré-requisitos <span className="text-gray-500 font-normal text-xs">(Opcional)</span>
+              </label>
+              <textarea
+                id="preRequisitos"
+                name="preRequisitos"
+                rows={2}
+                defaultValue={atividade.pre_requisitos || atividade.preRequisitos} 
+                placeholder="Ex: Instalar VS Code, trazer notebook..."
+                className="mt-1 w-full bg-orange-900/10 border border-orange-500/30 rounded-md p-3 text-orange-100 placeholder:text-orange-900/50 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y text-sm"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="dataInicio" className="text-sm font-medium text-gray-300">Data de Início</label>
@@ -175,7 +207,7 @@ function EditarAtividadeContent() {
               <label htmlFor="cargaHorariaTotal" className="text-sm font-medium text-gray-300">Carga Horária do Participante (h)</label>
               <input id="cargaHorariaTotal" name="cargaHorariaTotal" type="number" min="1" defaultValue={atividade.cargaHorariaTotal} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
-            <div>
+            <div className="col-span-2">
               <label htmlFor="cargaHorariaMinistrante" className="text-sm font-medium text-gray-300">Carga Horária do Ministrante (h)</label>
               <input id="cargaHorariaMinistrante" name="cargaHorariaMinistrante" type="number" min="1" defaultValue={atividade.cargaHorariaMinistrante || atividade.cargaHorariaTotal} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
@@ -183,7 +215,7 @@ function EditarAtividadeContent() {
 
           <div>
             <label className="text-sm font-medium text-gray-300 mb-1 block">Ministrante(s)</label>
-            <div className="mt-1 max-h-48 overflow-y-auto bg-slate-900/50 border border-gray-600 rounded-md p-3 space-y-2">
+            <div className="mt-1 max-h-48 overflow-y-auto bg-slate-900/50 border border-gray-600 rounded-md p-3 space-y-2 custom-scrollbar">
               {participantes.map(p => {
                 const isChecked = atividade.ministrantes_ids?.some((id: any) => String(id) === String(p.id));
                 return (
@@ -193,6 +225,9 @@ function EditarAtividadeContent() {
                   </label>
                 );
               })}
+              {participantes.length === 0 && (
+                <div className="text-gray-500 text-sm italic py-2">Nenhum ministrante cadastrado.</div>
+              )}
             </div>
           </div>
 
@@ -214,7 +249,7 @@ export default function EditarAtividadePage() {
       <Navbar role="ADMIN" />
 
       <main className="flex-1 flex items-center justify-center py-12 px-6 relative z-10">
-        <Suspense fallback={<div className="text-white">Carregando...</div>}>
+        <Suspense fallback={<div className="text-center text-brand-accent font-bold animate-pulse p-12">Carregando painel de edição...</div>}>
           <EditarAtividadeContent />
         </Suspense>
       </main>

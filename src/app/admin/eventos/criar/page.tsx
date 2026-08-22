@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '../../../../components/ui/Navbar';
 import { GlassCard, Button, InputField } from '../../../../components/ui/Core';
+import { Info } from 'lucide-react';
 
 export default function CriarEventoPage() {
   const router = useRouter();
@@ -11,12 +12,15 @@ export default function CriarEventoPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, descricao: string, link: string, tipo: string, valorInscricao: string) => {
-    if (!titulo || !dataInicio || !dataTermino || !descricao || !tipo) {
+  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, dataInicioInscricao: string, dataFimInscricao: string, descricao: string, link: string, tipo: string, valorInscricao: string) => {
+    if (!titulo || !dataInicio || !dataTermino || !dataInicioInscricao || !dataFimInscricao || !descricao || !tipo) {
       return 'Campos obrigatórios ausentes.';
     }
     if (new Date(dataTermino) < new Date(dataInicio)) {
-      return 'Data de término não pode ser anterior à data de início.';
+      return 'Data de término do evento não pode ser anterior à data de início.';
+    }
+    if (new Date(dataFimInscricao) < new Date(dataInicioInscricao)) {
+      return 'Data de término das inscrições não pode ser anterior à data de início das inscrições.';
     }
     if (valorInscricao && Number(valorInscricao) < 0) {
       return 'O valor da inscrição não pode ser negativo.';
@@ -37,6 +41,8 @@ export default function CriarEventoPage() {
       titulo: formData.get('titulo'),
       dataInicio: formData.get('dataInicio'),
       dataTermino: formData.get('dataTermino'),
+      dataInicioInscricao: formData.get('dataInicioInscricao'),
+      dataFimInscricao: formData.get('dataFimInscricao'),
       descricao: formData.get('descricao'),
       link: formData.get('link'),
       tipoContabilizacao: formData.get('tipoContabilizacao') || 'POR_ATIVIDADE',
@@ -48,6 +54,8 @@ export default function CriarEventoPage() {
       payload.titulo as string,
       payload.dataInicio as string,
       payload.dataTermino as string,
+      payload.dataInicioInscricao as string,
+      payload.dataFimInscricao as string,
       payload.descricao as string,
       payload.link as string,
       payload.tipoContabilizacao as string,
@@ -107,8 +115,13 @@ export default function CriarEventoPage() {
             <InputField label="Título do Evento" id="titulo" type="text" required />
             
             <div className="grid grid-cols-2 gap-4">
-              <InputField label="Data de Início" id="dataInicio" type="date" required />
-              <InputField label="Data de Término" id="dataTermino" type="date" required />
+              <InputField label="Data de Início do Evento" id="dataInicio" type="date" required />
+              <InputField label="Data de Término do Evento" id="dataTermino" type="date" required />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <InputField label="Início das Inscrições" id="dataInicioInscricao" type="date" required />
+              <InputField label="Término das Inscrições" id="dataFimInscricao" type="date" required />
             </div>
 
             <InputField label="Link (opcional)" id="link" type="url" />
@@ -120,7 +133,40 @@ export default function CriarEventoPage() {
             <p className="text-xs text-gray-500 -mt-3 mb-4">Sem valor de inscrição (vazio ou zero), o evento é gratuito e a inscrição já nasce isenta de pagamento.</p>
 
             <div className="flex flex-col space-y-1 mb-4">
-              <label htmlFor="tipoContabilizacao" className="text-sm font-medium text-gray-300">Tipo de Contabilização</label>
+              <div className="flex items-center gap-2">
+                <label htmlFor="tipoContabilizacao" className="text-sm font-medium text-gray-300">
+                  Tipo de Contabilização
+                </label>
+                <div className="relative group flex items-center">
+                  <button
+                    type="button"
+                    className="text-gray-400 hover:text-brand-accent transition-colors focus:outline-none"
+                    aria-label="Informações sobre tipos de contabilização"
+                  >
+                    <Info size={16} />
+                  </button>
+                  <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block group-focus-within:block z-50 w-80 p-4 bg-slate-900/95 border border-brand-accent/30 rounded-xl shadow-2xl backdrop-blur-md text-xs text-gray-300 pointer-events-none">
+                    <div className="font-bold text-white mb-2 text-xs flex items-center gap-1.5 border-b border-white/10 pb-1.5">
+                      <Info size={14} className="text-brand-accent" />
+                      Como funciona a emissão de certificados?
+                    </div>
+                    <div className="space-y-2.5">
+                      <div>
+                        <span className="font-bold text-brand-accent">🔹 Por Atividade (Padrão):</span>
+                        <p className="text-gray-300 mt-0.5 leading-relaxed text-[11px]">
+                          Emite <strong>certificados individuais para cada atividade</strong> realizada com sua respectiva carga horária, permitindo também o certificado geral.
+                        </p>
+                      </div>
+                      <div className="pt-2 border-t border-white/10">
+                        <span className="font-bold text-emerald-400">🔹 Por Carga Total:</span>
+                        <p className="text-gray-300 mt-0.5 leading-relaxed text-[11px]">
+                          Emite <strong>apenas um certificado geral</strong> somando as horas de todas as atividades com presença confirmada, sem gerar certificados avulsos.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <select id="tipoContabilizacao" name="tipoContabilizacao" className="w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent">
                 <option value="POR_ATIVIDADE">Por Atividade</option>
                 <option value="POR_CARGA_TOTAL">Por Carga Total</option>
