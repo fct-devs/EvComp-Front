@@ -26,22 +26,25 @@ interface Atividade {
 interface Inscricao {
   id: number;
   dataInscricao: string;
+  status: boolean;
   evento?: { titulo: string };
   participante?: { id: number; secretSeed?: string };
-  atividade?: Atividade[]; 
+  atividade?: Atividade[];
 }
 
-function CardAtividade({ 
-  atv, 
-  presencas, 
-  participanteId, 
+function CardAtividade({
+  atv,
+  presencas,
+  participanteId,
+  inscricaoStatus,
   onOpenQR,
-  onOpenInfo 
-}: { 
-  atv: Atividade; 
-  presencas: number[]; 
-  participanteId: number; 
-  onOpenQR: (id: number, partId: number) => void; 
+  onOpenInfo
+}: {
+  atv: Atividade;
+  presencas: number[];
+  participanteId: number;
+  inscricaoStatus: boolean;
+  onOpenQR: (id: number, partId: number) => void;
   onOpenInfo: (atv: Atividade) => void;
 }) {
   const isPresente = presencas.includes(atv.id);
@@ -138,7 +141,11 @@ function CardAtividade({
         </div>
       </div>
 
-      {showIngresso && (
+      {!inscricaoStatus ? (
+        <div className="w-full mt-auto bg-yellow-950 text-yellow-500 border border-yellow-900 rounded-lg py-2.5 text-sm font-bold text-center flex items-center justify-center gap-2">
+          Ingresso bloqueado: aguardando confirmação do pagamento
+        </div>
+      ) : showIngresso ? (
         <button
           onClick={() => onOpenQR(atv.id, participanteId)}
           className="w-full mt-auto bg-brand-accent hover:bg-blue-600 text-white rounded-lg py-2.5 text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-lg"
@@ -146,7 +153,7 @@ function CardAtividade({
           <QrCode size={18} />
           Exibir Ingresso
         </button>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -253,8 +260,14 @@ export default function MinhasInscricoesPage() {
                         Inscrito em: {new Date(inscricao.dataInscricao).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
-                    <div className="mt-4 md:mt-0 px-4 py-1.5 bg-brand-accent/10 text-brand-accent border border-brand-accent/30 rounded-full font-semibold text-xs tracking-wider">
-                      INSCRIÇÃO ATIVA
+                    <div
+                      className={`mt-4 md:mt-0 px-4 py-1.5 rounded-full font-semibold text-xs tracking-wider border ${
+                        inscricao.status
+                          ? 'bg-brand-accent/10 text-brand-accent border-brand-accent/30'
+                          : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
+                      }`}
+                    >
+                      {inscricao.status ? 'INSCRIÇÃO ATIVA' : 'AGUARDANDO PAGAMENTO'}
                     </div>
                   </div>
 
@@ -272,11 +285,12 @@ export default function MinhasInscricoesPage() {
                               {atividadesAgrupadas[dia]
                                 .sort((a, b) => a.horarioInicio.localeCompare(b.horarioInicio))
                                 .map((atv) => (
-                                  <CardAtividade 
-                                    key={atv.id} 
-                                    atv={atv} 
-                                    presencas={presencas} 
+                                  <CardAtividade
+                                    key={atv.id}
+                                    atv={atv}
+                                    presencas={presencas}
                                     participanteId={inscricao.participante?.id || 0}
+                                    inscricaoStatus={inscricao.status}
                                     onOpenQR={(id, partId) => setSelectedAtividade({ id, participanteId: partId })}
                                     onOpenInfo={(atividade) => setInfoAtividade(atividade)}
                                   />
