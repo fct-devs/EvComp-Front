@@ -37,6 +37,14 @@ export default function AdminDashboardPage() {
               <Link href="/admin/coletores"><Button className="w-full" variant="secondary">Gerir Coletores</Button></Link>
             </div>
           </GlassCard>
+
+          <GlassCard className="p-6 bg-slate-800/80 border border-white/10 hover:border-brand-accent/50 transition-colors">
+            <h2 className="text-xl font-bold text-white mb-4">Pagamentos</h2>
+            <p className="text-gray-400 text-sm mb-6">Confira comprovantes de PIX e aprove ou recuse inscrições.</p>
+            <div className="space-y-3">
+              <Link href="/admin/pagamentos"><Button className="w-full" variant="secondary">Ver Pagamentos</Button></Link>
+            </div>
+          </GlassCard>
         </div>
       </main>
     </div>

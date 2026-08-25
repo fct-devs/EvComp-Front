@@ -30,7 +30,7 @@ function EditarEventoForm() {
       .catch(() => setFetching(false));
   }, [id]);
 
-  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, dataInicioInscricao: string, dataFimInscricao: string, descricao: string, link: string, tipo: string) => {
+  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, dataInicioInscricao: string, dataFimInscricao: string, descricao: string, link: string, tipo: string, valorInscricao: string) => {
     if (!titulo || !dataInicio || !dataTermino || !dataInicioInscricao || !dataFimInscricao || !descricao || !tipo) {
       return 'Campos obrigatórios ausentes.';
     }
@@ -39,6 +39,9 @@ function EditarEventoForm() {
     }
     if (new Date(dataFimInscricao) < new Date(dataInicioInscricao)) {
       return 'Data de término das inscrições não pode ser anterior à data de início das inscrições.';
+    }
+    if (valorInscricao && Number(valorInscricao) < 0) {
+      return 'O valor da inscrição não pode ser negativo.';
     }
     return null;
   };
@@ -50,6 +53,8 @@ function EditarEventoForm() {
     setSuccess('');
 
     const formData = new FormData(e.currentTarget);
+    const valorInscricaoRaw = (formData.get('valorInscricao') as string) || '';
+    const chavePixRaw = ((formData.get('chavePix') as string) || '').trim();
     const payload = {
       titulo: formData.get('titulo'),
       dataInicio: formData.get('dataInicio'),
@@ -58,7 +63,9 @@ function EditarEventoForm() {
       dataFimInscricao: formData.get('dataFimInscricao'),
       descricao: formData.get('descricao'),
       link: formData.get('link'),
-      tipoContabilizacao: formData.get('tipoContabilizacao')
+      tipoContabilizacao: formData.get('tipoContabilizacao'),
+      chavePix: chavePixRaw || null,
+      valorInscricao: valorInscricaoRaw ? Number(valorInscricaoRaw) : null
     };
 
     const erroValidacao = validarDadosEvento(
@@ -69,7 +76,8 @@ function EditarEventoForm() {
       payload.dataFimInscricao as string,
       payload.descricao as string,
       payload.link as string,
-      payload.tipoContabilizacao as string
+      payload.tipoContabilizacao as string,
+      valorInscricaoRaw
     );
 
     if (erroValidacao) {
@@ -138,6 +146,12 @@ function EditarEventoForm() {
             </div>
 
             <InputField label="Link (opcional)" id="link" type="url" defaultValue={evento.link || ''} />
+
+            <div className="grid grid-cols-2 gap-4">
+              <InputField label="Chave PIX (opcional)" id="chavePix" type="text" defaultValue={evento.chavePix || ''} placeholder="Deixe em branco para evento gratuito" />
+              <InputField label="Valor da Inscrição (opcional)" id="valorInscricao" type="number" step="0.01" min="0" defaultValue={evento.valorInscricao ?? ''} placeholder="0,00" />
+            </div>
+            <p className="text-xs text-gray-500 -mt-3 mb-4">Sem valor de inscrição (vazio ou zero), o evento é gratuito e a inscrição já nasce isenta de pagamento.</p>
 
             <div className="flex flex-col space-y-1 mb-4">
               <div className="flex items-center gap-2">

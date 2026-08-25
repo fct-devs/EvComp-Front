@@ -6,6 +6,7 @@ import { Navbar } from '../../../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../../../components/ui/Core';
 import { buscarPerfilUsuario } from '../../../../actions/auth';
 import { verificarConflitos } from '../../../../../utils/validation';
+import { formatarBRL } from '../../../../../utils/formatadores';
 import { Calendar, Clock, MapPin, Check, Plus, AlertTriangle, Info, XCircle } from 'lucide-react';
 
 export default function InscricaoEventoPage() {
@@ -186,35 +187,47 @@ export default function InscricaoEventoPage() {
           <Button variant="secondary" onClick={() => router.push('/dashboard/eventos')}>Voltar aos Eventos</Button>
         </div>
 
-        {evento && (
-          <div className="glass-panel p-8 rounded-2xl border-white/10 mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-            <div className="space-y-2">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-brand-accent">{evento.titulo}</h2>
-              <p className="text-gray-300 max-w-2xl text-sm leading-relaxed">{evento.descricao}</p>
-            </div>
-            
-            <div className="flex flex-wrap sm:flex-nowrap gap-4 text-sm bg-slate-900/60 p-4 rounded-xl border border-white/10">
-              <div className="flex flex-col">
-                <span className="uppercase text-[10px] font-bold text-gray-500 tracking-wider">Período do Evento</span>
-                <span className="font-semibold text-white">
-                  {evento.dataInicio ? new Date(evento.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'} a {evento.dataFim ? new Date(evento.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}
+        {evento && (() => {
+          const ehPago = evento.valorInscricao != null && Number(evento.valorInscricao) > 0;
+          return (
+            <GlassCard className="p-8 bg-slate-800/80 border border-white/10 mb-8">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <h2 className="text-2xl font-bold text-brand-accent">{evento.titulo}</h2>
+                <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap ${ehPago ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' : 'bg-green-500/20 text-green-400 border-green-500/50'}`}>
+                  {ehPago ? formatarBRL(evento.valorInscricao) : 'Gratuito'}
                 </span>
               </div>
-              <div className="hidden sm:block w-px bg-white/10"></div>
-              <div className="flex flex-col">
-                <span className="uppercase text-[10px] font-bold text-brand-accent tracking-wider">Período de Inscrição</span>
-                <span className="font-semibold text-brand-accent">
-                  {(() => {
-                    const dIn = evento.dataInicioInscricao ? new Date(evento.dataInicioInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
-                    const dFi = evento.dataFimInscricao ? new Date(evento.dataFimInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
-                    if (dIn && dFi) return dIn === dFi ? dIn : `${dIn} a ${dFi}`;
-                    return dIn || dFi || 'Não informado';
-                  })()}
-                </span>
+              <p className="text-gray-300 mb-4">{evento.descricao}</p>
+
+              <div className="flex flex-wrap sm:flex-nowrap gap-4 text-sm bg-slate-900/60 p-4 rounded-xl border border-white/10 mb-4">
+                <div className="flex flex-col">
+                  <span className="uppercase text-[10px] font-bold text-gray-500 tracking-wider">Período do Evento</span>
+                  <span className="font-semibold text-white">
+                    {evento.dataInicio ? new Date(evento.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'} a {evento.dataFim ? new Date(evento.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}
+                  </span>
+                </div>
+                <div className="hidden sm:block w-px bg-white/10"></div>
+                <div className="flex flex-col">
+                  <span className="uppercase text-[10px] font-bold text-brand-accent tracking-wider">Período de Inscrição</span>
+                  <span className="font-semibold text-brand-accent">
+                    {(() => {
+                      const dIn = evento.dataInicioInscricao ? new Date(evento.dataInicioInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                      const dFi = evento.dataFimInscricao ? new Date(evento.dataFimInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                      if (dIn && dFi) return dIn === dFi ? dIn : `${dIn} a ${dFi}`;
+                      return dIn || dFi || 'Não informado';
+                    })()}
+                  </span>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+
+              {ehPago && (
+                <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-sm text-yellow-200">
+                  Este evento é pago. Após confirmar a inscrição, acesse a aba <strong>Pagamentos</strong> para ver a chave PIX e enviar o comprovante.
+                </div>
+              )}
+            </GlassCard>
+          );
+        })()}
 
         <GlassCard className="p-8 bg-slate-800/80 border border-white/10">
           <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
