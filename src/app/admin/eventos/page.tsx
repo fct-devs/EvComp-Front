@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../components/ui/Core';
+import { formatarBRL } from '../../../utils/formatadores';
 
 
 export default function AdminEventosPage() {
@@ -236,9 +237,29 @@ export default function AdminEventosPage() {
                           <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Detalhes</h4>
                           <ul className="text-sm text-gray-200 space-y-1">
                             <li><strong>Contabilização:</strong> {ev.tipoContabilizacao === 'POR_ATIVIDADE' ? 'Por Atividade' : 'Por Carga Total'}</li>
+                            <li>
+                              <strong>Inscrição:</strong>{' '}
+                              {ev.valorInscricao != null && Number(ev.valorInscricao) > 0 ? (
+                                <span className="text-yellow-400 font-semibold">{formatarBRL(ev.valorInscricao)}</span>
+                              ) : (
+                                <span className="text-green-400 font-semibold">Gratuita</span>
+                              )}
+                            </li>
+                            {ev.chavePix && (
+                              <li><strong>Chave PIX:</strong> <code className="bg-slate-900/60 px-1.5 py-0.5 rounded text-xs">{ev.chavePix}</code></li>
+                            )}
                             {ev.link && (
                               <li><strong>Link:</strong> <a href={ev.link} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">{ev.link}</a></li>
                             )}
+                            <li>
+                              <strong>Inscrições:</strong>{' '}
+                              {(() => {
+                                const dIn = ev.dataInicioInscricao ? new Date(ev.dataInicioInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                                const dFi = ev.dataFimInscricao ? new Date(ev.dataFimInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                                if (dIn && dFi) return dIn === dFi ? dIn : `${dIn} a ${dFi}`;
+                                return dIn || dFi || 'Não definido';
+                              })()}
+                            </li>
                           </ul>
                         </div>
                       </div>
@@ -307,6 +328,24 @@ export default function AdminEventosPage() {
                                           <div className="col-span-2">
                                             <span className="block text-xs text-gray-500 uppercase">Ministrante(s)</span>
                                             {atv.ministrantes.map((m: any) => m.nomeCompleto).join(', ')}
+                                          </div>
+                                        )}
+                                        {(atv.descricao || atv.preRequisitos || atv.pre_requisitos) && (
+                                          <div className="col-span-2 space-y-3 pt-3 border-t border-white/10 mt-2">
+                                            {atv.descricao && (
+                                              <div>
+                                                <span className="block text-xs text-brand-accent uppercase font-bold tracking-wider mb-1">Descrição</span>
+                                                <p className="text-sm text-gray-300 whitespace-pre-wrap bg-slate-900/60 p-3 rounded border border-white/5">{atv.descricao}</p>
+                                              </div>
+                                            )}
+                                            {(atv.preRequisitos || atv.pre_requisitos) && (
+                                              <div>
+                                                <span className="block text-xs text-orange-400 uppercase font-bold tracking-wider mb-1">⚠️ Pré-requisitos</span>
+                                                <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded text-orange-200 text-sm whitespace-pre-wrap">
+                                                  {atv.preRequisitos || atv.pre_requisitos}
+                                                </div>
+                                              </div>
+                                            )}
                                           </div>
                                         )}
                                       </div>

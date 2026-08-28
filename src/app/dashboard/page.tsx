@@ -60,6 +60,16 @@ export default async function DashboardPage() {
             </Link>
           </GlassCard>
 
+          <GlassCard className="p-6 bg-slate-800/80 border border-white/10 hover:border-brand-accent/50 transition-colors flex flex-col justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-2">Meus Pagamentos</h2>
+              <p className="text-gray-400 text-sm mb-6">Acompanhe o status e envie o comprovante da sua inscrição.</p>
+            </div>
+            <Link href="/dashboard/pagamentos">
+              <Button className="w-full" variant="secondary">Ver Pagamentos</Button>
+            </Link>
+          </GlassCard>
+
           {temModoColetor && (
             <GlassCard className="bg-emerald-900/20 shadow-[0_0_15px_rgba(16,185,129,0.1)] flex flex-col justify-between">
               <div>

@@ -52,15 +52,17 @@ export const Navbar = ({ role = 'PARTICIPANTE' }: { role?: 'PARTICIPANTE' | 'COL
       {(displayRole === 'PARTICIPANTE' || displayRole === 'COLETOR') && (
         <>
           <Link href="/dashboard/minhas-inscricoes" className={getLinkClass('/dashboard/minhas-inscricoes')}>Inscrições</Link>
+          <Link href="/dashboard/pagamentos" className={getLinkClass('/dashboard/pagamentos')}>Pagamentos</Link>
           <Link href="/dashboard/certificados" className={getLinkClass('/dashboard/certificados')}>Certificados</Link>
         </>
       )}
-      
+
       {displayRole === 'ADMIN' && (
         <>
           <Link href="/admin/eventos" className={getLinkClass('/admin/eventos')}>Gestão</Link>
           <Link href="/admin/coletores" className={getLinkClass('/admin/coletores')}>Coletores</Link>
           <Link href="/admin/relatorios" className={getLinkClass('/admin/relatorios')}>Relatórios</Link>
+          <Link href="/admin/pagamentos" className={getLinkClass('/admin/pagamentos')}>Pagamentos</Link>
         </>
       )}
       

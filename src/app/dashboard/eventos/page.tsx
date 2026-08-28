@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Navbar } from '../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../components/ui/Core';
 import { buscarPerfilUsuario } from '../../actions/auth';
+import { formatarBRL } from '../../../utils/formatadores';
 
 export default function ParticipanteEventosPage() {
   const [eventos, setEventos] = useState([]);
@@ -58,13 +59,29 @@ export default function ParticipanteEventosPage() {
           ) : eventos.length === 0 ? (
             <p className="text-gray-400 col-span-full text-center">Nenhum evento disponível no momento.</p>
           ) : (
-            eventos.map((ev: any) => (
+            eventos.map((ev: any) => {
+              const ehPago = ev.valorInscricao != null && Number(ev.valorInscricao) > 0;
+              return (
               <GlassCard key={ev.id} className="p-6 bg-slate-800/80 border border-white/10 flex flex-col">
-                <h2 className="text-xl font-bold text-white mb-2">{ev.titulo}</h2>
-                <p className="text-gray-400 text-sm mb-4 flex-1">{ev.descricao}</p>
-                <div className="text-sm text-gray-300 mb-6 space-y-1">
-                  <p><strong>Início:</strong> {ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
-                  <p><strong>Término:</strong> {ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}</p>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h2 className="text-xl font-bold text-white">{ev.titulo}</h2>
+                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${ehPago ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' : 'bg-green-500/20 text-green-400 border-green-500/50'}`}>
+                    {ehPago ? formatarBRL(ev.valorInscricao) : 'Gratuito'}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-300 mb-6 space-y-1.5 bg-slate-900/40 p-3 rounded-lg border border-white/5">
+                  <p className="text-xs text-gray-400">
+                    <strong className="text-white">Evento:</strong> {ev.dataInicio ? new Date(ev.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'} a {ev.dataFim ? new Date(ev.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-'}
+                  </p>
+                  <p className="text-xs text-brand-accent">
+                    <strong>Inscrições:</strong>{' '}
+                    {(() => {
+                      const dIn = ev.dataInicioInscricao ? new Date(ev.dataInicioInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                      const dFi = ev.dataFimInscricao ? new Date(ev.dataFimInscricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : null;
+                      if (dIn && dFi) return dIn === dFi ? dIn : `${dIn} a ${dFi}`;
+                      return dIn || dFi || 'Não informado';
+                    })()}
+                  </p>
                 </div>
                 {inscritos.includes(ev.id) ? (
                   <span className="block w-full text-center px-6 py-2 rounded-full font-bold transition-all duration-300 bg-gray-500/50 text-gray-300 cursor-not-allowed border border-gray-400/20">
@@ -76,7 +93,8 @@ export default function ParticipanteEventosPage() {
                   </Link>
                 )}
               </GlassCard>
-            ))
+              );
+            })
           )}
         </div>
       </main>
