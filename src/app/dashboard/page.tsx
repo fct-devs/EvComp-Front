@@ -19,7 +19,6 @@ export default async function DashboardPage() {
     if (perfilRes.data.nome) userName = perfilRes.data.nome.split(' ')[0];
   }
 
-  // Define se o usuário tem privilégios de coletor (role COLETOR explícita ou flag isColetor)
   const temModoColetor = role === 'COLETOR' || isColetor;
 
   return (
@@ -31,9 +30,9 @@ export default async function DashboardPage() {
         <p className="text-gray-400 mb-8">Bem-vindo(a) ao seu painel. O que deseja fazer hoje?</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <GlassCard className="p-6 bg-slate-800/80 border border-white/10 hover:border-brand-accent/50 transition-colors flex flex-col justify-between">
+          <GlassCard className="flex flex-col justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white mb-2">Explorar Eventos</h2>
+              <h2 className="text-xl font-bold text-white mb-4">Explorar Eventos</h2>
               <p className="text-gray-400 text-sm mb-6">Descubra e inscreva-se nos próximos eventos da instituição.</p>
             </div>
             <Link href="/dashboard/eventos">
@@ -41,9 +40,9 @@ export default async function DashboardPage() {
             </Link>
           </GlassCard>
 
-          <GlassCard className="p-6 bg-slate-800/80 border border-white/10 hover:border-brand-accent/50 transition-colors flex flex-col justify-between">
+          <GlassCard className="flex flex-col justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white mb-2">Minhas Inscrições</h2>
+              <h2 className="text-xl font-bold text-white mb-4">Minhas Inscrições</h2>
               <p className="text-gray-400 text-sm mb-6">Acesse suas credenciais e os seus passaportes de entrada (QR Code).</p>
             </div>
             <Link href="/dashboard/minhas-inscricoes">
@@ -51,9 +50,9 @@ export default async function DashboardPage() {
             </Link>
           </GlassCard>
 
-          <GlassCard className="p-6 bg-slate-800/80 border border-white/10 hover:border-brand-accent/50 transition-colors flex flex-col justify-between">
+          <GlassCard className="flex flex-col justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white mb-2">Meus Certificados</h2>
+              <h2 className="text-xl font-bold text-white mb-4">Meus Certificados</h2>
               <p className="text-gray-400 text-sm mb-6">Visualize e baixe os seus certificados de participação.</p>
             </div>
             <Link href="/dashboard/certificados">
@@ -62,9 +61,9 @@ export default async function DashboardPage() {
           </GlassCard>
 
           {temModoColetor && (
-            <GlassCard className="p-6 bg-emerald-900/40 border border-emerald-500/30 hover:border-emerald-500/60 transition-colors flex flex-col justify-between shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+            <GlassCard className="bg-emerald-900/20 shadow-[0_0_15px_rgba(16,185,129,0.1)] flex flex-col justify-between">
               <div>
-                <h2 className="text-xl font-bold text-emerald-300 mb-2 flex items-center space-x-2">
+                <h2 className="text-xl font-bold text-emerald-300 mb-4 flex items-center space-x-2">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
                   <span>Modo Coletor</span>
                 </h2>

@@ -27,68 +27,75 @@ export const Navbar = ({ role = 'PARTICIPANTE' }: { role?: 'PARTICIPANTE' | 'COL
     }
   }, []);
 
-  // Fecha o menu mobile quando a rota muda
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Para evitar hydration mismatch visual abrupto
   const displayRole = mounted ? actualRole : role;
 
   const getLinkClass = (path: string, exact: boolean = false) => {
-    if (!pathname) return "text-gray-300 hover:text-white transition-colors block py-2 md:py-0";
+    if (!pathname) return "text-gray-300 hover:text-white transition-colors block py-2 md:py-0 text-base font-light tracking-wide";
     const isActive = exact ? pathname === path : pathname.startsWith(path);
     return isActive 
-      ? "text-white border-l-4 md:border-l-0 md:border-b-2 border-brand-accent pl-2 md:pl-0 md:pb-1 transition-colors block py-2 md:py-0 bg-slate-800/50 md:bg-transparent" 
-      : "text-gray-300 hover:text-white transition-colors block py-2 md:py-0 pl-2 md:pl-0";
+      ? "text-brand-accent transition-colors block py-2 md:py-0 text-base font-medium tracking-wide" 
+      : "text-gray-300 hover:text-white transition-colors block py-2 md:py-0 text-base font-light tracking-wide";
   };
 
-  const navLinks = (
+  const regularLinks = (
     <>
-      <Link href={displayRole === 'ADMIN' ? '/admin' : '/dashboard'} className={getLinkClass(displayRole === 'ADMIN' ? '/admin' : '/dashboard', true)}>HOME</Link>
+      <Link href={displayRole === 'ADMIN' ? '/admin' : '/dashboard'} className={getLinkClass(displayRole === 'ADMIN' ? '/admin' : '/dashboard', true)}>Home</Link>
+      
       {displayRole !== 'ADMIN' && (
-        <Link href="/dashboard/eventos" className={getLinkClass('/dashboard/eventos')}>EVENTOS</Link>
+        <Link href="/dashboard/eventos" className={getLinkClass('/dashboard/eventos')}>Eventos</Link>
       )}
+      
       {(displayRole === 'PARTICIPANTE' || displayRole === 'COLETOR') && (
         <>
-          <Link href="/dashboard/minhas-inscricoes" className={getLinkClass('/dashboard/minhas-inscricoes')}>MINHAS INSCRIÇÕES</Link>
-          <Link href="/dashboard/certificados" className={getLinkClass('/dashboard/certificados')}>CERTIFICADOS</Link>
+          <Link href="/dashboard/minhas-inscricoes" className={getLinkClass('/dashboard/minhas-inscricoes')}>Inscrições</Link>
+          <Link href="/dashboard/certificados" className={getLinkClass('/dashboard/certificados')}>Certificados</Link>
         </>
       )}
       
       {displayRole === 'ADMIN' && (
         <>
-          <Link href="/admin/eventos" className={getLinkClass('/admin/eventos')}>GESTÃO DE EVENTOS</Link>
-          <Link href="/admin/coletores" className={getLinkClass('/admin/coletores')}>COLETORES</Link>
-          <Link href="/admin/relatorios" className={getLinkClass('/admin/relatorios')}>RELATÓRIOS</Link>
+          <Link href="/admin/eventos" className={getLinkClass('/admin/eventos')}>Gestão</Link>
+          <Link href="/admin/coletores" className={getLinkClass('/admin/coletores')}>Coletores</Link>
+          <Link href="/admin/relatorios" className={getLinkClass('/admin/relatorios')}>Relatórios</Link>
         </>
       )}
       
       {displayRole === 'COLETOR' && (
-        <Link href="/coletor/scan" className={getLinkClass('/coletor/scan')}>COLETAR PRESENÇA</Link>
+        <Link href="/coletor/scan" className={getLinkClass('/coletor/scan')}>Coletar Presença</Link>
       )}
-
-      <Link href="/perfil" className={getLinkClass('/perfil')}>PERFIL</Link>
     </>
   );
 
   return (
-    <nav className="w-full bg-slate-900 border-b border-white/10 sticky top-0 z-50 shadow-md">
-      <div className="flex items-center justify-between px-6 lg:px-12 h-16">
-        <div className="flex items-center space-x-2">
-          <Link href={displayRole === 'ADMIN' ? '/admin' : '/dashboard'} className="font-bold text-lg tracking-wider text-white">EvComp</Link>
+    <nav className="w-full bg-black border-b border-white/20 sticky top-0 z-50">
+      <div className="flex items-center justify-between px-6 lg:px-12 h-20 max-w-[1400px] mx-auto">
+        
+        <div className="flex items-center">
+          <Link href={displayRole === 'ADMIN' ? '/admin' : '/dashboard'}>
+            <img 
+              src="/bannerSecompp3semFundoBranco.png" 
+              alt="SECOMPP 26" 
+              className="h-26 md:h-28 w-auto hover:opacity-90 transition-opacity"
+            />
+          </Link>
         </div>
 
-        {/* Menu Desktop */}
-        <div className="hidden md:flex items-center space-x-8 text-sm font-semibold">
-          {navLinks}
+        <div className="hidden md:flex items-center space-x-8">
+          {regularLinks}
+          
+          <Link href="/perfil" className="bg-brand-accent hover:bg-yellow-400 text-black px-6 py-2 rounded-md font-medium text-base transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md">
+            Perfil
+          </Link>
         </div>
 
-        {/* Menu Hamburger Mobile */}
         <div className="md:hidden flex items-center">
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-gray-300 hover:text-white focus:outline-none"
+            className="text-gray-300 hover:text-brand-accent transition-colors focus:outline-none"
             aria-label="Alternar menu mobile"
           >
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -96,10 +103,12 @@ export const Navbar = ({ role = 'PARTICIPANTE' }: { role?: 'PARTICIPANTE' | 'COL
         </div>
       </div>
 
-      {/* Menu Dropdown Mobile */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-slate-900 border-t border-white/10 flex flex-col space-y-1 px-4 pt-2 pb-4 text-sm font-semibold shadow-inner animate-in slide-in-from-top-2 duration-200">
-          {navLinks}
+        <div className="md:hidden bg-black border-t border-white/10 flex flex-col space-y-4 px-6 pt-4 pb-6 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+          {regularLinks}
+          <Link href="/perfil" className="bg-brand-accent text-black px-4 py-3 rounded-md font-medium text-base text-center mt-2">
+            Perfil
+          </Link>
         </div>
       )}
     </nav>
