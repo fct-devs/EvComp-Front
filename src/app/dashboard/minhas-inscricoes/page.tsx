@@ -7,7 +7,9 @@ import { GlassCard, Button } from '../../../components/ui/Core';
 import dynamic from 'next/dynamic';
 import { buscarPerfilUsuario } from '../../actions/auth';
 import { formatarBRL } from '../../../utils/formatadores';
-import { Calendar, Clock, MapPin, CheckCircle, XCircle, QrCode, Info, X } from 'lucide-react';
+import { periodoInscricaoAtivo } from '../../../utils/validation';
+import { Calendar, Clock, MapPin, CheckCircle, XCircle, QrCode, Info, X, Pencil } from 'lucide-react';
+
 
 const QRCodeModal = dynamic(() => import('../../../components/ui/QRCodeModal').then(mod => mod.QRCodeModal), { ssr: false });
 
@@ -28,7 +30,7 @@ interface Inscricao {
   id: number;
   dataInscricao: string;
   status: boolean;
-  evento?: { titulo: string };
+  evento?: { id: number; titulo: string; dataInicioInscricao?: string; dataFimInscricao?: string };
   participante?: { id: number; secretSeed?: string };
   atividade?: Atividade[];
   modalidade?: { id: number; nome: string; descricao: string | null; valor: number; ativo: boolean } | null;
@@ -268,18 +270,30 @@ export default function MinhasInscricoesPage() {
                         Inscrito em: {new Date(inscricao.dataInscricao).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
-                    <div
-                      className={`mt-4 md:mt-0 px-4 py-1.5 rounded-full font-semibold text-xs tracking-wider border ${
-                        inscricao.status
-                          ? 'bg-brand-accent/10 text-brand-accent border-brand-accent/30'
-                          : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
-                      }`}
-                    >
-                      {inscricao.status ? 'INSCRIÇÃO ATIVA' : 'AGUARDANDO PAGAMENTO'}
+                    <div className="mt-4 md:mt-0 flex items-center gap-3">
+                      <div
+                        className={`px-4 py-1.5 rounded-full font-semibold text-xs tracking-wider border ${
+                          inscricao.status
+                            ? 'bg-brand-accent/10 text-brand-accent border-brand-accent/30'
+                            : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
+                        }`}
+                      >
+                        {inscricao.status ? 'INSCRIÇÃO ATIVA' : 'AGUARDANDO PAGAMENTO'}
+                      </div>
+                      {inscricao.evento?.id && periodoInscricaoAtivo(inscricao.evento.dataInicioInscricao, inscricao.evento.dataFimInscricao) && (
+                        <Button
+                          variant="secondary"
+                          className="py-1.5 px-4 text-xs flex items-center gap-2"
+                          onClick={() => router.push(`/dashboard/eventos/${inscricao.evento?.id}/inscricao`)}
+                        >
+                          <Pencil size={14} />
+                          Editar Inscrição
+                        </Button>
+                      )}
                     </div>
                   </div>
 
-                  <div className="glass p-6 md:p-8 rounded-b-2xl rounded-tr-2xl shadow-2xl">
+                  <div className="glass p-6 md:p-8 rounded-b-2xl shadow-2xl">
                     {listaAtividadesSegura.length > 0 ? (
                       <div className="space-y-10">
                         {diasOrdenados.map((dia) => (

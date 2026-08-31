@@ -25,9 +25,11 @@ export default function InscricaoEventoPage() {
   const [error, setError] = useState('');
   const [sucesso, setSucesso] = useState(false);
   const [participanteId, setParticipanteId] = useState<number | null>(null);
-  const [jaInscrito, setJaInscrito] = useState(false);
+  const [inscricaoId, setInscricaoId] = useState<number | null>(null);
   const [modalAtividade, setModalAtividade] = useState<any>(null);
   const [modalResumo, setModalResumo] = useState(false);
+
+  const modoEdicao = inscricaoId !== null;
 
   useEffect(() => {
     async function carregarDados() {
@@ -64,11 +66,16 @@ export default function InscricaoEventoPage() {
           setError('Evento não encontrado');
         }
         
-        const minRes = await fetch(`/api/inscricoes/minhas?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
-        if (minRes.ok) {
-          const minData = await minRes.json();
-          if (minData.inscritos && minData.inscritos.includes(parseInt(String(eventoId)))) {
-            setJaInscrito(true);
+        const detalhesRes = await fetch(`/api/inscricoes/detalhes?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
+        if (detalhesRes.ok) {
+          const detalhesData = await detalhesRes.json();
+          const inscricaoDoEvento = (detalhesData || []).find(
+            (insc: any) => insc.evento?.id === parseInt(String(eventoId))
+          );
+          if (inscricaoDoEvento) {
+            setInscricaoId(inscricaoDoEvento.id);
+            const idsAtuais = (inscricaoDoEvento.atividade || []).map((atv: any) => atv.id);
+            setSelecionadas(new Set(idsAtuais));
           }
         }
         
@@ -120,22 +127,30 @@ export default function InscricaoEventoPage() {
         }
       }
 
-      const payload = {
-        participanteId: participanteId,
-        eventoId: parseInt(String(eventoId)),
-        atividadeIds: atividadesArray,
-        modalidadeId
-      };
+    const res = modoEdicao
+      ? await fetch(`/api/inscricoes/${inscricaoId}`, { 
+          credentials: 'include',
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ atividadeIds: atividadesArray })
+        })
+      : await fetch('/api/inscricoes', { 
+          credentials: 'include',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            participanteId: participanteId,
+            eventoId: parseInt(String(eventoId)),
+            atividadeIds: atividadesArray,
+            modalidadeId: modalidadeId
+          })
+        });
 
-      const res = await fetch('/api/inscricoes', { credentials: 'include',
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Erro ao realizar inscrição.');
+        const fallbackErrorMessage = modoEdicao ? 'Erro ao atualizar inscrição.' : 'Erro ao realizar inscrição.';
+        throw new Error(data.error || fallbackErrorMessage);
       }
 
       setSucesso(true);
@@ -191,7 +206,7 @@ export default function InscricaoEventoPage() {
 
       <main className="flex-1 w-full max-w-6xl mx-auto py-12 px-6 relative z-10">
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-extrabold text-white">Monte sua Grade</h1>
+          <h1 className="text-3xl font-extrabold text-white">{modoEdicao ? 'Editar sua Grade' : 'Monte sua Grade'}</h1>
           <Button variant="secondary" onClick={() => router.push('/dashboard/eventos')}>Voltar aos Eventos</Button>
         </div>
 
@@ -301,8 +316,10 @@ export default function InscricaoEventoPage() {
               <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
                 <Check size={40} strokeWidth={3} />
               </div>
-              <h3 className="text-2xl font-bold text-white">Grade Confirmada!</h3>
-              <p className="text-gray-400 text-lg">Sua inscrição nas atividades foi realizada com sucesso.</p>
+              <h3 className="text-2xl font-bold text-white">{modoEdicao ? 'Grade Atualizada!' : 'Grade Confirmada!'}</h3>
+              <p className="text-gray-400 text-lg">
+                {modoEdicao ? 'Sua inscrição nas atividades foi atualizada com sucesso.' : 'Sua inscrição nas atividades foi realizada com sucesso.'}
+              </p>
               <div className="pt-6">
                 <Button onClick={() => router.push('/dashboard/minhas-inscricoes')}>Ver Meus Ingressos</Button>
               </div>
@@ -429,15 +446,27 @@ export default function InscricaoEventoPage() {
                 <div className="flex items-start space-x-3 max-w-2xl">
                   <Info className="w-6 h-6 text-brand-accent shrink-0 mt-0.5" />
                   <p className="text-sm text-gray-300 leading-relaxed">
-                    <strong className="text-white">Confirme sua grade:</strong> Revise os horários selecionados. Após confirmar a inscrição, as atividades não poderão ser alteradas pelo painel.
+                    {modoEdicao ? (
+                      <><strong className="text-white">Atualize sua grade:</strong> Revise os horários selecionados e salve para aplicar as alterações na sua inscrição.</>
+                    ) : (
+                      <><strong className="text-white">Confirme sua grade:</strong> Revise os horários selecionados. Após confirmar a inscrição, as atividades não poderão ser alteradas pelo painel.</>
+                    )}
                   </p>
                 </div>
                 <Button
-                  onClick={() => setModalResumo(true)}
-                  disabled={submitting || selecionadas.size === 0 || modalidades.length === 0 || (modalidades.length > 1 && modalidadeId === null)}
+                  onClick={modoEdicao ? handleInscrever : () => setModalResumo(true)}
+                  disabled={
+                    submitting ||
+                    selecionadas.size === 0 ||
+                    (!modoEdicao && (modalidades.length === 0 || (modalidades.length > 1 && modalidadeId === null)))
+                  }
                   className="w-full md:w-auto shrink-0 shadow-lg shadow-brand-accent/20"
                 >
-                  {submitting ? 'Processando...' : `Confirmar ${selecionadas.size} Atividade(s)`}
+                  {submitting
+                    ? 'Processando...'
+                    : modoEdicao
+                      ? `Salvar Alterações (${selecionadas.size})`
+                      : `Confirmar ${selecionadas.size} Atividade(s)`}
                 </Button>
               </div>
             </div>

@@ -38,6 +38,32 @@ export function validarDadosEvento(titulo: string, dataInicio: Date, dataTermino
   return true;
 }
 
+export function periodoInscricaoAtivo(dataInicioInscricao?: string | null, dataFimInscricao?: string | null): boolean {
+  if (!dataInicioInscricao && !dataFimInscricao) return true;
+
+  const parseDataLocal = (valor?: string | null): Date | null => {
+    if (!valor) return null;
+    const datePart = valor.split('T')[0];
+    const partes = datePart.split('-').map(Number);
+    if (partes.length !== 3 || partes.some(isNaN)) return null;
+    const [ano, mes, dia] = partes;
+    return new Date(ano, mes - 1, dia);
+  };
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const inicio = parseDataLocal(dataInicioInscricao);
+  const fim = parseDataLocal(dataFimInscricao);
+
+  if (inicio) inicio.setHours(0, 0, 0, 0);
+  if (fim) fim.setHours(23, 59, 59, 999);
+
+  if (inicio && hoje < inicio) return false;
+  if (fim && hoje > fim) return false;
+  return true;
+}
+
 export function verificarConflitos(atividade: any, outrasAtividades: any[]): boolean {
   if (!atividade || !atividade.dataInicio || !atividade.horarioInicio || !atividade.horarioFim) return false;
   
