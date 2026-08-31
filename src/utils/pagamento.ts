@@ -15,6 +15,7 @@ export interface Pagamento {
   motivoRecusa: string | null;
   chavePix: string | null;
   valorInscricao: number | null;
+  modalidadeNome: string | null;
   urlComprovante: string | null;
 }
 

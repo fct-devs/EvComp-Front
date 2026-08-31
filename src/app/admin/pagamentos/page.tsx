@@ -10,7 +10,6 @@ import { Eye } from 'lucide-react';
 interface Evento {
   id: number;
   titulo: string;
-  valorInscricao: number | null;
 }
 
 export default function AdminPagamentosPage() {
@@ -153,7 +152,7 @@ export default function AdminPagamentosPage() {
               <option value="">-- Fila de conferência (pendentes) --</option>
               {eventos.map((ev) => (
                 <option key={ev.id} value={ev.id}>
-                  {ev.titulo} — {ev.valorInscricao != null && Number(ev.valorInscricao) > 0 ? formatarBRL(ev.valorInscricao) : 'Gratuito'}
+                  {ev.titulo}
                 </option>
               ))}
             </select>
@@ -172,6 +171,7 @@ export default function AdminPagamentosPage() {
                   <tr className="border-b border-white/20 text-sm">
                     <th className="py-3 px-4">Participante</th>
                     <th className="py-3 px-4">Evento</th>
+                    <th className="py-3 px-4">Modalidade</th>
                     <th className="py-3 px-4">Valor</th>
                     <th className="py-3 px-4">Enviado em</th>
                     <th className="py-3 px-4">Status</th>
@@ -192,6 +192,7 @@ export default function AdminPagamentosPage() {
                           <p className="text-xs text-gray-400">{pagamento.emailParticipante}</p>
                         </td>
                         <td className="py-3 px-4">{pagamento.tituloEvento}</td>
+                        <td className="py-3 px-4">{pagamento.modalidadeNome || '-'}</td>
                         <td className="py-3 px-4">{formatarBRL(pagamento.valorInscricao)}</td>
                         <td className="py-3 px-4">{formatarDataHora(pagamento.dataEnvio)}</td>
                         <td className="py-3 px-4">

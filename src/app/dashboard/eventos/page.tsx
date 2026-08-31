@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { Navbar } from '../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../components/ui/Core';
 import { buscarPerfilUsuario } from '../../actions/auth';
-import { formatarBRL } from '../../../utils/formatadores';
+import { ModalidadeInscricao, resumoPrecoModalidades } from '../../../utils/modalidade';
 
 export default function ParticipanteEventosPage() {
   const [eventos, setEventos] = useState([]);
+  const [modalidades, setModalidades] = useState<ModalidadeInscricao[]>([]);
   const [inscritos, setInscritos] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +26,9 @@ export default function ParticipanteEventosPage() {
           }
         }
         setInscritos(minInscritos);
+
+        const modRes = await fetch('/api/modalidades', { credentials: 'include' });
+        if (modRes.ok) setModalidades(await modRes.json());
 
         let evRes;
         if (perfilRes.success && perfilRes.data.id) {
@@ -60,13 +64,16 @@ export default function ParticipanteEventosPage() {
             <p className="text-gray-400 col-span-full text-center">Nenhum evento disponível no momento.</p>
           ) : (
             eventos.map((ev: any) => {
-              const ehPago = ev.valorInscricao != null && Number(ev.valorInscricao) > 0;
+              const modalidadesDoEvento = modalidades.filter((m) => m.eventoId === ev.id);
+              const rotuloPreco = resumoPrecoModalidades(modalidadesDoEvento);
+              const semModalidade = rotuloPreco === 'Sem modalidade configurada';
+              const gratuito = rotuloPreco === 'Gratuito';
               return (
               <GlassCard key={ev.id} className="p-6 bg-slate-800/80 border border-white/10 flex flex-col">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h2 className="text-xl font-bold text-white">{ev.titulo}</h2>
-                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${ehPago ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' : 'bg-green-500/20 text-green-400 border-green-500/50'}`}>
-                    {ehPago ? formatarBRL(ev.valorInscricao) : 'Gratuito'}
+                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${semModalidade ? 'bg-gray-500/20 text-gray-400 border-gray-500/50' : gratuito ? 'bg-green-500/20 text-green-400 border-green-500/50' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'}`}>
+                    {rotuloPreco}
                   </span>
                 </div>
                 <div className="text-sm text-gray-300 mb-6 space-y-1.5 bg-slate-900/40 p-3 rounded-lg border border-white/5">

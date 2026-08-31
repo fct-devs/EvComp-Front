@@ -3,17 +3,23 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
-export const Button = ({ children, variant = 'primary', className = '', ...props }: any) => {
+export const Button = ({ children, variant = 'primary', className = '', disabled, ...props }: any) => {
   const baseStyle = "px-6 py-2 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2";
+
   const variants = {
     primary: "bg-brand-accent text-black hover:bg-yellow-400 shadow-md",
     secondary: "bg-transparent border border-white/50 text-white hover:bg-white/10",
     danger: "bg-red-600 text-white hover:bg-red-500",
     glass: "glass text-white hover:bg-white/10"
   };
+  const disabledStyle = "opacity-50 cursor-not-allowed grayscale pointer-events-none";
 
   return (
-    <button className={`${baseStyle} ${variants[variant as keyof typeof variants]} ${className}`} {...props}>
+    <button
+      className={`${baseStyle} ${variants[variant as keyof typeof variants]} ${disabled ? disabledStyle : ''} ${className}`}
+      disabled={disabled}
+      {...props}
+    >
       {children}
     </button>
   );
