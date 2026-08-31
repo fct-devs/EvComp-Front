@@ -21,6 +21,8 @@ export default function InscricaoEventoPage() {
   const [modalidadeId, setModalidadeId] = useState<number | null>(null);
   const [selecionadas, setSelecionadas] = useState<Set<number>>(new Set());
   const [idsOriginais, setIdsOriginais] = useState<number[]>([]);
+  const [pagamentoAprovado, setPagamentoAprovado] = useState(false);
+  const [pagamentoInfo, setPagamentoInfo] = useState<{ status: string; temComprovante: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -78,6 +80,21 @@ export default function InscricaoEventoPage() {
             const idsAtuais = (inscricaoDoEvento.atividade || []).map((atv: any) => atv.id);
             setSelecionadas(new Set(idsAtuais));
             setIdsOriginais(idsAtuais);
+            if (inscricaoDoEvento.modalidade?.id) {
+              setModalidadeId(inscricaoDoEvento.modalidade.id);
+            }
+            setPagamentoAprovado(Boolean(inscricaoDoEvento.status));
+
+            try {
+              const pagRes = await fetch(`/api/pagamentos/minha/${inscricaoDoEvento.id}`, { credentials: 'include' });
+              if (pagRes.ok) {
+                const pagData = await pagRes.json();
+                setPagamentoInfo({
+                  status: pagData.status,
+                  temComprovante: Boolean(pagData.temComprovante)
+                });
+              }
+            } catch (e) {}
           }
         }
         
@@ -133,24 +150,27 @@ export default function InscricaoEventoPage() {
         }
       }
 
-    const res = modoEdicao
-      ? await fetch(`/api/inscricoes/${inscricaoId}`, { 
-          credentials: 'include',
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ atividadeIds: atividadesArray })
-        })
-      : await fetch('/api/inscricoes', { 
-          credentials: 'include',
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            participanteId: participanteId,
-            eventoId: parseInt(String(eventoId)),
-            atividadeIds: atividadesArray,
-            modalidadeId: modalidadeId
+      const res = modoEdicao
+        ? await fetch(`/api/inscricoes/${inscricaoId}`, { 
+            credentials: 'include',
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              atividadeIds: atividadesArray,
+              modalidadeId: modalidadeId
+            })
           })
-        });
+        : await fetch('/api/inscricoes', { 
+            credentials: 'include',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              participanteId: participanteId,
+              eventoId: parseInt(String(eventoId)),
+              atividadeIds: atividadesArray,
+              modalidadeId: modalidadeId
+            })
+          });
 
       const data = await res.json();
 
@@ -205,6 +225,87 @@ export default function InscricaoEventoPage() {
     if (b === 'Data a definir') return -1;
     return a.localeCompare(b);
   });
+
+  const isAprovado = pagamentoAprovado || pagamentoInfo?.status === 'APROVADO';
+  const isSobAnalise = pagamentoInfo?.status === 'PENDENTE' && Boolean(pagamentoInfo?.temComprovante);
+  const isRecusado = pagamentoInfo?.status === 'RECUSADO';
+  const modalidadeBloqueada = modoEdicao && (isAprovado || isSobAnalise);
+
+  if (sucesso) {
+    const modalidadeSelecionada = modalidades.find((m) => m.id === modalidadeId) || null;
+    const ehPago = modalidadeSelecionada && Number(modalidadeSelecionada.valor) > 0;
+
+    return (
+      <div className="min-h-screen bg-brand-dark flex flex-col relative overflow-hidden">
+        <Navbar role="PARTICIPANTE" />
+
+        <main className="flex-1 w-full max-w-2xl mx-auto py-16 px-6 relative z-10 flex items-center justify-center">
+          <GlassCard className="w-full p-8 md:p-12 text-center space-y-6 animate-in fade-in zoom-in duration-300 bg-slate-800/90 border-white/10 shadow-2xl">
+            <div className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+              <Check size={44} strokeWidth={3} />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-3xl font-extrabold text-white">
+                {modoEdicao ? 'Grade Atualizada com Sucesso!' : 'Inscrição Confirmada!'}
+              </h2>
+              <p className="text-gray-300 text-base max-w-md mx-auto">
+                {modoEdicao
+                  ? 'As alterações na sua grade foram salvas com sucesso no sistema.'
+                  : 'Sua inscrição foi registrada com sucesso no evento.'}
+              </p>
+            </div>
+
+            <div className="bg-slate-900/60 border border-white/10 rounded-xl p-5 text-left space-y-3">
+              <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                <span className="text-gray-400 font-medium">Evento:</span>
+                <span className="text-white font-bold text-right">{evento?.titulo || 'Evento'}</span>
+              </div>
+              {modalidadeSelecionada && (
+                <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                  <span className="text-gray-400 font-medium">Modalidade / Kit:</span>
+                  <span className="text-brand-accent font-bold">
+                    {modalidadeSelecionada.nome} ({Number(modalidadeSelecionada.valor) > 0 ? formatarBRL(modalidadeSelecionada.valor) : 'Gratuito'})
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-400 font-medium">Atividades Selecionadas:</span>
+                <span className="text-emerald-400 font-bold">{selecionadas.size} atividade(s)</span>
+              </div>
+            </div>
+
+            {ehPago && (
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-sm text-yellow-200 text-left flex items-start gap-3">
+                <Info size={20} className="text-yellow-400 shrink-0 mt-0.5" />
+                <p>
+                  Como este evento é pago, acesse a aba <strong>Pagamentos</strong> para efetuar o PIX e enviar o seu comprovante para validação.
+                </p>
+              </div>
+            )}
+
+            <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
+              {ehPago && (
+                <Button
+                  onClick={() => router.push('/dashboard/pagamentos')}
+                  className="w-full sm:w-auto bg-brand-accent hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-brand-accent/20"
+                >
+                  Ir para Pagamentos
+                </Button>
+              )}
+              <Button
+                variant={ehPago ? 'secondary' : 'primary'}
+                onClick={() => router.push('/dashboard/minhas-inscricoes')}
+                className="w-full sm:w-auto font-bold py-3 px-8 rounded-full"
+              >
+                Ver Minhas Inscrições
+              </Button>
+            </div>
+          </GlassCard>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-dark flex flex-col relative overflow-hidden">
@@ -261,6 +362,42 @@ export default function InscricaoEventoPage() {
                 </div>
               </div>
 
+              {modoEdicao && isAprovado && (
+                <div className="p-3.5 mb-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-sm text-emerald-300 flex items-start gap-2.5">
+                  <Check size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-emerald-200">Modalidade confirmada:</strong> O pagamento desta inscrição já foi aprovado e seu kit está garantido. Não é possível alterar a modalidade.
+                  </div>
+                </div>
+              )}
+
+              {modoEdicao && isSobAnalise && (
+                <div className="p-3.5 mb-4 bg-blue-500/10 border border-blue-500/30 rounded-lg text-sm text-blue-200 flex items-start gap-2.5">
+                  <Info size={18} className="text-blue-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-blue-100">Comprovante em análise:</strong> Você já enviou um comprovante de pagamento que está sendo avaliado pela organização. A modalidade de inscrição está bloqueada até a conclusão da conferência.
+                  </div>
+                </div>
+              )}
+
+              {modoEdicao && isRecusado && (
+                <div className="p-3.5 mb-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-sm text-amber-200 flex items-start gap-2.5">
+                  <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-amber-100">Comprovante anterior recusado:</strong> Você pode alterar a sua modalidade de inscrição agora. Ao salvar, envie o novo comprovante correspondente na aba <strong>Pagamentos</strong>.
+                  </div>
+                </div>
+              )}
+
+              {modoEdicao && !isAprovado && !isSobAnalise && !isRecusado && modalidades.length > 1 && (
+                <div className="p-3.5 mb-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-sm text-amber-200 flex items-start gap-2.5">
+                  <Info size={18} className="text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-amber-100">Edição de modalidade permitida:</strong> Como você ainda não enviou um comprovante, pode alterar sua modalidade livremente antes de realizar o pagamento.
+                  </div>
+                </div>
+              )}
+
               {modalidades.length === 1 && (
                 <div className="p-3 mb-4 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-gray-200">
                   <strong className="text-white">Modalidade de inscrição:</strong> {modalidades[0].nome} — {Number(modalidades[0].valor) > 0 ? formatarBRL(modalidades[0].valor) : 'Gratuito'}
@@ -269,28 +406,38 @@ export default function InscricaoEventoPage() {
 
               {modalidades.length > 1 && (
                 <div className="mb-4">
-                  <h4 className="text-sm font-bold text-white mb-2">Escolha sua modalidade de inscrição</h4>
+                  <h4 className="text-sm font-bold text-white mb-2">
+                    {modoEdicao ? 'Modalidade de inscrição' : 'Escolha sua modalidade de inscrição'}
+                  </h4>
                   <div className="space-y-2">
-                    {modalidades.filter((m) => m.ativo).map((m) => (
-                      <label key={m.id} className={`flex items-center justify-between gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${modalidadeId === m.id ? 'border-brand-accent bg-brand-accent/10' : 'border-white/10 bg-slate-900/40 hover:border-white/30'}`}>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            name="modalidade"
-                            checked={modalidadeId === m.id}
-                            onChange={() => setModalidadeId(m.id)}
-                            className="w-4 h-4"
-                          />
-                          <div>
-                            <span className="text-white font-medium text-sm">{m.nome}</span>
-                            {m.descricao && <p className="text-xs text-gray-400">{m.descricao}</p>}
+                    {modalidades.filter((m) => m.ativo).map((m) => {
+                      return (
+                        <label 
+                          key={m.id} 
+                          className={`flex items-center justify-between gap-3 p-3 rounded-lg border transition-colors ${
+                            modalidadeBloqueada ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
+                          } ${modalidadeId === m.id ? 'border-brand-accent bg-brand-accent/10' : 'border-white/10 bg-slate-900/40 hover:border-white/30'}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="modalidade"
+                              checked={modalidadeId === m.id}
+                              disabled={modalidadeBloqueada}
+                              onChange={() => setModalidadeId(m.id)}
+                              className="w-4 h-4"
+                            />
+                            <div>
+                              <span className="text-white font-medium text-sm">{m.nome}</span>
+                              {m.descricao && <p className="text-xs text-gray-400">{m.descricao}</p>}
+                            </div>
                           </div>
-                        </div>
-                        <span className="text-sm font-bold text-brand-accent whitespace-nowrap">
-                          {Number(m.valor) > 0 ? formatarBRL(m.valor) : 'Gratuito'}
-                        </span>
-                      </label>
-                    ))}
+                          <span className="text-sm font-bold text-brand-accent whitespace-nowrap">
+                            {Number(m.valor) > 0 ? formatarBRL(m.valor) : 'Gratuito'}
+                          </span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -317,20 +464,7 @@ export default function InscricaoEventoPage() {
           
           {error && <div className="p-4 mb-6 bg-red-500/20 border border-red-500/50 text-red-200 rounded-lg">{error}</div>}
           
-          {sucesso ? (
-            <div className="text-center py-12 space-y-4 animate-in fade-in slide-in-from-bottom-4">
-              <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
-                <Check size={40} strokeWidth={3} />
-              </div>
-              <h3 className="text-2xl font-bold text-white">{modoEdicao ? 'Grade Atualizada!' : 'Grade Confirmada!'}</h3>
-              <p className="text-gray-400 text-lg">
-                {modoEdicao ? 'Sua inscrição nas atividades foi atualizada com sucesso.' : 'Sua inscrição nas atividades foi realizada com sucesso.'}
-              </p>
-              <div className="pt-6">
-                <Button onClick={() => router.push('/dashboard/minhas-inscricoes')}>Ver Meus Ingressos</Button>
-              </div>
-            </div>
-          ) : modalidades.length === 0 ? (
+          {modalidades.length === 0 ? (
             <div className="text-center py-12 space-y-4">
               <div className="w-20 h-20 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-orange-500/50">
                 <AlertTriangle size={40} />
@@ -442,9 +576,9 @@ export default function InscricaoEventoPage() {
                   <Info className="w-6 h-6 text-brand-accent shrink-0 mt-0.5" />
                   <p className="text-sm text-gray-300 leading-relaxed">
                     {modoEdicao ? (
-                      <><strong className="text-white">Atualize sua grade:</strong> Revise os horários selecionados e salve para aplicar as alterações na sua inscrição.</>
+                      <><strong className="text-white">Atualize sua grade:</strong> Revise as atividades selecionadas e salve para aplicar as alterações na sua inscrição (permitido apenas enquanto o período de inscrições estiver aberto).</>
                     ) : (
-                      <><strong className="text-white">Confirme sua grade:</strong> Revise os horários selecionados. Após confirmar a inscrição, as atividades não poderão ser alteradas pelo painel.</>
+                      <><strong className="text-white">Confirme sua grade:</strong> Revise as atividades selecionadas e confirme sua inscrição (você poderá alterar sua grade e modalidade enquanto o período de inscrições estiver aberto).</>
                     )}
                   </p>
                 </div>
