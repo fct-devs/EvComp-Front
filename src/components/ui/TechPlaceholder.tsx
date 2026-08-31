@@ -9,15 +9,13 @@ export const TechPlaceholder = () => (
       style={{ backgroundImage: 'radial-gradient(#FCBF38 1px, transparent 1px)', backgroundSize: '30px 30px' }}
     ></div>
     
-    <div className="z-10 flex flex-col items-center space-y-8">
-      <img 
-        src="/bannerSecompp3semFundoBranco.png" 
-        alt="Logotipo Oficial SECOMPP 26" 
-        className="w-auto h-40 md:h-48 drop-shadow-2xl"
-      />
+    <div className="z-10 flex flex-col items-center space-y-4">
+      <div className="text-5xl md:text-6xl font-black tracking-tight text-white drop-shadow-2xl">
+        Ev<span className="text-brand-accent">Comp</span>
+      </div>
       
-      <p className="text-lg text-gray-300 max-w-md font-light mx-auto">
-        23ª Semana do Curso de Ciência da Computação da FCT-Unesp
+      <p className="text-base md:text-lg text-gray-300 max-w-md font-light mx-auto leading-relaxed">
+        Sistema de Gestão de Eventos Acadêmicos da FCT-UNESP
       </p>
     </div>
   </div>

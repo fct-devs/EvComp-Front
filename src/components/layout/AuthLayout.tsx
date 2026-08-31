@@ -10,12 +10,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       
       <div className="w-full md:w-1/2 lg:w-2/5 flex-1 flex flex-col justify-center px-6 sm:px-12 lg:px-24 py-12 relative min-h-[100dvh] md:min-h-0">
         
-        <div className="absolute top-6 left-6 md:top-8 md:right-8 md:left-auto flex items-center opacity-80 hover:opacity-100 transition-opacity z-20">
-          <img 
-            src="/bannerSecompp3semFundoBranco.png" 
-            alt="SECOMPP 26" 
-            className="w-auto h-34 md:h-36"
-          />
+        <div className="absolute top-6 left-6 md:top-8 md:right-8 md:left-auto flex items-center z-20">
+          <span className="text-2xl font-black tracking-tight text-white">
+            Ev<span className="text-brand-accent">Comp</span>
+          </span>
         </div>
         
         {children}

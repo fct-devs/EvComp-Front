@@ -77,12 +77,10 @@ export const Navbar = ({ role = 'PARTICIPANTE' }: { role?: 'PARTICIPANTE' | 'COL
       <div className="flex items-center justify-between px-6 lg:px-12 h-20 max-w-[1400px] mx-auto">
         
         <div className="flex items-center">
-          <Link href={displayRole === 'ADMIN' ? '/admin' : '/dashboard'}>
-            <img 
-              src="/bannerSecompp3semFundoBranco.png" 
-              alt="SECOMPP 26" 
-              className="h-26 md:h-28 w-auto hover:opacity-90 transition-opacity"
-            />
+          <Link href={displayRole === 'ADMIN' ? '/admin' : '/dashboard'} className="flex items-center gap-1 group">
+            <span className="text-2xl font-black tracking-tight text-white group-hover:opacity-90 transition-opacity">
+              Ev<span className="text-brand-accent">Comp</span>
+            </span>
           </Link>
         </div>
 
