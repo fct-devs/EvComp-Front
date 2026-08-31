@@ -176,7 +176,13 @@ export default function PagamentosPage() {
 
                   {pagamento.status !== 'ISENTO' && (
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        {pagamento.modalidadeNome && (
+                          <div>
+                            <p className="text-xs text-gray-400 mb-1">Modalidade</p>
+                            <p className="text-white font-semibold text-lg">{pagamento.modalidadeNome}</p>
+                          </div>
+                        )}
                         <div>
                           <p className="text-xs text-gray-400 mb-1">Valor da inscrição</p>
                           <p className="text-white font-semibold text-lg">{formatarBRL(pagamento.valorInscricao)}</p>

@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../../../components/ui/Navbar';
-import { GlassCard, Button } from '../../../components/ui/Core';
+import { GlassCard, Button, InputField } from '../../../components/ui/Core';
 import { formatarBRL } from '../../../utils/formatadores';
+import { ModalidadeInscricao, resumoPrecoModalidades } from '../../../utils/modalidade';
 
 
 export default function AdminEventosPage() {
   const [eventos, setEventos] = useState<any[]>([]);
   const [atividades, setAtividades] = useState<any[]>([]);
+  const [modalidades, setModalidades] = useState<ModalidadeInscricao[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedEvento, setExpandedEvento] = useState<number | null>(null);
   const [expandedAtividade, setExpandedAtividade] = useState<number | null>(null);
@@ -18,7 +20,11 @@ export default function AdminEventosPage() {
   const [modalMode, setModalMode] = useState<'PRIMARY' | 'SECONDARY'>('PRIMARY');
   const [atividadeToExcluir, setAtividadeToExcluir] = useState<number | null>(null);
   const [success, setSuccess] = useState('');
-  
+
+  const [modalidadeForm, setModalidadeForm] = useState<{ eventoId: number; modalidade?: ModalidadeInscricao } | null>(null);
+  const [modalidadeFormError, setModalidadeFormError] = useState('');
+  const [salvandoModalidade, setSalvandoModalidade] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchError, setSearchError] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -26,18 +32,23 @@ export default function AdminEventosPage() {
   const fetchTodosEventosEAtividades = async () => {
     setLoading(true);
     try {
-      const [resEventos, resAtividades] = await Promise.all([
+      const [resEventos, resAtividades, resModalidades] = await Promise.all([
         fetch('/api/eventos', { credentials: 'include' }),
-        fetch('/api/atividades', { credentials: 'include' })
+        fetch('/api/atividades', { credentials: 'include' }),
+        fetch('/api/modalidades', { credentials: 'include' })
       ]);
       const dataEventos = await resEventos.json();
       const dataAtividades = await resAtividades.json();
-      
+      const dataModalidades = await resModalidades.json();
+
       if (Array.isArray(dataEventos)) setEventos(dataEventos);
       else setEventos([]);
-      
+
       if (Array.isArray(dataAtividades)) setAtividades(dataAtividades);
       else setAtividades([]);
+
+      if (Array.isArray(dataModalidades)) setModalidades(dataModalidades);
+      else setModalidades([]);
     } catch (err) {
       console.error('Erro ao buscar dados:', err);
     } finally {
@@ -138,6 +149,74 @@ export default function AdminEventosPage() {
     return atividades.filter(a => a.evento && String(a.evento.id) === String(eventoId));
   };
 
+  const getModalidadesDoEvento = (eventoId: number) => {
+    return modalidades.filter(m => m.eventoId === eventoId);
+  };
+
+  const abrirFormModalidade = (eventoId: number, modalidade?: ModalidadeInscricao) => {
+    setModalidadeFormError('');
+    setModalidadeForm({ eventoId, modalidade });
+  };
+
+  const handleSalvarModalidade = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!modalidadeForm) return;
+    setSalvandoModalidade(true);
+    setModalidadeFormError('');
+
+    const formData = new FormData(e.currentTarget);
+    const payload = {
+      nome: formData.get('nome'),
+      descricao: (formData.get('descricao') as string) || null,
+      valor: Number(formData.get('valor')),
+      ativo: formData.get('ativo') === 'on'
+    };
+
+    try {
+      const editando = !!modalidadeForm.modalidade;
+      const url = editando
+        ? `/api/eventos/${modalidadeForm.eventoId}/modalidades/${modalidadeForm.modalidade!.id}`
+        : `/api/eventos/${modalidadeForm.eventoId}/modalidades`;
+      const res = await fetch(url, {
+        credentials: 'include',
+        method: editando ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setModalidadeFormError(data.error || 'Erro ao salvar modalidade.');
+        return;
+      }
+
+      setModalidades(prev => {
+        const existe = prev.some(m => m.id === data.id);
+        return existe ? prev.map(m => (m.id === data.id ? data : m)) : [...prev, data];
+      });
+      setModalidadeForm(null);
+    } catch (err) {
+      setModalidadeFormError('Erro de conexão ao salvar modalidade.');
+    } finally {
+      setSalvandoModalidade(false);
+    }
+  };
+
+  const handleExcluirModalidade = async (eventoId: number, modalidadeId: number) => {
+    if (!confirm('Tem certeza que deseja excluir esta modalidade?')) return;
+    try {
+      const res = await fetch(`/api/eventos/${eventoId}/modalidades/${modalidadeId}`, { credentials: 'include', method: 'DELETE' });
+      if (res.ok) {
+        setModalidades(prev => prev.filter(m => m.id !== modalidadeId));
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao excluir modalidade.');
+      }
+    } catch (err) {
+      alert('Erro de conexão ao tentar excluir a modalidade.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-brand-dark flex flex-col relative overflow-hidden">
       <Navbar role="ADMIN" />
@@ -192,6 +271,7 @@ export default function AdminEventosPage() {
             eventos.map((ev: any) => {
               const isExpanded = expandedEvento === ev.id;
               const atvs = getAtividadesDoEvento(ev.id);
+              const modalidadesDoEvento = getModalidadesDoEvento(ev.id);
 
               return (
                 <GlassCard key={ev.id} className="p-0 bg-slate-800/80 border border-white/10 overflow-hidden transition-all duration-300">
@@ -239,11 +319,7 @@ export default function AdminEventosPage() {
                             <li><strong>Contabilização:</strong> {ev.tipoContabilizacao === 'POR_ATIVIDADE' ? 'Por Atividade' : 'Por Carga Total'}</li>
                             <li>
                               <strong>Inscrição:</strong>{' '}
-                              {ev.valorInscricao != null && Number(ev.valorInscricao) > 0 ? (
-                                <span className="text-yellow-400 font-semibold">{formatarBRL(ev.valorInscricao)}</span>
-                              ) : (
-                                <span className="text-green-400 font-semibold">Gratuita</span>
-                              )}
+                              <span className="text-yellow-400 font-semibold">{resumoPrecoModalidades(modalidadesDoEvento)}</span>
                             </li>
                             {ev.chavePix && (
                               <li><strong>Chave PIX:</strong> <code className="bg-slate-900/60 px-1.5 py-0.5 rounded text-xs">{ev.chavePix}</code></li>
@@ -262,6 +338,37 @@ export default function AdminEventosPage() {
                             </li>
                           </ul>
                         </div>
+                      </div>
+
+                      <div className="mb-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-md font-bold text-brand-accent">Modalidades de Inscrição</h4>
+                          <Button className="text-xs py-1 px-3" onClick={() => abrirFormModalidade(ev.id)}>Nova Modalidade</Button>
+                        </div>
+                        {modalidadesDoEvento.length === 0 ? (
+                          <div className="bg-orange-500/10 border border-orange-500/30 rounded-md p-4 text-sm text-orange-200">
+                            Nenhuma modalidade cadastrada. As inscrições pagas para este evento ficam bloqueadas até que
+                            ao menos uma modalidade ativa exista.
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {modalidadesDoEvento.map((m) => (
+                              <div key={m.id} className="flex items-center justify-between bg-slate-800/50 border border-white/5 rounded-lg p-3">
+                                <div>
+                                  <span className="font-medium text-white text-sm">{m.nome}</span>
+                                  <span className={`ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full border ${m.ativo ? 'bg-green-500/20 text-green-400 border-green-500/50' : 'bg-gray-500/20 text-gray-400 border-gray-500/50'}`}>
+                                    {m.ativo ? 'ATIVA' : 'INATIVA'}
+                                  </span>
+                                  <p className="text-xs text-gray-400 mt-1">{formatarBRL(m.valor)}{m.descricao ? ` — ${m.descricao}` : ''}</p>
+                                </div>
+                                <div className="space-x-2">
+                                  <Button variant="secondary" className="text-xs py-1 px-3" onClick={() => abrirFormModalidade(ev.id, m)}>Editar</Button>
+                                  <Button variant="danger" className="text-xs py-1 px-3" onClick={() => handleExcluirModalidade(ev.id, m.id)}>Excluir</Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       <div className="mb-6">
@@ -406,6 +513,37 @@ export default function AdminEventosPage() {
                 {modalMode === 'PRIMARY' ? 'Sim, Excluir' : 'Forçar Exclusão'}
               </Button>
             </div>
+          </GlassCard>
+        </div>
+      )}
+
+      {modalidadeForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <GlassCard className="max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-bold text-white mb-4">
+              {modalidadeForm.modalidade ? 'Editar Modalidade' : 'Nova Modalidade'}
+            </h3>
+            <form onSubmit={handleSalvarModalidade}>
+              {modalidadeFormError && (
+                <div className="p-3 mb-4 bg-red-500/20 border border-red-500 text-red-200 rounded-md text-sm">{modalidadeFormError}</div>
+              )}
+              <InputField label="Nome" id="nome" type="text" defaultValue={modalidadeForm.modalidade?.nome} required />
+              <div className="flex flex-col space-y-1 mb-4">
+                <label htmlFor="descricao" className="text-sm font-medium text-gray-300">Descrição (opcional)</label>
+                <textarea id="descricao" name="descricao" rows={3} defaultValue={modalidadeForm.modalidade?.descricao || ''} className="w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"></textarea>
+              </div>
+              <InputField label="Valor" id="valor" type="number" step="0.01" min="0" defaultValue={modalidadeForm.modalidade?.valor ?? 0} required />
+              <div className="flex items-center gap-2 mb-6">
+                <input id="ativo" name="ativo" type="checkbox" defaultChecked={modalidadeForm.modalidade ? modalidadeForm.modalidade.ativo : true} className="w-4 h-4" />
+                <label htmlFor="ativo" className="text-sm font-medium text-gray-300">Ativa</label>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button type="button" variant="secondary" onClick={() => setModalidadeForm(null)}>Cancelar</Button>
+                <Button type="submit" disabled={salvandoModalidade}>
+                  {salvandoModalidade ? 'Salvando...' : 'Salvar'}
+                </Button>
+              </div>
+            </form>
           </GlassCard>
         </div>
       )}

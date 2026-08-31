@@ -6,8 +6,10 @@ import { Navbar } from '../../../components/ui/Navbar';
 import { GlassCard, Button } from '../../../components/ui/Core';
 import dynamic from 'next/dynamic';
 import { buscarPerfilUsuario } from '../../actions/auth';
+import { formatarBRL } from '../../../utils/formatadores';
 import { periodoInscricaoAtivo } from '../../../utils/validation';
 import { Calendar, Clock, MapPin, CheckCircle, XCircle, QrCode, Info, X, Pencil } from 'lucide-react';
+
 
 const QRCodeModal = dynamic(() => import('../../../components/ui/QRCodeModal').then(mod => mod.QRCodeModal), { ssr: false });
 
@@ -31,6 +33,8 @@ interface Inscricao {
   evento?: { id: number; titulo: string; dataInicioInscricao?: string; dataFimInscricao?: string };
   participante?: { id: number; secretSeed?: string };
   atividade?: Atividade[];
+  modalidade?: { id: number; nome: string; descricao: string | null; valor: number; ativo: boolean } | null;
+  valorAplicado?: number;
 }
 
 function CardAtividade({
@@ -257,6 +261,11 @@ export default function MinhasInscricoesPage() {
                   <div className="glass-panel p-6 rounded-t-2xl border-b-0 flex flex-col md:flex-row justify-between items-start md:items-center">
                     <div>
                       <h2 className="text-2xl font-bold text-brand-accent">{inscricao.evento?.titulo || 'Evento'}</h2>
+                      {inscricao.modalidade && (
+                        <p className="text-xs text-brand-accent mt-1">
+                          {inscricao.modalidade.nome} — {formatarBRL(inscricao.valorAplicado)}
+                        </p>
+                      )}
                       <p className="text-xs text-gray-400 mt-1 uppercase tracking-wide">
                         Inscrito em: {new Date(inscricao.dataInscricao).toLocaleDateString('pt-BR')}
                       </p>

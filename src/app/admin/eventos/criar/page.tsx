@@ -12,7 +12,7 @@ export default function CriarEventoPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, dataInicioInscricao: string, dataFimInscricao: string, descricao: string, link: string, tipo: string, valorInscricao: string) => {
+  const validarDadosEvento = (titulo: string, dataInicio: string, dataTermino: string, dataInicioInscricao: string, dataFimInscricao: string, descricao: string, link: string, tipo: string) => {
     if (!titulo || !dataInicio || !dataTermino || !dataInicioInscricao || !dataFimInscricao || !descricao || !tipo) {
       return 'Campos obrigatórios ausentes.';
     }
@@ -21,9 +21,6 @@ export default function CriarEventoPage() {
     }
     if (new Date(dataFimInscricao) < new Date(dataInicioInscricao)) {
       return 'Data de término das inscrições não pode ser anterior à data de início das inscrições.';
-    }
-    if (valorInscricao && Number(valorInscricao) < 0) {
-      return 'O valor da inscrição não pode ser negativo.';
     }
     return null;
   };
@@ -35,7 +32,6 @@ export default function CriarEventoPage() {
     setSuccess('');
 
     const formData = new FormData(e.currentTarget);
-    const valorInscricaoRaw = (formData.get('valorInscricao') as string) || '';
     const chavePixRaw = ((formData.get('chavePix') as string) || '').trim();
     const payload = {
       titulo: formData.get('titulo'),
@@ -46,8 +42,7 @@ export default function CriarEventoPage() {
       descricao: formData.get('descricao'),
       link: formData.get('link'),
       tipoContabilizacao: formData.get('tipoContabilizacao') || 'POR_ATIVIDADE',
-      chavePix: chavePixRaw || null,
-      valorInscricao: valorInscricaoRaw ? Number(valorInscricaoRaw) : null
+      chavePix: chavePixRaw || null
     };
 
     const erroValidacao = validarDadosEvento(
@@ -58,8 +53,7 @@ export default function CriarEventoPage() {
       payload.dataFimInscricao as string,
       payload.descricao as string,
       payload.link as string,
-      payload.tipoContabilizacao as string,
-      valorInscricaoRaw
+      payload.tipoContabilizacao as string
     );
 
     if (erroValidacao) {
@@ -126,11 +120,8 @@ export default function CriarEventoPage() {
 
             <InputField label="Link (opcional)" id="link" type="url" />
 
-            <div className="grid grid-cols-2 gap-4">
-              <InputField label="Chave PIX (opcional)" id="chavePix" type="text" placeholder="Deixe em branco para evento gratuito" />
-              <InputField label="Valor da Inscrição (opcional)" id="valorInscricao" type="number" step="0.01" min="0" placeholder="0,00" />
-            </div>
-            <p className="text-xs text-gray-500 -mt-3 mb-4">Sem valor de inscrição (vazio ou zero), o evento é gratuito e a inscrição já nasce isenta de pagamento.</p>
+            <InputField label="Chave PIX (opcional)" id="chavePix" type="text" placeholder="Deixe em branco para evento gratuito" />
+            <p className="text-xs text-gray-500 -mt-3 mb-4">A chave PIX é usada para receber o pagamento das modalidades pagas deste evento. Cadastre as modalidades de inscrição depois de criar o evento.</p>
 
             <div className="flex flex-col space-y-1 mb-4">
               <div className="flex items-center gap-2">

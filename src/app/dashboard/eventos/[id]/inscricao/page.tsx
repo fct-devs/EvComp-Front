@@ -7,6 +7,7 @@ import { GlassCard, Button } from '../../../../../components/ui/Core';
 import { buscarPerfilUsuario } from '../../../../actions/auth';
 import { verificarConflitos } from '../../../../../utils/validation';
 import { formatarBRL } from '../../../../../utils/formatadores';
+import { ModalidadeInscricao } from '../../../../../utils/modalidade';
 import { Calendar, Clock, MapPin, Check, Plus, AlertTriangle, Info, XCircle } from 'lucide-react';
 
 export default function InscricaoEventoPage() {
@@ -16,6 +17,8 @@ export default function InscricaoEventoPage() {
 
   const [evento, setEvento] = useState<any>(null);
   const [atividades, setAtividades] = useState<any[]>([]);
+  const [modalidades, setModalidades] = useState<ModalidadeInscricao[]>([]);
+  const [modalidadeId, setModalidadeId] = useState<number | null>(null);
   const [selecionadas, setSelecionadas] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -24,6 +27,7 @@ export default function InscricaoEventoPage() {
   const [participanteId, setParticipanteId] = useState<number | null>(null);
   const [inscricaoId, setInscricaoId] = useState<number | null>(null);
   const [modalAtividade, setModalAtividade] = useState<any>(null);
+  const [modalResumo, setModalResumo] = useState(false);
 
   const modoEdicao = inscricaoId !== null;
 
@@ -42,7 +46,9 @@ export default function InscricaoEventoPage() {
         if (res.ok) {
           const data = await res.json();
           setEvento(data.dadosEvento);
-          
+          setModalidades(data.modalidades || []);
+          if ((data.modalidades || []).length === 1) setModalidadeId(data.modalidades[0].id);
+
           const atividadesComVagas = await Promise.all(
             (data.atividades || []).map(async (atv: any) => {
               try {
@@ -121,21 +127,25 @@ export default function InscricaoEventoPage() {
         }
       }
 
-      const res = modoEdicao
-        ? await fetch(`/api/inscricoes/${inscricaoId}`, { credentials: 'include',
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ atividadeIds: atividadesArray })
+    const res = modoEdicao
+      ? await fetch(`/api/inscricoes/${inscricaoId}`, { 
+          credentials: 'include',
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ atividadeIds: atividadesArray })
+        })
+      : await fetch('/api/inscricoes', { 
+          credentials: 'include',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            participanteId: participanteId,
+            eventoId: parseInt(String(eventoId)),
+            atividadeIds: atividadesArray,
+            modalidadeId: modalidadeId
           })
-        : await fetch('/api/inscricoes', { credentials: 'include', 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              participanteId: participanteId,
-              eventoId: parseInt(String(eventoId)),
-              atividadeIds: atividadesArray
-            })
-          });
+        });
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -144,6 +154,7 @@ export default function InscricaoEventoPage() {
       }
 
       setSucesso(true);
+      setModalResumo(false);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -200,13 +211,25 @@ export default function InscricaoEventoPage() {
         </div>
 
         {evento && (() => {
-          const ehPago = evento.valorInscricao != null && Number(evento.valorInscricao) > 0;
+          const modalidadeSelecionada = modalidades.find((m) => m.id === modalidadeId) || null;
+          const rotuloBadge = modalidades.length === 0
+            ? 'Sem modalidade configurada'
+            : modalidadeSelecionada
+              ? (Number(modalidadeSelecionada.valor) > 0 ? formatarBRL(modalidadeSelecionada.valor) : 'Gratuito')
+              : 'Selecione uma modalidade';
+          const ehPago = !!modalidadeSelecionada && Number(modalidadeSelecionada.valor) > 0;
+          const badgeClasse = modalidades.length === 0
+            ? 'bg-gray-500/20 text-gray-400 border-gray-500/50'
+            : ehPago
+              ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
+              : 'bg-green-500/20 text-green-400 border-green-500/50';
+
           return (
             <GlassCard className="p-8 bg-slate-800/80 border border-white/10 mb-8">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <h2 className="text-2xl font-bold text-brand-accent">{evento.titulo}</h2>
-                <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap ${ehPago ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50' : 'bg-green-500/20 text-green-400 border-green-500/50'}`}>
-                  {ehPago ? formatarBRL(evento.valorInscricao) : 'Gratuito'}
+                <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap ${badgeClasse}`}>
+                  {rotuloBadge}
                 </span>
               </div>
               <p className="text-gray-300 mb-4">{evento.descricao}</p>
@@ -231,6 +254,40 @@ export default function InscricaoEventoPage() {
                   </span>
                 </div>
               </div>
+
+              {modalidades.length === 1 && (
+                <div className="p-3 mb-4 bg-slate-900/60 border border-white/10 rounded-lg text-sm text-gray-200">
+                  <strong className="text-white">Modalidade de inscrição:</strong> {modalidades[0].nome} — {Number(modalidades[0].valor) > 0 ? formatarBRL(modalidades[0].valor) : 'Gratuito'}
+                </div>
+              )}
+
+              {modalidades.length > 1 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-bold text-white mb-2">Escolha sua modalidade de inscrição</h4>
+                  <div className="space-y-2">
+                    {modalidades.filter((m) => m.ativo).map((m) => (
+                      <label key={m.id} className={`flex items-center justify-between gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${modalidadeId === m.id ? 'border-brand-accent bg-brand-accent/10' : 'border-white/10 bg-slate-900/40 hover:border-white/30'}`}>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="modalidade"
+                            checked={modalidadeId === m.id}
+                            onChange={() => setModalidadeId(m.id)}
+                            className="w-4 h-4"
+                          />
+                          <div>
+                            <span className="text-white font-medium text-sm">{m.nome}</span>
+                            {m.descricao && <p className="text-xs text-gray-400">{m.descricao}</p>}
+                          </div>
+                        </div>
+                        <span className="text-sm font-bold text-brand-accent whitespace-nowrap">
+                          {Number(m.valor) > 0 ? formatarBRL(m.valor) : 'Gratuito'}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {ehPago && (
                 <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-sm text-yellow-200">
@@ -266,6 +323,25 @@ export default function InscricaoEventoPage() {
               <div className="pt-6">
                 <Button onClick={() => router.push('/dashboard/minhas-inscricoes')}>Ver Meus Ingressos</Button>
               </div>
+            </div>
+          ) : jaInscrito ? (
+            <div className="text-center py-12 space-y-4">
+              <div className="w-20 h-20 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/50">
+                <Info size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-white">Você já está inscrito!</h3>
+              <p className="text-gray-400">Identificamos que você já possui uma grade montada para este evento.</p>
+              <div className="pt-6">
+                <Button onClick={() => router.push('/dashboard/minhas-inscricoes')}>Ir para Minhas Inscrições</Button>
+              </div>
+            </div>
+          ) : modalidades.length === 0 ? (
+            <div className="text-center py-12 space-y-4">
+              <div className="w-20 h-20 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-orange-500/50">
+                <AlertTriangle size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-white">Modalidades ainda não configuradas</h3>
+              <p className="text-gray-400">Este evento ainda não possui modalidades de inscrição configuradas. Fale com a organização.</p>
             </div>
           ) : atividades.length === 0 ? (
             <p className="text-gray-400 text-center py-12 text-lg">Nenhuma atividade programada para este evento no momento.</p>
@@ -377,7 +453,15 @@ export default function InscricaoEventoPage() {
                     )}
                   </p>
                 </div>
-                <Button onClick={handleInscrever} disabled={submitting || selecionadas.size === 0} className="w-full md:w-auto shrink-0 shadow-lg shadow-brand-accent/20">
+                <Button
+                  onClick={modoEdicao ? handleInscrever : () => setModalResumo(true)}
+                  disabled={
+                    submitting ||
+                    selecionadas.size === 0 ||
+                    (!modoEdicao && (modalidades.length === 0 || (modalidades.length > 1 && modalidadeId === null)))
+                  }
+                  className="w-full md:w-auto shrink-0 shadow-lg shadow-brand-accent/20"
+                >
                   {submitting
                     ? 'Processando...'
                     : modoEdicao
@@ -434,6 +518,53 @@ export default function InscricaoEventoPage() {
           </GlassCard>
         </div>
       )}
+
+      {modalResumo && evento && (() => {
+        const modalidadeSelecionada = modalidades.find((m) => m.id === modalidadeId) || null;
+        const atividadesSelecionadas = Array.from(selecionadas).map((id) => atividades.find((a: any) => a.id === id)).filter(Boolean);
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <GlassCard className="max-w-lg w-full p-6 animate-in fade-in zoom-in duration-200">
+              <h3 className="text-xl font-bold text-white mb-4">Resumo da Inscrição</h3>
+
+              {error && <div className="p-3 mb-4 bg-red-500/20 border border-red-500/50 text-red-200 rounded-lg text-sm">{error}</div>}
+
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                <div>
+                  <span className="block text-xs text-gray-500 uppercase font-bold tracking-wider">Evento</span>
+                  <span className="text-white font-semibold">{evento.titulo}</span>
+                </div>
+                {modalidadeSelecionada && (
+                  <div>
+                    <span className="block text-xs text-gray-500 uppercase font-bold tracking-wider">Modalidade</span>
+                    <span className="text-white font-semibold">
+                      {modalidadeSelecionada.nome} — {Number(modalidadeSelecionada.valor) > 0 ? formatarBRL(modalidadeSelecionada.valor) : 'Gratuito'}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <span className="block text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Atividades Selecionadas ({atividadesSelecionadas.length})</span>
+                  <ul className="space-y-1">
+                    {atividadesSelecionadas.map((atv: any) => (
+                      <li key={atv.id} className="text-sm text-gray-200 bg-slate-900/50 rounded p-2 border border-white/5">
+                        {atv.titulo} <span className="text-gray-500">— {atv.horarioInicio?.slice(0, 5)} às {atv.horarioFim?.slice(0, 5)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                <Button variant="secondary" onClick={() => setModalResumo(false)} disabled={submitting}>Voltar</Button>
+                <Button onClick={handleInscrever} disabled={submitting}>
+                  {submitting ? 'Processando...' : 'Confirmar Inscrição'}
+                </Button>
+              </div>
+            </GlassCard>
+          </div>
+        );
+      })()}
     </div>
   );
 }
