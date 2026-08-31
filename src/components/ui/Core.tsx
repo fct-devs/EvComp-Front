@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 export const Button = ({ children, variant = 'primary', className = '', disabled, ...props }: any) => {
-  const baseStyle = "px-6 py-2 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95";
+  const baseStyle = "px-6 py-2 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2";
+
   const variants = {
-    primary: "bg-white text-slate-900 hover:bg-gray-200",
-    secondary: "bg-transparent border border-white text-white hover:bg-white hover:text-slate-900",
-    danger: "bg-red-500 text-white hover:bg-red-600",
-    glass: "glass text-white hover:bg-white/20"
+    primary: "bg-brand-accent text-black hover:bg-yellow-400 shadow-md",
+    secondary: "bg-transparent border border-white/50 text-white hover:bg-white/10",
+    danger: "bg-red-600 text-white hover:bg-red-500",
+    glass: "glass text-white hover:bg-white/10"
   };
   const disabledStyle = "opacity-50 cursor-not-allowed grayscale pointer-events-none";
 
@@ -37,14 +38,14 @@ export const InputField = ({ label, id, error, ...props }: any) => {
           id={id}
           name={id}
           style={{ colorScheme: 'dark' }}
-          className={`w-full bg-transparent border rounded-md p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-accent transition-all ${error ? 'border-red-500' : 'border-gray-600'} ${isPassword ? 'pr-12' : ''}`}
+          className={`w-full bg-white/5 border rounded-md p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-accent transition-all [&:-webkit-autofill]:[transition:background-color_9999s_ease-in-out_0s] [&:-webkit-autofill]:[-webkit-text-fill-color:#fff] ${error ? 'border-red-500' : 'border-white/20'} ${isPassword ? 'pr-12' : ''}`}
           {...props}
           type={inputType}
         />
         {isPassword && (
           <button
             type="button"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 focus:outline-none flex items-center justify-center h-full px-1"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-accent focus:outline-none flex items-center justify-center h-full px-1 transition-colors"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
           >
@@ -59,7 +60,7 @@ export const InputField = ({ label, id, error, ...props }: any) => {
 
 export const GlassCard = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => {
   return (
-    <div className={`glass-panel p-8 rounded-2xl shadow-2xl ${className}`}>
+    <div className={`glass-panel p-8 bg-white/5 border-3 border-white/90 hover:border-brand-accent transition-all duration-300 shadow-2xl rounded-2xl ${className}`}>
       {children}
     </div>
   );

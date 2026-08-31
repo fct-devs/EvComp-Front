@@ -341,7 +341,7 @@ export default function AdminEventosPage() {
                       </div>
 
                       <div className="mb-6">
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                           <h4 className="text-md font-bold text-brand-accent">Modalidades de Inscrição</h4>
                           <Button className="text-xs py-1 px-3" onClick={() => abrirFormModalidade(ev.id)}>Nova Modalidade</Button>
                         </div>
@@ -353,7 +353,7 @@ export default function AdminEventosPage() {
                         ) : (
                           <div className="space-y-2">
                             {modalidadesDoEvento.map((m) => (
-                              <div key={m.id} className="flex items-center justify-between bg-slate-800/50 border border-white/5 rounded-lg p-3">
+                              <div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-800/50 border border-white/5 rounded-lg p-3">
                                 <div>
                                   <span className="font-medium text-white text-sm">{m.nome}</span>
                                   <span className={`ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full border ${m.ativo ? 'bg-green-500/20 text-green-400 border-green-500/50' : 'bg-gray-500/20 text-gray-400 border-gray-500/50'}`}>
@@ -361,7 +361,7 @@ export default function AdminEventosPage() {
                                   </span>
                                   <p className="text-xs text-gray-400 mt-1">{formatarBRL(m.valor)}{m.descricao ? ` — ${m.descricao}` : ''}</p>
                                 </div>
-                                <div className="space-x-2">
+                                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
                                   <Button variant="secondary" className="text-xs py-1 px-3" onClick={() => abrirFormModalidade(ev.id, m)}>Editar</Button>
                                   <Button variant="danger" className="text-xs py-1 px-3" onClick={() => handleExcluirModalidade(ev.id, m.id)}>Excluir</Button>
                                 </div>

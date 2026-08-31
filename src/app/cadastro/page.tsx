@@ -17,27 +17,23 @@ export default function CadastroPage() {
   const [sucess, setSucess] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // Estado para controlar os requisitos da senha
   const [senhaRequisitos, setSenhaRequisitos] = useState({
     minCaracteres: false,
     temMaiuscula: false,
     temNumero: false,
   });
 
-  
   const isInstitucional = verificarEmailInstitucional(formData.email);
   const informarDadosInvalidos = () => setError('Dados inválidos. Verifique os campos.');
   const informarEmailDuplicado = () => setError('Este e-mail já está em uso.');
   const informarErroCadastro = () => setError('Erro ao realizar cadastro.');
   const informarSucesso = () => {
     setSucess('Cadastro realizado com sucesso.');
-
     setTimeout(() => {
       router.push('/login');
     }, 2000); 
   }
 
-  // Efeito para validar a senha em tempo real conforme o usuário digita
   useEffect(() => {
     const { senha } = formData;
     setSenhaRequisitos({
@@ -93,11 +89,11 @@ export default function CadastroPage() {
     <AuthLayout>
       <div className="w-full max-w-md mx-auto relative z-10 py-8">
         <div className="flex flex-row items-center justify-between mb-8">
-          <div className="flex rounded-full border border-white/20 p-1 w-full bg-slate-800">
+          <div className="flex rounded-full border border-white/20 p-1 w-full bg-black">
             <Link href="/login" className="w-1/2 text-center py-2 text-gray-400 hover:text-white rounded-full font-semibold cursor-pointer transition-colors">
               ENTRAR
             </Link>
-            <div className="w-1/2 text-center py-2 bg-white text-slate-900 rounded-full font-bold cursor-pointer transition-colors shadow-sm">
+            <div className="w-1/2 text-center py-2 bg-white text-black rounded-full font-bold cursor-pointer transition-colors shadow-sm">
               CADASTRAR
             </div>
           </div>
@@ -127,16 +123,15 @@ export default function CadastroPage() {
          <div>
             <InputField label="Senha" id="senha" type="password" placeholder="Senha" value={formData.senha} onChange={handleChange} required />
             
-            {/**Bloco visual dos requisitos da senha **/}
             {formData.senha && (
               <ul className="mt-2 space-y-1 text-xs transition-all duration-300">
-                <li className={`flex items-center gap-2 ${senhaRequisitos.minCaracteres ? 'text-sky-400 line-through opacity-60' : 'text-gray-400'}`}>
+                <li className={`flex items-center gap-2 ${senhaRequisitos.minCaracteres ? 'text-brand-accent line-through opacity-60' : 'text-gray-400'}`}>
                   <span>{senhaRequisitos.minCaracteres ? '✓' : '○'}</span> Mínimo de 8 caracteres
                 </li>
-                <li className={`flex items-center gap-2 ${senhaRequisitos.temMaiuscula ? 'text-sky-400 line-through opacity-60' : 'text-gray-400'}`}>
+                <li className={`flex items-center gap-2 ${senhaRequisitos.temMaiuscula ? 'text-brand-accent line-through opacity-60' : 'text-gray-400'}`}>
                   <span>{senhaRequisitos.temMaiuscula ? '✓' : '○'}</span> Pelo menos uma letra maiúscula
                 </li>
-                <li className={`flex items-center gap-2 ${senhaRequisitos.temNumero ? 'text-sky-400 line-through opacity-60' : 'text-gray-400'}`}>
+                <li className={`flex items-center gap-2 ${senhaRequisitos.temNumero ? 'text-brand-accent line-through opacity-60' : 'text-gray-400'}`}>
                   <span>{senhaRequisitos.temNumero ? '✓' : '○'}</span> Pelo menos um número
                 </li>
               </ul>
