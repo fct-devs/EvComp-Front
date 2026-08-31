@@ -20,6 +20,7 @@ export default function InscricaoEventoPage() {
   const [modalidades, setModalidades] = useState<ModalidadeInscricao[]>([]);
   const [modalidadeId, setModalidadeId] = useState<number | null>(null);
   const [selecionadas, setSelecionadas] = useState<Set<number>>(new Set());
+  const [idsOriginais, setIdsOriginais] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -76,6 +77,7 @@ export default function InscricaoEventoPage() {
             setInscricaoId(inscricaoDoEvento.id);
             const idsAtuais = (inscricaoDoEvento.atividade || []).map((atv: any) => atv.id);
             setSelecionadas(new Set(idsAtuais));
+            setIdsOriginais(idsAtuais);
           }
         }
         
@@ -109,6 +111,10 @@ export default function InscricaoEventoPage() {
       }
 
       for (const atvId of atividadesArray) {
+        if (modoEdicao && idsOriginais.includes(atvId)) {
+          continue;
+        }
+
         const vagasRes = await fetch(`/api/atividades/${atvId}/vagas`, { credentials: 'include' });
         if (vagasRes.ok) {
           const vagasData = await vagasRes.json();
@@ -322,17 +328,6 @@ export default function InscricaoEventoPage() {
               </p>
               <div className="pt-6">
                 <Button onClick={() => router.push('/dashboard/minhas-inscricoes')}>Ver Meus Ingressos</Button>
-              </div>
-            </div>
-          ) : jaInscrito ? (
-            <div className="text-center py-12 space-y-4">
-              <div className="w-20 h-20 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/50">
-                <Info size={40} />
-              </div>
-              <h3 className="text-2xl font-bold text-white">Você já está inscrito!</h3>
-              <p className="text-gray-400">Identificamos que você já possui uma grade montada para este evento.</p>
-              <div className="pt-6">
-                <Button onClick={() => router.push('/dashboard/minhas-inscricoes')}>Ir para Minhas Inscrições</Button>
               </div>
             </div>
           ) : modalidades.length === 0 ? (
