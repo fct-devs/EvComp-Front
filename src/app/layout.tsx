@@ -10,9 +10,10 @@ const inter = Inter({
 
 // Estes dados vão aparecer na aba do navegador e no Google
 export const metadata: Metadata = {
-  title: "SECOMPP - FCT Unesp",
-  description: "Sistema Oficial da Semana da Computação da FCT-Unesp",
+  title: "EvComp - FCT-UNESP",
+  description: "Sistema de Gestão de Eventos Acadêmicos da FCT-UNESP",
 };
+
 
 export default function RootLayout({
   children,
