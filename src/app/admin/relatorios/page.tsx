@@ -81,12 +81,14 @@ export default function AdminRelatoriosPage() {
   const formatarNomeTipo = (tipo: string) => {
     if (tipo === 'PARTICIPANTES') return 'Participantes por Atividade';
     if (tipo === 'GRAFICO') return 'Comparativo Internos/Externos';
+    if (tipo === 'PARTICIPANTES_APROVADOS') return 'Participantes com Pagamento Aprovado';
     return tipo;
   };
 
   const formatarDescricaoTipo = (tipo: string) => {
-    if (tipo === 'PARTICIPANTES') return 'Gera a lista em PDF dos inscritos confirmados';
+    if (tipo === 'PARTICIPANTES') return 'Gera a lista em PDF dos inscritos confirmados por atividade';
     if (tipo === 'GRAFICO') return 'Gera um gráfico visual com dados da comunidade';
+    if (tipo === 'PARTICIPANTES_APROVADOS') return 'Lista em PDF os participantes confirmados (pagamento aprovado/isento) e modalidades';
     return 'Relatório do sistema';
   };
 
