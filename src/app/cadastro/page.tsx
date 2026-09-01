@@ -142,7 +142,7 @@ export default function CadastroPage() {
           <div className="flex items-center space-x-2 pt-2">
             <input type="checkbox" id="termos" className="w-4 h-4 text-brand-accent rounded focus:ring-brand-accent bg-transparent border-gray-600" required />
             <label htmlFor="termos" className="text-sm text-gray-300">
-              Concordo com os <a href="#" className="underline hover:text-white">Termos de Serviço</a> da aplicação.
+              Concordo com os <Link href="/termos" target="_blank" className="underline hover:text-brand-accent transition-colors font-semibold">Termos de Serviço</Link> da aplicação.
             </label>
           </div>
 
