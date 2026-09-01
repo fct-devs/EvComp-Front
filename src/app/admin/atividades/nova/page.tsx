@@ -11,6 +11,7 @@ export default function CriacaoAtividadePage() {
   
   const [formData, setFormData] = useState({
     titulo: '',
+    local: '',
     ministrantes: '',
     descricao: '',
     preRequisitos: '',
@@ -83,7 +84,10 @@ export default function CriacaoAtividadePage() {
               </div>
             )}
             
-            <InputField label="Título da Atividade" id="titulo" type="text" value={formData.titulo} onChange={handleChange} required />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField label="Título da Atividade" id="titulo" type="text" value={formData.titulo} onChange={handleChange} required />
+              <InputField label="Local / Sala" id="local" type="text" placeholder="Ex: Sala 5B (Central), Lab. 06" value={formData.local} onChange={handleChange} />
+            </div>
             <InputField label="Ministrante(s)" id="ministrantes" type="text" value={formData.ministrantes} onChange={handleChange} required />
             
             <div className="space-y-4 pt-2 pb-2">

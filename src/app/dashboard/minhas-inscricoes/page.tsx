@@ -249,6 +249,15 @@ export default function MinhasInscricoesPage() {
               
               const listaAtividadesSegura = inscricao.atividade || [];
               
+              const parseDataPtBR = (dataStr: string) => {
+                const parts = dataStr.split('/');
+                if (parts.length === 3) {
+                  const [dia, mes, ano] = parts.map(Number);
+                  return new Date(ano, mes - 1, dia).getTime();
+                }
+                return 0;
+              };
+
               const atividadesAgrupadas = listaAtividadesSegura.reduce((acc, atv) => {
                 const dataFormatada = atv.dataInicio 
                   ? new Date(atv.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) 
@@ -259,10 +268,21 @@ export default function MinhasInscricoesPage() {
                 return acc;
               }, {} as Record<string, Atividade[]>);
 
+              // Ordena as atividades dentro de cada dia por horário de início e depois por título
+              Object.keys(atividadesAgrupadas).forEach((dia) => {
+                atividadesAgrupadas[dia].sort((a, b) => {
+                  const horaA = a.horarioInicio || '00:00';
+                  const horaB = b.horarioInicio || '00:00';
+                  const compHora = horaA.localeCompare(horaB);
+                  if (compHora !== 0) return compHora;
+                  return (a.titulo || '').localeCompare(b.titulo || '');
+                });
+              });
+
               const diasOrdenados = Object.keys(atividadesAgrupadas).sort((a, b) => {
                 if (a === 'Data a definir') return 1;
                 if (b === 'Data a definir') return -1;
-                return a.localeCompare(b);
+                return parseDataPtBR(a) - parseDataPtBR(b);
               });
 
               return (

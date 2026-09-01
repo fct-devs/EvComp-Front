@@ -208,6 +208,15 @@ export default function InscricaoEventoPage() {
     return <div className="min-h-screen bg-brand-dark flex items-center justify-center text-brand-accent font-bold text-xl animate-pulse">Carregando painel de inscrição...</div>;
   }
 
+  const parseDataPtBR = (dataStr: string) => {
+    const parts = dataStr.split('/');
+    if (parts.length === 3) {
+      const [dia, mes, ano] = parts.map(Number);
+      return new Date(ano, mes - 1, dia).getTime();
+    }
+    return 0;
+  };
+
   const atividadesAgrupadas = atividades.reduce((acc: any, atv: any) => {
     let dataFormatada = 'Data a definir';
     if (atv.dataInicio) {
@@ -220,10 +229,21 @@ export default function InscricaoEventoPage() {
     return acc;
   }, {} as Record<string, any[]>);
 
+  // Ordena as atividades dentro de cada dia por horário de início e depois por título
+  Object.keys(atividadesAgrupadas).forEach((dia) => {
+    atividadesAgrupadas[dia].sort((a: any, b: any) => {
+      const horaA = a.horarioInicio || '00:00';
+      const horaB = b.horarioInicio || '00:00';
+      const compHora = horaA.localeCompare(horaB);
+      if (compHora !== 0) return compHora;
+      return (a.titulo || '').localeCompare(b.titulo || '');
+    });
+  });
+
   const diasOrdenados = Object.keys(atividadesAgrupadas).sort((a: string, b: string) => {
     if (a === 'Data a definir') return 1;
     if (b === 'Data a definir') return -1;
-    return a.localeCompare(b);
+    return parseDataPtBR(a) - parseDataPtBR(b);
   });
 
   const isAprovado = pagamentoAprovado || pagamentoInfo?.status === 'APROVADO';
