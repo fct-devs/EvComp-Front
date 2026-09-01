@@ -66,6 +66,7 @@ function EditarAtividadeContent() {
     const formData = new FormData(e.currentTarget);
     const data = {
       titulo: formData.get('titulo') as string,
+      local: formData.get('local') as string,
       descricao: formData.get('descricao') as string,
       pre_requisitos: formData.get('preRequisitos') as string,
       data_inicio: formData.get('dataInicio') as string,
@@ -121,12 +122,24 @@ function EditarAtividadeContent() {
   if (!atividade) return <div className="text-center text-red-400 p-12">{error}</div>;
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto">
       <GlassCard className="p-8">
-        <h2 className="text-3xl font-extrabold text-white text-center mb-8">Editar Atividade</h2>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white">Editar Atividade</h1>
+            <p className="text-gray-400 mt-1">Altere os dados da atividade selecionada.</p>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => router.back()}
+            className="px-4 py-2 border border-gray-600 rounded-md text-sm font-medium text-gray-300 hover:bg-white/5 transition-colors"
+          >
+            Voltar
+          </button>
+        </div>
         
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-md mb-6">
+          <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-md mb-6 animate-in fade-in">
             {error}
           </div>
         )}
@@ -141,9 +154,15 @@ function EditarAtividadeContent() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="titulo" className="text-sm font-medium text-gray-300">Título da Atividade</label>
-            <input id="titulo" name="titulo" type="text" defaultValue={atividade.titulo} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="titulo" className="text-sm font-medium text-gray-300">Título da Atividade</label>
+              <input id="titulo" name="titulo" type="text" defaultValue={atividade.titulo} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+            </div>
+            <div>
+              <label htmlFor="local" className="text-sm font-medium text-gray-300">Local / Sala <span className="text-gray-500 font-normal text-xs">(Opcional)</span></label>
+              <input id="local" name="local" type="text" defaultValue={atividade.local} placeholder="Ex: Sala 5B (Central), Lab. 06" className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+            </div>
           </div>
 
           <div className="space-y-4 pt-2 pb-2">
@@ -179,37 +198,37 @@ function EditarAtividadeContent() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="dataInicio" className="text-sm font-medium text-gray-300">Data de Início</label>
-              <input id="dataInicio" name="dataInicio" type="date" defaultValue={atividade.dataInicio} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="dataInicio" name="dataInicio" type="date" defaultValue={atividade.dataInicio || atividade.data_inicio} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
             <div>
               <label htmlFor="dataTermino" className="text-sm font-medium text-gray-300">Data de Término</label>
-              <input id="dataTermino" name="dataTermino" type="date" defaultValue={atividade.dataFim} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="dataTermino" name="dataTermino" type="date" defaultValue={atividade.dataFim || atividade.dataTermino || atividade.data_termino} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="horaInicio" className="text-sm font-medium text-gray-300">Horário de Início</label>
-              <input id="horaInicio" name="horaInicio" type="time" defaultValue={atividade.horarioInicio} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="horaInicio" name="horaInicio" type="time" defaultValue={(atividade.horarioInicio || atividade.horario_inicio || '')?.slice(0, 5)} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
             <div>
               <label htmlFor="horaTermino" className="text-sm font-medium text-gray-300">Horário de Término</label>
-              <input id="horaTermino" name="horaTermino" type="time" defaultValue={atividade.horarioFim} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="horaTermino" name="horaTermino" type="time" defaultValue={(atividade.horarioFim || atividade.horarioTermino || atividade.horario_termino || '')?.slice(0, 5)} required style={{ colorScheme: 'dark' }} className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="vagas" className="text-sm font-medium text-gray-300">Máx. Participantes (Vagas)</label>
-              <input id="vagas" name="vagas" type="number" min="1" defaultValue={atividade.maxParticipantes} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="vagas" name="vagas" type="number" min="1" defaultValue={atividade.maxParticipantes ?? atividade.max_participantes} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
             <div>
               <label htmlFor="cargaHorariaTotal" className="text-sm font-medium text-gray-300">Carga Horária do Participante (h)</label>
-              <input id="cargaHorariaTotal" name="cargaHorariaTotal" type="number" min="1" defaultValue={atividade.cargaHorariaTotal} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="cargaHorariaTotal" name="cargaHorariaTotal" type="number" min="1" defaultValue={atividade.cargaHorariaTotal ?? atividade.carga_horaria_total} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
             <div className="col-span-2">
               <label htmlFor="cargaHorariaMinistrante" className="text-sm font-medium text-gray-300">Carga Horária do Ministrante (h)</label>
-              <input id="cargaHorariaMinistrante" name="cargaHorariaMinistrante" type="number" min="1" defaultValue={atividade.cargaHorariaMinistrante || atividade.cargaHorariaTotal} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
+              <input id="cargaHorariaMinistrante" name="cargaHorariaMinistrante" type="number" min="1" defaultValue={atividade.cargaHorariaMinistrante ?? atividade.carga_horaria_ministrantes ?? atividade.cargaHorariaTotal ?? atividade.carga_horaria_total} required className="mt-1 w-full bg-slate-900/50 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent" />
             </div>
           </div>
 
@@ -217,7 +236,8 @@ function EditarAtividadeContent() {
             <label className="text-sm font-medium text-gray-300 mb-1 block">Ministrante(s)</label>
             <div className="mt-1 max-h-48 overflow-y-auto bg-slate-900/50 border border-gray-600 rounded-md p-3 space-y-2 custom-scrollbar">
               {participantes.map(p => {
-                const isChecked = atividade.ministrantes_ids?.some((id: any) => String(id) === String(p.id));
+                const isChecked = (atividade.ministrantes_ids || atividade.ministrantesIds)?.some((id: any) => String(id) === String(p.id))
+                  || atividade.ministrantes?.some((m: any) => String(m.id || m) === String(p.id));
                 return (
                   <label key={p.id} className="flex items-center space-x-3 text-white cursor-pointer hover:bg-white/5 p-1 rounded transition-colors">
                     <input type="checkbox" name="ministranteId" value={p.id} defaultChecked={isChecked} className="w-4 h-4 text-brand-accent bg-slate-800 border-gray-600 rounded focus:ring-brand-accent focus:ring-2" />

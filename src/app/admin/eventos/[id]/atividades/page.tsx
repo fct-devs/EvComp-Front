@@ -56,6 +56,7 @@ export default function GerenciarAtividadesPage() {
     const formData = new FormData(e.currentTarget);
     const payload = {
       titulo: formData.get('titulo'),
+      local: formData.get('local'),
       data_inicio: formData.get('dataInicio'),
       horario_inicio: parseInt(String(formData.get('horarioInicio'))?.replace(':', '') || '0'),
       data_termino: formData.get('dataTermino'),
@@ -133,7 +134,10 @@ export default function GerenciarAtividadesPage() {
             <form onSubmit={handleCriar} className="space-y-4">
               {formError && <div className="p-3 bg-red-500/20 text-red-200 rounded-md text-sm">{formError}</div>}
               
-              <InputField label="Título da Atividade" id="titulo" type="text" required />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField label="Título da Atividade" id="titulo" type="text" required />
+                <InputField label="Local / Sala" id="local" type="text" placeholder="Ex: Sala 5B (Central), Lab. 06" />
+              </div>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <InputField label="Data Início" id="dataInicio" type="date" required />
@@ -167,6 +171,7 @@ export default function GerenciarAtividadesPage() {
                 <thead>
                   <tr className="border-b border-white/20">
                     <th className="py-3 px-4">Título</th>
+                    <th className="py-3 px-4">Local</th>
                     <th className="py-3 px-4">Horário</th>
                     <th className="py-3 px-4">Vagas</th>
                     <th className="py-3 px-4 text-center">Ações</th>
@@ -176,6 +181,7 @@ export default function GerenciarAtividadesPage() {
                   {atividades.map((atv: any) => (
                     <tr key={atv.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
                       <td className="py-3 px-4 font-semibold">{atv.titulo}</td>
+                      <td className="py-3 px-4 text-sm text-gray-300">{atv.local || '-'}</td>
                       <td className="py-3 px-4 text-sm text-gray-300">
                         {atv.dataInicio ? new Date(atv.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : ''} <br/>
                         {atv.horarioInicio?.slice(0,5)} até {atv.horarioFim?.slice(0,5)}
