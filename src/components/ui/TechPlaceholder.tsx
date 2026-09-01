@@ -15,7 +15,7 @@ export const TechPlaceholder = () => (
       </div>
       
       <p className="text-base md:text-lg text-gray-300 max-w-md font-light mx-auto leading-relaxed">
-        Sistema de Gestão de Eventos Acadêmicos da FCT-UNESP
+        Sistema de Gestão de Eventos da Computação
       </p>
     </div>
   </div>

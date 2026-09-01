@@ -60,7 +60,7 @@ export default function InscricaoEventoPage() {
                   const vagasData = await vagasRes.json();
                   return { ...atv, vagasDisponiveis: vagasData.vagasDisponiveis };
                 }
-              } catch (e) {}
+              } catch (e) { }
               return { ...atv, vagasDisponiveis: 0 };
             })
           );
@@ -68,7 +68,7 @@ export default function InscricaoEventoPage() {
         } else {
           setError('Evento não encontrado');
         }
-        
+
         const detalhesRes = await fetch(`/api/inscricoes/detalhes?participanteId=${perfilRes.data.id}`, { credentials: 'include' });
         if (detalhesRes.ok) {
           const detalhesData = await detalhesRes.json();
@@ -94,10 +94,10 @@ export default function InscricaoEventoPage() {
                   temComprovante: Boolean(pagData.temComprovante)
                 });
               }
-            } catch (e) {}
+            } catch (e) { }
           }
         }
-        
+
         setLoading(false);
       } catch (err: any) {
         console.error("Erro no fetch:", err);
@@ -119,7 +119,7 @@ export default function InscricaoEventoPage() {
   const handleInscrever = async () => {
     setSubmitting(true);
     setError('');
-    
+
     try {
       const atividadesArray = Array.from(selecionadas);
 
@@ -151,26 +151,26 @@ export default function InscricaoEventoPage() {
       }
 
       const res = modoEdicao
-        ? await fetch(`/api/inscricoes/${inscricaoId}`, { 
-            credentials: 'include',
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              atividadeIds: atividadesArray,
-              modalidadeId: modalidadeId
-            })
+        ? await fetch(`/api/inscricoes/${inscricaoId}`, {
+          credentials: 'include',
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            atividadeIds: atividadesArray,
+            modalidadeId: modalidadeId
           })
-        : await fetch('/api/inscricoes', { 
-            credentials: 'include',
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              participanteId: participanteId,
-              eventoId: parseInt(String(eventoId)),
-              atividadeIds: atividadesArray,
-              modalidadeId: modalidadeId
-            })
-          });
+        })
+        : await fetch('/api/inscricoes', {
+          credentials: 'include',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            participanteId: participanteId,
+            eventoId: parseInt(String(eventoId)),
+            atividadeIds: atividadesArray,
+            modalidadeId: modalidadeId
+          })
+        });
 
       const data = await res.json();
 
@@ -190,17 +190,17 @@ export default function InscricaoEventoPage() {
 
   const isAtividadeIniciadaOuEncerrada = (atv: any) => {
     if (!atv.dataInicio) return false;
-    
+
     const [ano, mes, dia] = atv.dataInicio.split('T')[0].split('-');
     const dtInicio = new Date(Number(ano), Number(mes) - 1, Number(dia));
-    
+
     if (atv.horarioInicio) {
       const [h, m] = atv.horarioInicio.split(':');
       dtInicio.setHours(Number(h), Number(m), 0, 0);
     } else {
       dtInicio.setHours(23, 59, 59, 999);
     }
-    
+
     return new Date() > dtInicio;
   };
 
@@ -214,7 +214,7 @@ export default function InscricaoEventoPage() {
       const dataLimpa = atv.dataInicio.split('T')[0];
       dataFormatada = new Date(dataLimpa + 'T12:00:00Z').toLocaleDateString('pt-BR', { timeZone: 'UTC' });
     }
-    
+
     if (!acc[dataFormatada]) acc[dataFormatada] = [];
     acc[dataFormatada].push(atv);
     return acc;
@@ -412,11 +412,10 @@ export default function InscricaoEventoPage() {
                   <div className="space-y-2">
                     {modalidades.filter((m) => m.ativo).map((m) => {
                       return (
-                        <label 
-                          key={m.id} 
-                          className={`flex items-center justify-between gap-3 p-3 rounded-lg border transition-colors ${
-                            modalidadeBloqueada ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
-                          } ${modalidadeId === m.id ? 'border-brand-accent bg-brand-accent/10' : 'border-white/10 bg-slate-900/40 hover:border-white/30'}`}
+                        <label
+                          key={m.id}
+                          className={`flex items-center justify-between gap-3 p-3 rounded-lg border transition-colors ${modalidadeBloqueada ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
+                            } ${modalidadeId === m.id ? 'border-brand-accent bg-brand-accent/10' : 'border-white/10 bg-slate-900/40 hover:border-white/30'}`}
                         >
                           <div className="flex items-center gap-3">
                             <input
@@ -461,9 +460,9 @@ export default function InscricaoEventoPage() {
               {selecionadas.size} selecionada(s)
             </div>
           </div>
-          
+
           {error && <div className="p-4 mb-6 bg-red-500/20 border border-red-500/50 text-red-200 rounded-lg">{error}</div>}
-          
+
           {modalidades.length === 0 ? (
             <div className="text-center py-12 space-y-4">
               <div className="w-20 h-20 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-orange-500/50">
@@ -488,12 +487,12 @@ export default function InscricaoEventoPage() {
                       .sort((a: any, b: any) => a.horarioInicio.localeCompare(b.horarioInicio))
                       .map((atv: any) => {
                         const atividadesSelecionadas = Array.from(selecionadas).map((id: number) => atividades.find((a: any) => a.id === id)).filter(Boolean);
-                        
+
                         const isIniciada = isAtividadeIniciadaOuEncerrada(atv);
                         const isSemVagas = atv.vagasDisponiveis <= 0;
                         const isSelecionada = selecionadas.has(atv.id);
                         const isConflitante = !isSelecionada && verificarConflitos(atv, atividadesSelecionadas);
-                        
+
                         let cardStyle = "border-white/5 bg-slate-900/50 hover:border-brand-accent/30";
                         if (isSelecionada) cardStyle = "border-emerald-500/50 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]";
                         else if (isConflitante) cardStyle = "border-orange-500/40 bg-slate-900/40 opacity-75";
@@ -501,11 +500,11 @@ export default function InscricaoEventoPage() {
 
                         return (
                           <div key={atv.id} className={`glass p-5 rounded-xl transition-all duration-300 flex flex-col h-full ${cardStyle}`}>
-                            
+
                             <div className="flex justify-between items-start mb-3">
                               <h4 className="font-bold text-white text-lg leading-tight pr-2 flex items-start gap-2">
                                 {atv.titulo}
-                                <button 
+                                <button
                                   onClick={() => setModalAtividade(atv)}
                                   className="mt-1 text-gray-500 hover:text-brand-accent transition-colors shrink-0 focus:outline-none"
                                   title="Ver Detalhes e Pré-requisitos"
@@ -566,7 +565,7 @@ export default function InscricaoEventoPage() {
                             )}
                           </div>
                         );
-                    })}
+                      })}
                   </div>
                 </div>
               ))}
@@ -605,18 +604,18 @@ export default function InscricaoEventoPage() {
 
       {modalAtividade && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div 
-            className="absolute inset-0" 
+          <div
+            className="absolute inset-0"
             onClick={() => setModalAtividade(null)}
           ></div>
           <GlassCard className="w-full max-w-lg p-8 bg-slate-900/95 border-white/10 relative z-10 shadow-2xl transform transition-all">
-            <button 
-              onClick={() => setModalAtividade(null)} 
+            <button
+              onClick={() => setModalAtividade(null)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-1"
             >
               <XCircle size={24} />
             </button>
-            
+
             <h3 className="text-2xl font-bold text-white mb-6 pr-8 border-b border-white/10 pb-4">
               {modalAtividade.titulo}
             </h3>
@@ -639,7 +638,7 @@ export default function InscricaoEventoPage() {
                   {modalAtividade.preRequisitos || 'Não há pré-requisitos obrigatórios para participar.'}
                 </p>
               </div>
-              
+
               <div className="text-xs text-gray-500 pt-4 border-t border-white/5">
                 Ministrante(s): {modalAtividade.ministrantes || 'Não informado'}
               </div>

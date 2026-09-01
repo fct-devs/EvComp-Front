@@ -10,8 +10,8 @@ const inter = Inter({
 
 // Estes dados vão aparecer na aba do navegador e no Google
 export const metadata: Metadata = {
-  title: "EvComp - FCT-UNESP",
-  description: "Sistema de Gestão de Eventos Acadêmicos da FCT-UNESP",
+  title: "EvComp",
+  description: "Sistema de Gestão de Eventos da Computação.",
 };
 
 

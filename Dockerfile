@@ -9,12 +9,14 @@ RUN npm install
 COPY . .
 ARG API_URL
 ENV API_URL=$API_URL
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Imagem final para rodar o app
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV production
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copia do builder os arquivos essenciais
 COPY --from=builder /app/package*.json ./
