@@ -159,14 +159,34 @@ export default function PagamentosPage() {
             {pagamentos.map((pagamento) => {
               const estilo = ESTILO_STATUS[pagamento.status];
               const enviando = enviandoId === pagamento.id;
-              const podeEnviar = pagamento.status === 'PENDENTE' || pagamento.status === 'RECUSADO';
+
+              // Verifica se o evento já iniciou usando a flag enviada pelo backend
+              const eventoIniciado = (() => {
+                if ((pagamento as any).eventoIniciado === true) return true;
+                if (!pagamento.dataInicioEvento) return false;
+                try {
+                  const p = String(pagamento.dataInicioEvento).split('T')[0].split('-');
+                  if (p.length < 3) return false;
+                  const dInicio = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 0, 0, 0);
+                  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+                  return hoje >= dInicio;
+                } catch { return false; }
+              })();
+
+              const podeEnviar = (pagamento.status === 'PENDENTE' || pagamento.status === 'RECUSADO') && !eventoIniciado;
 
               return (
                 <GlassCard key={pagamento.id} className="p-6 bg-slate-800/80 border border-white/10 shadow-lg">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-4">
                     <h2 className="text-xl font-bold text-brand-accent">{pagamento.tituloEvento}</h2>
-                    <span className={`mt-3 md:mt-0 px-3 py-1 rounded-full text-xs font-bold border ${estilo.classe}`}>
-                      {estilo.rotulo}
+                    <span className={`mt-3 md:mt-0 px-3 py-1 rounded-full text-xs font-bold border ${
+                      eventoIniciado && pagamento.status !== 'APROVADO' && pagamento.status !== 'ISENTO'
+                        ? 'bg-red-500/20 text-red-400 border-red-500/50'
+                        : estilo.classe
+                    }`}>
+                      {eventoIniciado && pagamento.status !== 'APROVADO' && pagamento.status !== 'ISENTO'
+                        ? 'PAGAMENTO EXPIRADO'
+                        : estilo.rotulo}
                     </span>
                   </div>
 
@@ -227,6 +247,13 @@ export default function PagamentosPage() {
                             <span>Comprovante recusado</span>
                           </div>
                           {pagamento.motivoRecusa && <p className="text-gray-300 text-sm">Motivo: {pagamento.motivoRecusa}</p>}
+                        </div>
+                      )}
+
+                      {eventoIniciado && pagamento.status !== 'APROVADO' && (
+                        <div className="p-3 mb-4 bg-red-500/10 border border-red-500/30 rounded-lg text-xs text-red-300 flex items-center gap-2">
+                          <XCircle size={16} className="shrink-0" />
+                          <span>O evento já foi iniciado. O prazo para envio de comprovantes ou regularização de pagamento está encerrado.</span>
                         </div>
                       )}
 

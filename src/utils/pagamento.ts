@@ -1,4 +1,4 @@
-export type StatusPagamento = 'ISENTO' | 'PENDENTE' | 'APROVADO' | 'RECUSADO';
+﻿export type StatusPagamento = 'ISENTO' | 'PENDENTE' | 'APROVADO' | 'RECUSADO';
 
 export interface Pagamento {
   id: number;
@@ -17,6 +17,9 @@ export interface Pagamento {
   valorInscricao: number | null;
   modalidadeNome: string | null;
   urlComprovante: string | null;
+  dataInicioEvento?: string | null;
+  dataFimInscricao?: string | null;
+  dataInicioInscricao?: string | null;
 }
 
 export interface PagamentoPendente extends Pagamento {

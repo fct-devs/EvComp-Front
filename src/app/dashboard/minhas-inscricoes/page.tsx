@@ -30,7 +30,16 @@ interface Inscricao {
   id: number;
   dataInscricao: string;
   status: boolean;
-  evento?: { id: number; titulo: string; dataInicioInscricao?: string; dataFimInscricao?: string };
+  statusPagamento?: string;
+  motivoRecusaPagamento?: string;
+  evento?: { 
+    id: number; 
+    titulo: string; 
+    dataInicio?: string; 
+    dataTermino?: string;
+    dataInicioInscricao?: string; 
+    dataFimInscricao?: string; 
+  };
   participante?: { id: number; secretSeed?: string };
   atividade?: Atividade[];
   modalidade?: { id: number; nome: string; descricao: string | null; valor: number; ativo: boolean } | null;
@@ -270,26 +279,52 @@ export default function MinhasInscricoesPage() {
                         Inscrito em: {new Date(inscricao.dataInscricao).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
-                    <div className="mt-4 md:mt-0 flex items-center gap-3">
-                      <div
-                        className={`px-4 py-1.5 rounded-full font-semibold text-xs tracking-wider border ${
-                          inscricao.status
-                            ? 'bg-brand-accent/10 text-brand-accent border-brand-accent/30'
-                            : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
-                        }`}
-                      >
-                        {inscricao.status ? 'INSCRIÇÃO ATIVA' : 'AGUARDANDO PAGAMENTO'}
-                      </div>
-                      {inscricao.evento?.id && periodoInscricaoAtivo(inscricao.evento.dataInicioInscricao, inscricao.evento.dataFimInscricao) && (
-                        <Button
-                          variant="secondary"
-                          className="py-1.5 px-4 text-xs flex items-center gap-2"
-                          onClick={() => router.push(`/dashboard/eventos/${inscricao.evento?.id}/inscricao`)}
-                        >
-                          <Pencil size={14} />
-                          Editar Inscrição
-                        </Button>
-                      )}
+                    <div className="mt-4 md:mt-0 flex flex-wrap items-center gap-3">
+                      {(() => {
+                        const eventoIniciado = (() => {
+                          if (!inscricao.evento?.dataInicio) return false;
+                          const dInicio = new Date(inscricao.evento.dataInicio.split('T')[0] + 'T23:59:59');
+                          return new Date() > dInicio;
+                        })();
+
+                        const periodoNormalAberto = periodoInscricaoAtivo(inscricao.evento?.dataInicioInscricao, inscricao.evento?.dataFimInscricao);
+                        const isRecusado = inscricao.statusPagamento === 'RECUSADO';
+                        const podeRegularizar = isRecusado && !eventoIniciado;
+                        const podeEditar = (periodoNormalAberto && !inscricao.status) || podeRegularizar;
+
+                        return (
+                          <>
+                            {inscricao.status ? (
+                              <div className="px-4 py-1.5 rounded-full font-semibold text-xs tracking-wider border bg-brand-accent/10 text-brand-accent border-brand-accent/30">
+                                INSCRIÇÃO ATIVA
+                              </div>
+                            ) : eventoIniciado ? (
+                              <div className="px-4 py-1.5 rounded-full font-semibold text-xs tracking-wider border bg-red-500/20 text-red-400 border-red-500/50">
+                                INSCRIÇÃO NÃO CONFIRMADA
+                              </div>
+                            ) : isRecusado ? (
+                              <div className="px-4 py-1.5 rounded-full font-semibold text-xs tracking-wider border bg-amber-500/20 text-amber-300 border-amber-500/50">
+                                REGULARIZAÇÃO PENDENTE
+                              </div>
+                            ) : (
+                              <div className="px-4 py-1.5 rounded-full font-semibold text-xs tracking-wider border bg-yellow-500/20 text-yellow-400 border-yellow-500/50">
+                                AGUARDANDO PAGAMENTO
+                              </div>
+                            )}
+
+                            {inscricao.evento?.id && podeEditar && (
+                              <Button
+                                variant={podeRegularizar ? "primary" : "secondary"}
+                                className="py-1.5 px-4 text-xs flex items-center gap-2"
+                                onClick={() => router.push(`/dashboard/eventos/${inscricao.evento?.id}/inscricao`)}
+                              >
+                                <Pencil size={14} />
+                                {podeRegularizar ? 'Regularizar Inscrição' : 'Editar Inscrição'}
+                              </Button>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 
