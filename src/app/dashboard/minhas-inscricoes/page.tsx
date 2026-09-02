@@ -24,6 +24,7 @@ interface Atividade {
   horarioFim: string;
   cargaHorariaTotal: number;
   local?: string; 
+  ministrantes?: any;
 }
 
 interface Inscricao {
