@@ -7,7 +7,7 @@ RUN npm install
 
 # Copia código-fonte e faz o build
 COPY . .
-ARG API_URL
+ARG API_URL=http://evcomp-api:8080/api
 ENV API_URL=$API_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
@@ -16,6 +16,7 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV API_URL=http://evcomp-api:8080/api
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copia do builder os arquivos essenciais
