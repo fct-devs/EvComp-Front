@@ -426,6 +426,17 @@ export default function MinhasInscricoesPage() {
                   </div>
                 </div>
               )}
+
+              {infoAtividade.ministrantes && (
+                <div className="text-xs text-gray-400 pt-4 border-t border-white/5">
+                  <span className="font-semibold text-gray-300">Ministrante(s): </span>
+                  {Array.isArray(infoAtividade.ministrantes) && (infoAtividade.ministrantes as any[]).length > 0
+                    ? (infoAtividade.ministrantes as any[]).map((m: any) => m.nomeCompleto || m.nome || m).join(', ')
+                    : typeof infoAtividade.ministrantes === 'string'
+                    ? infoAtividade.ministrantes
+                    : 'Não informado'}
+                </div>
+              )}
             </div>
           </div>
         </div>
