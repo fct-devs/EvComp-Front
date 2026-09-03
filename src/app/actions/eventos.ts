@@ -1,10 +1,12 @@
-const API_BASE = process.env.API_URL || 'http://localhost:8080/api';
+import { getApiBase } from '../../utils/api';
+
+const getBase = () => getApiBase();
 
 // --- MÉTODOS DA ConsultarEventoUI E InscricaoUI (ASTAH) ---
 
 export async function solicitarConsultaEvento() {
   try {
-    const res = await fetch(`${API_BASE}/eventos`, { credentials: 'include',  cache: 'no-store' });
+    const res = await fetch(`${getBase()}/eventos`, { credentials: 'include',  cache: 'no-store' });
     if (!res.ok) return { success: false, data: [] };
     const data = await res.json();
     return { success: true, data };
@@ -14,7 +16,7 @@ export async function solicitarConsultaEvento() {
 }
 export async function buscarEventosDoColetor() {
   try {
-    const res = await fetch(`${API_BASE}/eventos/coletor`, { credentials: 'include', 
+    const res = await fetch(`${getBase()}/eventos/coletor`, { credentials: 'include', 
       cache: 'no-store'
     });
     if (!res.ok) return { success: false, error: 'Erro ao carregar eventos', data: [] };
@@ -32,7 +34,7 @@ export async function solicitarEventosDisponiveis(participanteId: string) {
 
 export async function selecionarAtividade(atividadeId: string) {
   try {
-    const res = await fetch(`${API_BASE}/atividades/${atividadeId}`, { credentials: 'include',  cache: 'no-store' });
+    const res = await fetch(`${getBase()}/atividades/${atividadeId}`, { credentials: 'include',  cache: 'no-store' });
     if (!res.ok) return { success: false, data: null };
     const data = await res.json();
     return { success: true, data };
