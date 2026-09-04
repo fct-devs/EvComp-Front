@@ -659,8 +659,13 @@ export default function InscricaoEventoPage() {
                 </p>
               </div>
 
-              <div className="text-xs text-gray-500 pt-4 border-t border-white/5">
-                Ministrante(s): {modalAtividade.ministrantes || 'Não informado'}
+              <div className="text-xs text-gray-400 pt-4 border-t border-white/5">
+                <span className="font-semibold text-gray-300">Ministrante(s): </span>
+                {Array.isArray(modalAtividade.ministrantes) && modalAtividade.ministrantes.length > 0
+                  ? modalAtividade.ministrantes.map((m: any) => m.nomeCompleto || m.nome || m).join(', ')
+                  : typeof modalAtividade.ministrantes === 'string' && modalAtividade.ministrantes
+                  ? modalAtividade.ministrantes
+                  : 'Não informado'}
               </div>
             </div>
           </GlassCard>

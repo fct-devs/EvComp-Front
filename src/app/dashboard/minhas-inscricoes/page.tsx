@@ -24,6 +24,7 @@ interface Atividade {
   horarioFim: string;
   cargaHorariaTotal: number;
   local?: string; 
+  ministrantes?: any;
 }
 
 interface Inscricao {
@@ -424,6 +425,17 @@ export default function MinhasInscricoesPage() {
                   <div className="p-4 bg-orange-500/10 rounded-lg border border-orange-500/20 text-orange-200 text-sm leading-relaxed whitespace-pre-wrap">
                     {infoAtividade.preRequisitos}
                   </div>
+                </div>
+              )}
+
+              {infoAtividade.ministrantes && (
+                <div className="text-xs text-gray-400 pt-4 border-t border-white/5">
+                  <span className="font-semibold text-gray-300">Ministrante(s): </span>
+                  {Array.isArray(infoAtividade.ministrantes) && (infoAtividade.ministrantes as any[]).length > 0
+                    ? (infoAtividade.ministrantes as any[]).map((m: any) => m.nomeCompleto || m.nome || m).join(', ')
+                    : typeof infoAtividade.ministrantes === 'string'
+                    ? infoAtividade.ministrantes
+                    : 'Não informado'}
                 </div>
               )}
             </div>
