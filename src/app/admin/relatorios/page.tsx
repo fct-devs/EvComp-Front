@@ -25,7 +25,7 @@ export default function AdminRelatoriosPage() {
           setEventoSelecionado(String(data[0].id));
         }
       })
-      .catch((err) => setError('Erro ao buscar eventos finalizados'));
+      .catch((err) => setError('Erro ao buscar eventos'));
 
     fetch('/api/relatorios/tipos', { credentials: 'include' })
       .then((res) => res.json())
@@ -98,14 +98,14 @@ export default function AdminRelatoriosPage() {
       
       <main className="flex-1 w-full max-w-5xl mx-auto py-12 px-6">
         <h1 className="text-3xl font-extrabold text-white mb-2">Painel de Relatórios</h1>
-        <p className="text-gray-400 mb-8">Audite os dados do evento e gere as listas de frequência finais.</p>
+        <p className="text-gray-400 mb-8">Audite os dados do evento e gere relatórios de acompanhamento ou listas finais.</p>
 
         {error && <div className="mb-6 p-4 bg-red-500/20 border border-red-500 text-red-200 rounded-md text-sm">{error}</div>}
 
         <GlassCard className="bg-slate-900 border-white/5 p-8">
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Selecione o Evento Finalizado:
+              Selecione o Evento:
             </label>
             <select 
               className="w-full md:w-1/2 p-2 rounded bg-slate-800 text-white border border-white/10"
