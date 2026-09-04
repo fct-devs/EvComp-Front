@@ -1,14 +1,31 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { getApiBase } from '../../utils/api';
 
 const getBase = () => getApiBase();
+
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 // --- MÉTODOS DA ConsultarEventoUI E InscricaoUI (ASTAH) ---
 
 export async function solicitarConsultaEvento() {
   try {
-    const res = await fetch(`${getBase()}/eventos`, { credentials: 'include',  cache: 'no-store' });
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/eventos`, { 
+      headers,
+      cache: 'no-store' 
+    });
     if (!res.ok) return { success: false, data: [] };
     const data = await res.json();
     return { success: true, data };
@@ -16,9 +33,12 @@ export async function solicitarConsultaEvento() {
     return { success: false, error: 'Falha ao buscar eventos', data: [] };
   }
 }
+
 export async function buscarEventosDoColetor() {
   try {
-    const res = await fetch(`${getBase()}/eventos/coletor`, { credentials: 'include', 
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/eventos/coletor`, { 
+      headers,
       cache: 'no-store'
     });
     if (!res.ok) return { success: false, error: 'Erro ao carregar eventos', data: [] };
@@ -36,7 +56,11 @@ export async function solicitarEventosDisponiveis(participanteId: string) {
 
 export async function selecionarAtividade(atividadeId: string) {
   try {
-    const res = await fetch(`${getBase()}/atividades/${atividadeId}`, { credentials: 'include',  cache: 'no-store' });
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/atividades/${atividadeId}`, { 
+      headers,
+      cache: 'no-store' 
+    });
     if (!res.ok) return { success: false, data: null };
     const data = await res.json();
     return { success: true, data };

@@ -1,15 +1,29 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { getApiBase } from '../../utils/api';
 
 const getBase = () => getApiBase();
 
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 // --- MÉTODOS DA RegistrarPresencaUI (ASTAH) ---
 export async function registrarPresenca(atividadeId: string, codigoParticipante: string) {
   try {
-    const res = await fetch(`${getBase()}/presenca`, { credentials: 'include', 
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/presenca`, { 
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ atividadeId, ra: codigoParticipante }),
     });
     
@@ -32,9 +46,10 @@ export async function solicitarCriacaoEvento(formData: FormData) {
   };
   
   try {
-    const res = await fetch(`${getBase()}/eventos`, { credentials: 'include', 
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/eventos`, { 
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
     });
     
@@ -53,9 +68,10 @@ export async function solicitarCriacaoEvento(formData: FormData) {
 export async function solicitarCriacaoAtividade(formData: FormData) {
   const payload = Object.fromEntries(formData.entries());
   try {
-    const res = await fetch(`${getBase()}/atividades`, { credentials: 'include', 
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/atividades`, { 
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
     });
     
@@ -69,8 +85,15 @@ export async function solicitarCriacaoAtividade(formData: FormData) {
 // --- MÉTODOS DA AtribuirColetorUI e RemoverColetorUI (ASTAH) ---
 export async function exibirParticipantes() {
   try {
-    const res = await fetch(`${getBase()}/participantes`, { credentials: 'include',  cache: 'no-store' });
-    if (!res.ok) return { success: false, data: [] };
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/participantes`, { 
+      headers,
+      cache: 'no-store' 
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      return { success: false, data: [], error: errorData?.error || `Erro ${res.status} ao buscar participantes.` };
+    }
     const data = await res.json();
     return { success: true, data };
   } catch (error) {
@@ -80,11 +103,14 @@ export async function exibirParticipantes() {
 
 export async function tornarColetor(eventoId: string, participanteId: string) {
   try {
-    const res = await fetch(`${getBase()}/eventos/${eventoId}/coletores/${participanteId}`, { credentials: 'include', 
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/eventos/${eventoId}/coletores/${participanteId}`, { 
       method: 'POST',
+      headers,
     });
-    if (!res.ok) return { success: false, error: 'Não foi possível atribuir o coletor.' };
-    return { success: true, message: 'Participante promovido a Coletor.' };
+    const data = await res.json().catch(() => null);
+    if (!res.ok) return { success: false, error: data?.error || 'Não foi possível atribuir o coletor.' };
+    return { success: true, message: data?.message || 'Participante promovido a Coletor.' };
   } catch (error) {
     return { success: false, error: 'Erro de rede.' };
   }
@@ -92,11 +118,14 @@ export async function tornarColetor(eventoId: string, participanteId: string) {
 
 export async function removerColetor(eventoId: string, coletorId: string) {
   try {
-    const res = await fetch(`${getBase()}/eventos/${eventoId}/coletores/${coletorId}`, { credentials: 'include', 
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/eventos/${eventoId}/coletores/${coletorId}`, { 
       method: 'DELETE',
+      headers,
     });
-    if (!res.ok) return { success: false, error: 'Não foi possível remover o coletor.' };
-    return { success: true };
+    const data = await res.json().catch(() => null);
+    if (!res.ok) return { success: false, error: data?.error || 'Não foi possível remover o coletor.' };
+    return { success: true, message: data?.message || 'Coletor removido com sucesso.' };
   } catch (error) {
     return { success: false, error: 'Erro de rede.' };
   }
@@ -105,8 +134,10 @@ export async function removerColetor(eventoId: string, coletorId: string) {
 // --- MÉTODOS DA GerarRelatorioUI (ASTAH) ---
 export async function solicitarGerarRelatorio(eventoId: string) {
   try {
-    const res = await fetch(`${getBase()}/relatorios/gerar?eventoId=${eventoId}`, { credentials: 'include', 
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/relatorios/gerar?eventoId=${eventoId}`, { 
       method: 'GET',
+      headers,
     });
     if (!res.ok) return { success: false, error: 'Erro ao gerar relatório.' };
     
@@ -120,9 +151,10 @@ export async function solicitarGerarRelatorio(eventoId: string) {
 // --- MÉTODOS DA EmitirCertificadosUI (ASTAH) ---
 export async function emitirCertificado(participanteId: string, eventoId: string, atividadeId: string) {
   try {
-    const res = await fetch(`${getBase()}/certificados/emitir`, { credentials: 'include', 
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${getBase()}/certificados/emitir`, { 
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ participanteId, eventoId, atividadeId }),
     });
     if (!res.ok) return { success: false, error: 'Erro ao emitir certificado.' };
