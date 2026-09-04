@@ -37,7 +37,7 @@ export default function GestaoColetoresPage() {
     if (!selectedEventoId) return showMessage("Selecione um evento primeiro!", 'error');
     const res = await removerColetor(selectedEventoId, coletorId);
     if (res.success) {
-      showMessage('Coletor removido com sucesso!', 'success');
+      showMessage(res.message || 'Coletor removido com sucesso!', 'success');
       fetchData();
     } else {
       showMessage(res.error || "Erro ao remover coletor.", 'error');
@@ -46,16 +46,26 @@ export default function GestaoColetoresPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const resPart = await exibirParticipantes();
-    if (resPart.success) setParticipantes(resPart.data);
+    try {
+      const resPart = await exibirParticipantes();
+      if (resPart.success && Array.isArray(resPart.data)) {
+        setParticipantes(resPart.data);
+      } else if (resPart.error) {
+        showMessage(resPart.error, 'error');
+      }
+    } catch (err: any) {
+      showMessage('Erro ao buscar participantes: ' + (err.message || 'Falha de rede'), 'error');
+    }
     
     // Buscar eventos
     try {
       const resEv = await fetch('/api/eventos', { credentials: 'include' });
       const dataEv = await resEv.json();
-      setEventos(dataEv);
-      if (dataEv.length > 0 && !selectedEventoId) {
-        setSelectedEventoId(String(dataEv[0].id));
+      if (Array.isArray(dataEv)) {
+        setEventos(dataEv);
+        if (dataEv.length > 0 && !selectedEventoId) {
+          setSelectedEventoId(String(dataEv[0].id));
+        }
       }
     } catch(e) {}
     
