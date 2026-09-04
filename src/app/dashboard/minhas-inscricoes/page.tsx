@@ -311,7 +311,7 @@ export default function MinhasInscricoesPage() {
                         const periodoNormalAberto = periodoInscricaoAtivo(inscricao.evento?.dataInicioInscricao, inscricao.evento?.dataFimInscricao);
                         const isRecusado = inscricao.statusPagamento === 'RECUSADO';
                         const podeRegularizar = isRecusado && !eventoIniciado;
-                        const podeEditar = (periodoNormalAberto && !inscricao.status) || podeRegularizar;
+                        const podeEditar = (periodoNormalAberto && !eventoIniciado) || podeRegularizar;
 
                         return (
                           <>
