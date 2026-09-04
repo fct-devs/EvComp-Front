@@ -1,3 +1,5 @@
+'use server';
+
 import { getApiBase } from '../../utils/api';
 
 const getBase = () => getApiBase();
