@@ -37,14 +37,14 @@ export function Programacao({ conteudo }: { conteudo: Conteudo }) {
         </div>
 
         {/* Seletor de Dias */}
-        <div className="flex justify-center items-center gap-2 sm:gap-4 mb-12 overflow-x-auto pb-4 custom-scrollbar">
+        <div className="flex justify-start sm:justify-center items-center gap-2.5 sm:gap-4 mb-12 overflow-x-auto pb-4 px-3 sm:px-0 custom-scrollbar scroll-smooth">
           {dias.map((d) => {
             const ativo = d.id === diaSelecionado;
             return (
               <button
                 key={d.id}
                 onClick={() => setDiaSelecionado(d.id)}
-                className={`px-5 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap flex flex-col items-center ${
+                className={`flex-shrink-0 min-w-[76px] sm:min-w-[90px] px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap flex flex-col items-center select-none active:scale-95 touch-manipulation ${
                   ativo
                     ? 'bg-gradient-to-r from-brand-primary to-brand-accent text-black shadow-lg shadow-brand-accent/20 scale-105'
                     : 'bg-slate-900 border border-white/10 text-gray-400 hover:text-white hover:border-white/30'
@@ -190,6 +190,21 @@ export function Programacao({ conteudo }: { conteudo: Conteudo }) {
               {modalAtividade.descricao && (
                 <div className="mb-6 text-gray-300 text-sm sm:text-base leading-relaxed whitespace-pre-line bg-slate-950/50 p-4 rounded-xl border border-white/5">
                   {modalAtividade.descricao}
+                </div>
+              )}
+
+              {/* Pré-requisitos */}
+              {modalAtividade.preRequisitos && (
+                <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-1.5 flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Pré-requisitos
+                  </h4>
+                  <p className="text-sm whitespace-pre-line text-amber-100/90 leading-relaxed font-normal">
+                    {modalAtividade.preRequisitos}
+                  </p>
                 </div>
               )}
 

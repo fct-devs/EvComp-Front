@@ -181,6 +181,7 @@ export const landingData: Conteudo = {
     { id: "s6b", nome: "Sala 6B", detalhe: "Central" },
     { id: "anf1", nome: "Anfiteatro 1", detalhe: "Anfiteatro" },
     { id: "aud", nome: "Auditório", detalhe: "Bloco V" },
+    { id: "blvd", nome: "Boulevard", detalhe: "Pedagogia" },
   ],
 
   palestrantes: [
@@ -238,34 +239,6 @@ export const landingData: Conteudo = {
       {
         "nome": "Felipe Wunder Giovaneli",
         "linkedin": "https://www.linkedin.com/in/felipe-wunder-giovaneli-108688244/"
-      }
-    ],
-    "palestranteId": "",
-    "tema": ""
-  },
-  {
-    "id": "a-qa",
-    "titulo": "Missão QA - Fundamentos de teste de software",
-    "trilha": "minicurso",
-    "diaId": "d1",
-    "inicio": "08:00",
-    "fim": "12:00",
-    "localId": "s6b",
-    "vagas": null,
-    "descricao": "Conceitos de testes de software, o papel do QA no processo de desenvolvimento e a importância da qualidade nas entregas. São introduzidos também User Stories, usados para descrever requisitos, e Gherkin, empregado na escrita estruturada de cenários de teste.\n\nNível: Básico · Carga horária total: 4 horas.",
-    "responsavel": "Maria Isabelly da Silva Andrade, Maria Julia Varga Sita e Mary Adryany Duarte Gonçalves da Silva",
-    "ministrantes": [
-      {
-        "nome": "Maria Isabelly da Silva Andrade",
-        "linkedin": ""
-      },
-      {
-        "nome": "Maria Julia Varga Sita",
-        "linkedin": ""
-      },
-      {
-        "nome": "Mary Adryany Duarte Gonçalves da Silva",
-        "linkedin": ""
       }
     ],
     "palestranteId": "",
@@ -357,14 +330,15 @@ export const landingData: Conteudo = {
   },
   {
     "id": "a-vlab",
-    "titulo": "Vlab",
+    "titulo": "Vlab: GoAhead - Uma Introdução ao Golang",
     "trilha": "especial",
     "diaId": "d2",
     "inicio": "08:00",
     "fim": "12:00",
     "localId": "s5b",
     "vagas": null,
-    "descricao": "Minicurso oferecido pela Vlab, patrocinadora da SECOMPP26. Conteúdo detalhado divulgado em breve.\n\nCarga horária total: 4 horas.",
+    "descricao": "Neste minicurso introdutório, você vai conhecer o Golang, entender seus principais conceitos e descobrir, na prática, como a linguagem pode ser utilizada no desenvolvimento de aplicações e APIs. Você vai conhecer os fundamentos da linguagem, explorar conceitos como structs, interfaces, ponteiros e concorrência e colocar tudo em prática desenvolvendo uma API completa com operações de CRUD.\n\nCarga horária total: 4 horas.",
+    "preRequisitos": "- Conhecimento básico em programação;\n- Experiência com alguma linguagem de programação;\n- Conhecimentos em HTTP e APIs são desejáveis, mas não obrigatórios.",
     "responsavel": "Vlab",
     "ministrantes": [],
     "palestranteId": "",
@@ -644,14 +618,15 @@ export const landingData: Conteudo = {
   },
   {
     "id": "a-inspectral",
-    "titulo": "Inspectral",
+    "titulo": "Inspectral: Introdução à aplicação de Machine Learning em imagens de satélite",
     "trilha": "especial",
     "diaId": "d4",
     "inicio": "08:00",
     "fim": "12:00",
     "localId": "s5b",
     "vagas": null,
-    "descricao": "Minicurso oferecido pela Inspectral, patrocinadora da SECOMPP26. Conteúdo detalhado divulgado em breve.\n\nCarga horária total: 4 horas.",
+    "descricao": "O minicurso abordará o fluxo de trabalho básico para a aplicação de técnicas de aprendizado de máquina em dados de sensoriamento remoto. O conteúdo inclui uma introdução às características das imagens de satélite multiespectrais e, a etapa principal, o desenvolvimento prático de treinamento e avaliação de um modelo de Machine Learning, utilizando um conjunto de dados base para tarefas de classificação.\n\nCarga horária total: 4 horas.",
+    "preRequisitos": "Nenhum.",
     "responsavel": "Inspectral",
     "ministrantes": [],
     "palestranteId": "",
@@ -841,6 +816,21 @@ export const landingData: Conteudo = {
     "tema": ""
   },
   {
+    "id": "a-mostra-trabalhos",
+    "titulo": "Mostra de Trabalhos",
+    "trilha": "especial",
+    "diaId": "d5",
+    "inicio": "08:00",
+    "fim": "12:00",
+    "localId": "blvd",
+    "vagas": null,
+    "descricao": "Espaço dedicado para que os alunos do curso compartilhem suas pesquisas acadêmicas e projetos científicos (atuais e concluídos) com os demais colegas. Um momento ideal para troca de conhecimento, integração e divulgação das diversas áreas de pesquisa realizadas no nosso curso de Ciência da Computação.\n\nCarga horária total: 4 horas.",
+    "responsavel": "Coordenação e Alunos do Curso",
+    "ministrantes": [],
+    "palestranteId": "",
+    "tema": ""
+  },
+  {
     "id": "a-mesa",
     "titulo": "Mesa-redonda",
     "trilha": "especial",
@@ -863,7 +853,6 @@ export const landingData: Conteudo = {
     { id: "m2", categoria: "patrocinio", nome: "DSC", href: "https://www.dsc.com.ai/", logoSrc: "/assets/dsc.svg", tamanho: "lg", fundo: "nenhum" },
     { id: "m11", categoria: "patrocinio", nome: "VLab", href: "https://www.vlabhealth.com/", logoSrc: "/assets/vlab.png", tamanho: "sm", fundo: "nenhum" },
     { id: "m12", categoria: "patrocinio", nome: "Inspectral", href: "https://www.inspectral.com.br/pt", logoSrc: "/assets/inspectral.png", tamanho: "lg", fundo: "nenhum" },
-    { id: "m13", categoria: "patrocinio", nome: "Chilli Beans", href: "https://loja.chillibeans.com.br/", logoSrc: "/assets/chillibeans.png", tamanho: "lg", fundo: "nenhum" },
 
     // Apoio
     { id: "m6", categoria: "apoio", nome: "Unesp", href: "https://www.fct.unesp.br", logoSrc: "/assets/unesp.svg", tamanho: "md", fundo: "nenhum" },
