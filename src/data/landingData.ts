@@ -314,7 +314,7 @@ export const landingData: Conteudo = {
     "localId": "lab6",
     "vagas": null,
     "descricao": "Fundamentos técnicos dos Large Language Models: as três famílias de arquitetura (decoders autoregressivos, encoders bidirecionais e encoder-decoders), os algoritmos de decodificação (amostragem aleatória, top-k e nucleus sampling) e o papel da temperatura.\n\nO paradigma de pré-treinamento é explorado em profundidade, junto de engenharia de dados para corpora, métricas como perplexidade, scaling laws e fine-tuning eficiente em parâmetros, com destaque para o LoRA.\n\nNível: Avançado · Carga horária total: 4 horas.",
-    "responsavel": "Daniel Henrique Peres Servejeira e João Gabriel de Morais Bezerra",
+    "responsavel": "Daniel Henrique Peres Servejeira, João Gabriel de Morais Bezerra e José Henrique Ioki Yamaoki",
     "ministrantes": [
       {
         "nome": "Daniel Henrique Peres Servejeira",
@@ -323,6 +323,10 @@ export const landingData: Conteudo = {
       {
         "nome": "João Gabriel de Morais Bezerra",
         "linkedin": "https://www.linkedin.com/in/joaobezcerra/"
+      },
+      {
+        "nome": "José Henrique Ioki Yamaoki",
+        "linkedin": "https://www.linkedin.com/in/joseyamaoki/"
       }
     ],
     "palestranteId": "",
@@ -886,40 +890,15 @@ export const landingData: Conteudo = {
       id: "l1",
       titulo: "Kit Simples",
       preco: "R$ 40,00",
-      detalhe: "Minicursos, palestras magnas e certificado oficial UNESP",
+      detalhe: "Acesso completo a todas as palestras e minicursos da SECOMPP 2026",
       inclui: [
         "Inscrição em todos os minicursos desejados (sem choque de horário)",
-        "Acesso livre a todas as palestras magnas no Auditório",
+        "Acesso livre a todas as palestras magnas e mesas-redondas no Auditório",
         "Certificado Oficial de Horas Complementares UNESP",
         "Coffee break em todos os dias do evento",
-      ],
-      destaque: false,
-      href: "/cadastro",
-    },
-    {
-      id: "l2",
-      titulo: "Kit Padrão",
-      preco: "R$ 50,00",
-      detalhe: "Minicursos, palestras, certificado UNESP + Convite para o After",
-      inclui: [
-        "Tudo incluso no Kit Simples",
-        "Convite exclusivo para o After SECOMPP 2026",
-        "Networking ampliado com palestrantes e convidados",
+        "Não inclui camiseta oficial nem entrada no After SECOMPP",
       ],
       destaque: true,
-      href: "/cadastro",
-    },
-    {
-      id: "l3",
-      titulo: "Kit Promocional",
-      preco: "R$ 70,00",
-      detalhe: "Experiência completa com Camiseta Oficial da SECOMPP 2026",
-      inclui: [
-        "Tudo incluso no Kit Padrão + After SECOMPP",
-        "Camiseta Oficial da 23ª SECOMPP (Tamanhos PP ao XG)",
-        "Kit de boas-vindas do participante",
-      ],
-      destaque: false,
       href: "/cadastro",
     },
   ],
@@ -937,8 +916,8 @@ export const landingData: Conteudo = {
     },
     {
       id: "q3",
-      pergunta: "Como funciona a escolha do tamanho da camiseta no Kit Promocional?",
-      resposta: "Ao adquirir o Kit Promocional (R$ 70,00), após a confirmação da inscrição pelo sistema, envie um e-mail para <b>secompp.fct@unesp.br</b> informando o tamanho desejado da sua camiseta (PP, P, M, G, GG ou XG).",
+      pergunta: "O que está incluso na inscrição?",
+      resposta: "A inscrição garante acesso completo a todas as palestras magnas, mesas-redondas, minicursos práticos selecionados, coffee break todos os dias e emissão de certificado oficial de horas complementares da UNESP.",
     },
     {
       id: "q4",

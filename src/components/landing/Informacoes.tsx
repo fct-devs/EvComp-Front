@@ -20,7 +20,7 @@ export function Informacoes({ lotes, config }: { lotes: Lote[]; config: Config }
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className={`grid gap-8 mx-auto ${lotes.length === 1 ? 'max-w-lg' : 'grid-cols-1 md:grid-cols-2 max-w-4xl'}`}>
           {lotes.map((lote) => (
             <div
               key={lote.id}
